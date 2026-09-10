@@ -13,7 +13,7 @@ cat > README.md << 'README_EOF'
 
 ## 🎯 Problem Statement
 
-Computer Vision models (YOLO, COCO-based) ko industries **bina verification** deploy kar deti hain. Agar dataset quality kharab ho ya model robust na ho, toh production mein **galat predictions** aati hain.
+Computer Vision models (YOLO, COCO-based) are deployed by industries without verification. When dataset quality degrades or model robustness fails, production systems generate incorrect predictions, causing reliability and safety issues in critical real-world applications.
 
 **Real-world Impact:**
 - 🏥 Healthcare: Wrong diagnosis
