@@ -1,0 +1,41 @@
+{
+  "good": {
+    "total_images": 303,
+    "total_labels": 303,
+    "classes": [
+      "bicycle",
+      "car",
+      "bus",
+      "truck"
+    ],
+    "corruption_level": 0
+  },
+  "bad": {
+    "total_images": 303,
+    "total_labels": 303,
+    "classes": [
+      "bicycle",
+      "car",
+      "bus",
+      "truck"
+    ],
+    "corruption_level": 20
+  },
+  "worst": {
+    "total_images": 303,
+    "total_labels": 303,
+    "classes": [
+      "bicycle",
+      "car",
+      "bus",
+      "truck"
+    ],
+    "corruption_level": 50
+  },
+  "class_mapping": {
+    "2": "bicycle",
+    "3": "car",
+    "6": "bus",
+    "8": "truck"
+  }
+}

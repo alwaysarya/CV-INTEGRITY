@@ -1,0 +1,139 @@
+# ============================================================
+# CV-INTEGRITY AI - Master Configuration File
+# ============================================================
+
+# ---------- PROJECT PATHS ----------
+paths:
+  root: "."
+  datasets:
+    raw: "datasets/raw"
+    processed: "datasets/processed"
+    metadata: "datasets/metadata"
+  models:
+    saved: "model/saved_models"
+    configs: "model/configs"
+  outputs:
+    reports: "outputs/reports"
+    plots: "outputs/plots"
+    exports: "outputs/exports"
+  logs: "logs"
+
+# ---------- DATASET CONFIGURATION ----------
+dataset:
+  classes:
+    - "car"
+    - "bike" 
+    - "bus"
+    - "truck"
+  splits:
+    train: 0.7
+    val: 0.2
+    test: 0.1
+  image_size: 640
+  batch_size: 16
+
+# ---------- GOOD DATASET ----------
+good_dataset:
+  description: "High quality dataset with clean images and correct labels"
+  min_images_per_class: 500
+  max_blur_score: 70
+  max_noise_level: 10
+  duplicate_threshold: 5
+  label_accuracy: 95
+
+# ---------- BAD DATASET ----------
+bad_dataset:
+  description: "Moderate quality dataset with 20% corruption"
+  corruption_level: 20
+  blur_percentage: 20
+  noise_percentage: 10
+  duplicate_percentage: 15
+  wrong_label_percentage: 10
+  expected_accuracy: 75
+
+# ---------- WORST DATASET ----------
+worst_dataset:
+  description: "Poor quality dataset with 50% corruption"
+  corruption_level: 50
+  blur_percentage: 50
+  noise_percentage: 40
+  duplicate_percentage: 30
+  wrong_label_percentage: 40
+  expected_accuracy: 45
+
+# ---------- MODEL CONFIGURATION ----------
+model:
+  type: "yolov8"
+  version: "yolov8n"
+  epochs: 50
+  batch_size: 16
+  imgsz: 640
+  device: "auto"
+  workers: 4
+  patience: 10
+  save: true
+  project: "model/saved_models"
+  name: "train"
+
+# ---------- TRUST ENGINE ----------
+trust_engine:
+  weights:
+    dataset_quality: 0.30
+    model_performance: 0.30
+    robustness: 0.25
+    stability: 0.15
+  
+  thresholds:
+    accept: 80
+    review: 50
+    quarantine: 0
+
+# ---------- ROBUSTNESS TESTING ----------
+robustness:
+  transformations:
+    - "brightness"
+    - "darkness"
+    - "blur"
+    - "noise"
+    - "rotation"
+    - "crop"
+    - "resize"
+  
+  intensity_levels:
+    low: 0.2
+    medium: 0.5
+    high: 0.8
+
+# ---------- ATTACK SIMULATOR ----------
+attack_simulator:
+  attack_types:
+    - "blur"
+    - "noise"
+    - "duplicate"
+    - "label_poison"
+    - "brightness"
+    - "contrast"
+  
+  scenario_1: "mild_attack"
+  scenario_2: "moderate_attack"
+  scenario_3: "severe_attack"
+
+# ---------- LOGGING ----------
+logging:
+  level: "INFO"
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
+  rotation: "10 MB"
+  retention: "10 days"
+
+# ---------- API ----------
+api:
+  host: "0.0.0.0"
+  port: 8000
+  debug: true
+  reload: true
+
+# ---------- DASHBOARD ----------
+dashboard:
+  title: "CV-INTEGRITY AI"
+  theme: "dark"
+  sidebar_state: "expanded"

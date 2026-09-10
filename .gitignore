@@ -1,0 +1,86 @@
+# Environment & Secrets
+.env
+.env.local
+*.env
+venv/
+env/
+.venv/
+
+# API Keys & Credentials
+secrets.json
+credentials.json
+api_keys.txt
+*.pem
+*.key
+
+# Datasets (Large)
+datasets/raw/
+datasets/processed/
+datasets/uploaded/
+datasets/attack_demo/
+*.zip
+*.tar.gz
+
+# Models (Large)
+model/saved_models/
+*.pt
+*.pth
+*.onnx
+*.weights
+runs/
+
+# Outputs & Reports
+outputs/reports/*.json
+outputs/plots/
+outputs/exports/
+
+# Logs
+logs/
+*.log
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+database/data/
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Streamlit
+.streamlit/secrets.toml
+
+# YOLO
+yolov8*.pt
+yolo11*.pt
+wandb/
+
+# Temp
+tmp/
+temp/
+*.tmp
+*.bak

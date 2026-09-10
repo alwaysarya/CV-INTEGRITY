@@ -1,0 +1,9 @@
+names:
+- car
+- bicycle
+- bus
+- truck
+nc: 4
+path: /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/processed/good
+train: images
+val: images
