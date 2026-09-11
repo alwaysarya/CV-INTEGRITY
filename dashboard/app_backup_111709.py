@@ -98,21 +98,13 @@ def get_dataset_images(dataset, num=4):
 # FIXED GAUGE CHART - 0-100 RANGE
 # ============================================================
 def create_gauge_chart(value, title, max_val=100):
-    """Create gauge chart with dataset-specific FIXED color"""
-    title_upper = title.upper()
-    if 'GOOD' in title_upper:
-        color = "#00ff87"   # GREEN for GOOD
-    elif 'BAD' in title_upper:
-        color = "#ffd700"   # YELLOW for BAD
-    elif 'WORST' in title_upper:
-        color = "#ff4757"   # RED for WORST
+    """Create gauge chart with 0-100 range"""
+    if value >= 80:
+        color = "#00ff87"
+    elif value >= 60:
+        color = "#ffd700"
     else:
-        if value >= 80:
-            color = "#00ff87"
-        elif value >= 60:
-            color = "#ffd700"
-        else:
-            color = "#ff4757"
+        color = "#ff4757"
     
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
@@ -151,7 +143,6 @@ def create_gauge_chart(value, title, max_val=100):
         font={'color': '#fff'}
     )
     return fig
-
 
 def create_radar_chart(df):
     categories = ['Precision', 'Recall', 'mAP50', 'mAP50-95']
