@@ -12,96 +12,208 @@ import subprocess
 from datetime import datetime
 import time
 
+# ============================================================
+# PAGE CONFIG
+# ============================================================
 st.set_page_config(
     page_title="CV-INTEGRITY AI",
     page_icon="🤖",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items={
+        'About': "CV-INTEGRITY AI - SIH 2026 | Model Trust & Quality Platform"
+    }
 )
 
+# ============================================================
+# ULTRA PROFESSIONAL CSS
+# ============================================================
 st.markdown("""
 <style>
-    .stApp { background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); }
+    /* Global */
+    .stApp {
+        background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+    }
+    
+    /* Main title */
     .main-title {
-        font-size: 3rem; font-weight: 800;
+        font-size: 3rem;
+        font-weight: 800;
         background: linear-gradient(90deg, #00ff87, #60efff, #00ff87);
         background-size: 200% auto;
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        text-align: center; padding: 0.5rem 0;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        padding: 0.5rem 0;
         animation: shine 3s linear infinite;
+        letter-spacing: -1px;
     }
-    @keyframes shine { to { background-position: 200% center; } }
-    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .sub-title { text-align: center; color: #a0a0b0; font-size: 1.1rem; margin-bottom: 2rem; }
+    @keyframes shine {
+        to { background-position: 200% center; }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .sub-title {
+        text-align: center;
+        color: #a0a0b0;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 1s ease-in;
+    }
+    
+    /* Metric cards */
     .metric-card {
         background: linear-gradient(145deg, #1e1e3a, #2a2a4a);
-        padding: 1.5rem; border-radius: 20px; border: 1px solid #333355;
-        text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        padding: 1.5rem;
+        border-radius: 20px;
+        border: 1px solid #333355;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         animation: fadeIn 0.5s ease-in;
     }
-    .metric-card:hover { transform: translateY(-5px) scale(1.02); border-color: #00ff87; }
-    .metric-value {
-        font-size: 2.5rem; font-weight: 800;
-        background: linear-gradient(90deg, #00ff87, #60efff);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .metric-label { color: #a0a0b0; font-size: 0.85rem; margin-top: 0.5rem; letter-spacing: 2px; }
-    .badge-accept { background: linear-gradient(90deg, #00ff87, #00cc6a); color: #000; padding: 0.5rem 1.5rem; border-radius: 30px; font-weight: 700; display: inline-block; }
-    .badge-review { background: linear-gradient(90deg, #ffd700, #ff9500); color: #000; padding: 0.5rem 1.5rem; border-radius: 30px; font-weight: 700; display: inline-block; }
-    .badge-quarantine { background: linear-gradient(90deg, #ff4757, #ff1744); color: #fff; padding: 0.5rem 1.5rem; border-radius: 30px; font-weight: 700; display: inline-block; }
-    .section-header { font-size: 1.4rem; font-weight: 700; color: #fff; margin: 1.5rem 0 1rem 0; padding-left: 1rem; border-left: 4px solid #00ff87; }
-    .custom-divider { border: none; height: 2px; background: linear-gradient(90deg, transparent, #00ff87, transparent); margin: 2rem 0; }
-    .info-box { background: linear-gradient(145deg, #1a1a2e, #252540); padding: 1.5rem; border-radius: 15px; border: 1px solid #333355; margin: 1rem 0; }
-    #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
-    [data-testid="stSidebar"] { background: linear-gradient(180deg, #0a0e27 0%, #1a1f3a 100%); border-right: 1px solid #333355; }
-    .stButton > button { background: linear-gradient(90deg, #00ff87, #60efff); color: #000; font-weight: 700; border: none; border-radius: 10px; padding: 0.6rem 1.5rem; width: 100%; }
-
     .metric-card:hover {
-        transform: translateY(-8px) scale(1.03);
-        border-color: #00ff87 !important;
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.6), 0 0 40px rgba(0, 255, 135, 0.4), 0 0 60px rgba(0, 255, 135, 0.2) !important;
+        transform: translateY(-5px) scale(1.02);
+        border-color: #00ff87;
+        box-shadow: 0 10px 30px rgba(0, 255, 135, 0.25);
     }
-    [data-testid="stSidebar"] .stRadio label:hover {
-        background: linear-gradient(90deg, rgba(0, 255, 135, 0.15), transparent) !important;
-        border-left: 4px solid #00ff87 !important;
-        box-shadow: 0 0 15px rgba(0, 255, 135, 0.5) !important;
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #00ff87, #60efff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .metric-label {
+        color: #a0a0b0;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+    
+    /* Badges */
+    .badge-accept {
+        background: linear-gradient(90deg, #00ff87, #00cc6a);
+        color: #000;
+        padding: 0.5rem 1.5rem;
+        border-radius: 30px;
+        font-weight: 700;
+        display: inline-block;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 15px rgba(0, 255, 135, 0.4);
+    }
+    .badge-review {
+        background: linear-gradient(90deg, #ffd700, #ff9500);
+        color: #000;
+        padding: 0.5rem 1.5rem;
+        border-radius: 30px;
+        font-weight: 700;
+        display: inline-block;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    }
+    .badge-quarantine {
+        background: linear-gradient(90deg, #ff4757, #ff1744);
+        color: #fff;
+        padding: 0.5rem 1.5rem;
+        border-radius: 30px;
+        font-weight: 700;
+        display: inline-block;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+    }
+    
+    /* Section headers */
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 1.5rem 0 1rem 0;
+        padding-left: 1rem;
+        border-left: 4px solid #00ff87;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Dividers */
+    .custom-divider {
+        border: none;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #00ff87, transparent);
+        margin: 2rem 0;
+    }
+    
+    /* Info box */
+    .info-box {
+        background: linear-gradient(145deg, #1a1a2e, #252540);
+        padding: 1.5rem;
+        border-radius: 15px;
+        border: 1px solid #333355;
+        margin: 1rem 0;
+    }
+    
+    /* Hide streamlit */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .stDeployButton {display: none;}
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0a0e27 0%, #1a1f3a 100%);
+        border-right: 1px solid #333355;
+    }
+    
+    /* Buttons */
+    .stButton > button {
+        background: linear-gradient(90deg, #00ff87, #60efff);
+        color: #000;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        transition: all 0.3s;
+        width: 100%;
     }
     .stButton > button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.7), 0 0 40px rgba(96, 239, 255, 0.5) !important;
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(0, 255, 135, 0.4);
     }
-    [data-testid="stExpander"]:hover {
-        border-color: #00ff87 !important;
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.4) !important;
+    
+    /* Progress bars */
+    .stProgress > div > div > div {
+        background: linear-gradient(90deg, #00ff87, #60efff);
     }
-    [data-testid="stDataFrame"]:hover {
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.3) !important;
-    }
-    [data-testid="stMetric"]:hover {
-        background: linear-gradient(145deg, #1e1e3a, #2a2a4a) !important;
-        border-radius: 15px;
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.4) !important;
-        padding: 1rem !important;
-    }
-    .info-box:hover {
-        border-color: #00ff87 !important;
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.4) !important;
-    }
-    .section-header:hover {
-        text-shadow: 0 0 10px rgba(0, 255, 135, 0.8), 0 0 20px rgba(0, 255, 135, 0.4);
-    }
-
-/* GLOW_ADDED */
 </style>
 """, unsafe_allow_html=True)
 
+# ============================================================
+# PATHS
+# ============================================================
 BASE = Path(__file__).parent.parent
 REPORTS = BASE / "outputs" / "reports"
 MODELS = BASE / "model" / "saved_models"
 DATASETS = BASE / "datasets" / "processed"
 UPLOAD_DIR = BASE / "datasets" / "uploaded"
 
+# ============================================================
+# CACHED DATA LOADING (FASTER)
+# ============================================================
 @st.cache_data(ttl=30)
 def load_json(path):
     if path.exists():
@@ -132,37 +244,28 @@ def get_dataset_images(dataset, num=4):
     return []
 
 # ============================================================
-# FIXED GAUGE CHART - 0-100 RANGE
+# CHART FUNCTIONS
 # ============================================================
 def create_gauge_chart(value, title, max_val=100):
-    """Create gauge chart with dataset-specific FIXED color"""
-    title_upper = title.upper()
-    if 'GOOD' in title_upper:
-        color = "#00ff87"   # GREEN for GOOD
-    elif 'BAD' in title_upper:
-        color = "#ffd700"   # YELLOW for BAD
-    elif 'WORST' in title_upper:
-        color = "#ff4757"   # RED for WORST
+    """Create a gauge chart with proper color coding"""
+    if value >= 80:
+        color = "#00ff87"
+    elif value >= 60:
+        color = "#ffd700"
     else:
-        if value >= 80:
-            color = "#00ff87"
-        elif value >= 60:
-            color = "#ffd700"
-        else:
-            color = "#ff4757"
+        color = "#ff4757"
     
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=value,
-        title={'text': title, 'font': {'size': 18, 'color': '#fff'}},
-        number={'suffix': "%", 'font': {'size': 36, 'color': color}},
+        title={'text': title, 'font': {'size': 16, 'color': '#fff'}},
+        number={'suffix': "%", 'font': {'size': 32, 'color': color}},
         gauge={
             'axis': {
                 'range': [0, 100],
                 'tickcolor': '#666',
-                'tickfont': {'color': '#888', 'size': 12},
-                'tickvals': [0, 20, 40, 60, 80, 100],
-                'ticktext': ['0', '20', '40', '60', '80', '100']
+                'tickfont': {'color': '#888', 'size': 10},
+                'tickvals': [0, 20, 40, 60, 80, 100]
             },
             'bar': {'color': color, 'thickness': 0.75},
             'bgcolor': '#1a1a2e',
@@ -174,48 +277,57 @@ def create_gauge_chart(value, title, max_val=100):
                 {'range': [80, 100], 'color': 'rgba(0, 255, 135, 0.15)'}
             ],
             'threshold': {
-                'line': {'color': '#fff', 'width': 3},
+                'line': {'color': '#fff', 'width': 2},
                 'thickness': 0.75,
                 'value': value
             }
         }
     ))
     fig.update_layout(
-        height=280,
-        margin=dict(l=30, r=30, t=60, b=30),
+        height=250,
+        margin=dict(l=20, r=20, t=50, b=20),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font={'color': '#fff'}
     )
     return fig
 
-
 def create_radar_chart(df):
+    """Create radar chart for model comparison"""
     categories = ['Precision', 'Recall', 'mAP50', 'mAP50-95']
     fig = go.Figure()
+    
     colors = ['#00ff87', '#ffd700', '#60efff']
     for i, row in df.iterrows():
         values = [row['Precision'], row['Recall'], row['mAP50'], row['mAP50-95']]
         fig.add_trace(go.Scatterpolar(
-            r=values, theta=categories, fill='toself',
-            name=row['Model'], line_color=colors[i % len(colors)]
+            r=values,
+            theta=categories,
+            fill='toself',
+            name=row['Model'],
+            line_color=colors[i % len(colors)]
         ))
+    
     fig.update_layout(
         polar=dict(
             radialaxis=dict(visible=True, range=[0, 100], gridcolor='#333355'),
             bgcolor='rgba(0,0,0,0)'
         ),
-        showlegend=True, height=500,
+        showlegend=True,
+        height=400,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font={'color': '#fff'}
     )
     return fig
 
+# ============================================================
+# SIDEBAR
+# ============================================================
 with st.sidebar:
     st.markdown("""
     <div style="text-align:center; padding: 1.5rem 0;">
-        <div style="font-size: 3.5rem;">🤖</div>
+        <div style="font-size: 3.5rem; animation: pulse 2s infinite;">🤖</div>
         <div style="font-size: 1.6rem; font-weight: 800; background: linear-gradient(90deg, #00ff87, #60efff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CV-INTEGRITY</div>
         <div style="color: #888; font-size: 0.75rem; letter-spacing: 3px;">AI TRUST PLATFORM</div>
     </div>
@@ -224,27 +336,41 @@ with st.sidebar:
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
     
     page = st.radio("**🧭 NAVIGATION**", [
-        "🏠 Home", "📤 Upload Dataset", "📊 Dataset Quality",
-        "🤖 Model Performance", "🧪 Robustness Testing",
-        "🧠 Trust Score", "📁 Reports"
+        "🏠 Home",
+        "📤 Upload Dataset",
+        "📊 Dataset Quality",
+        "🤖 Model Performance",
+        "🧪 Robustness Testing",
+        "🧠 Trust Score",
+        "📁 Reports",
+        "🔗 Blockchain"
     ])
     
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    # System status
     st.markdown("**📡 SYSTEM STATUS**")
     reports_count = len(list(REPORTS.glob('*.json'))) if REPORTS.exists() else 0
     models_count = len(list(MODELS.glob('*'))) if MODELS.exists() else 0
     datasets_count = len(list(DATASETS.glob('*'))) if DATASETS.exists() else 0
+    
     st.markdown(f"🟢 **Reports:** {reports_count}")
     st.markdown(f"🟢 **Models:** {models_count}")
     st.markdown(f"🟢 **Datasets:** {datasets_count}")
+    
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
     st.caption("🎓 SIH 2026 | v3.0")
 
+# ============================================================
+# PAGE: HOME
+# ============================================================
 if page == "🏠 Home":
     st.markdown('<div class="main-title">CV-INTEGRITY AI</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">🚀 Intelligent Computer Vision Model Trust & Quality Evaluation Platform</div>', unsafe_allow_html=True)
     
     trust_data = get_trust_data()
+    
+    # Top stats
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.markdown('<div class="metric-card"><div class="metric-value">3</div><div class="metric-label">📊 DATASETS</div></div>', unsafe_allow_html=True)
@@ -261,6 +387,7 @@ if page == "🏠 Home":
     
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
     
+    # Quick Trust Status
     if trust_data:
         st.markdown('<div class="section-header">🎯 Quick Trust Status</div>', unsafe_allow_html=True)
         cols = st.columns(3)
@@ -271,6 +398,7 @@ if page == "🏠 Home":
                 icon = data.get('icon', '🟢')
                 badge = 'badge-accept' if 'ACCEPT' in decision else 'badge-review' if 'REVIEW' in decision else 'badge-quarantine'
                 color = '#00ff87' if score >= 80 else '#ffd700' if score >= 60 else '#ff4757'
+                
                 st.markdown(f"""
                 <div class="metric-card">
                     <div style="font-size:2.5rem;">{icon}</div>
@@ -282,6 +410,7 @@ if page == "🏠 Home":
     
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
     
+    # How it works + Features
     col1, col2 = st.columns(2)
     with col1:
         st.markdown('<div class="section-header">🚀 How It Works</div>', unsafe_allow_html=True)
@@ -294,6 +423,7 @@ if page == "🏠 Home":
             <div style="padding:0.7rem 0; font-size:1rem;">5️⃣ 🧠 <b>Trust Score</b> – ACCEPT / REVIEW / QUARANTINE</div>
         </div>
         """, unsafe_allow_html=True)
+    
     with col2:
         st.markdown('<div class="section-header">🔥 Key Features</div>', unsafe_allow_html=True)
         st.markdown("""
@@ -306,8 +436,12 @@ if page == "🏠 Home":
         </div>
         """, unsafe_allow_html=True)
 
+# ============================================================
+# PAGE: UPLOAD DATASET
+# ============================================================
 elif page == "📤 Upload Dataset":
     st.markdown('<div class="main-title" style="font-size:2.2rem;">📤 Upload Your Dataset</div>', unsafe_allow_html=True)
+    
     st.info("""
     **📦 Dataset Format Requirements:**
     - ZIP file containing:
@@ -320,6 +454,7 @@ elif page == "📤 Upload Dataset":
     
     if uploaded_file is not None:
         st.success(f"✅ File uploaded: **{uploaded_file.name}** ({uploaded_file.size/1024/1024:.1f} MB)")
+        
         os.makedirs(UPLOAD_DIR, exist_ok=True)
         zip_path = UPLOAD_DIR / uploaded_file.name
         with open(zip_path, 'wb') as f:
@@ -339,6 +474,7 @@ elif page == "📤 Upload Dataset":
             num_images = len(list(images_path.glob("*")))
             st.success(f"✅ Dataset extracted! Found **{num_images} images** and **{len(list(labels_path.glob('*')))} labels**")
             
+            # Sample images
             st.markdown('<div class="section-header">🖼️ Sample Images</div>', unsafe_allow_html=True)
             sample_imgs = list(images_path.glob("*.jpg"))[:4] + list(images_path.glob("*.png"))[:4]
             if sample_imgs:
@@ -376,11 +512,16 @@ elif page == "📤 Upload Dataset":
         else:
             st.error("❌ Invalid format. ZIP must contain `images/` and `labels/` folders.")
 
+# ============================================================
+# PAGE: DATASET QUALITY
+# ============================================================
 elif page == "📊 Dataset Quality":
     st.markdown('<div class="main-title" style="font-size:2.2rem;">📊 Dataset Quality Analysis</div>', unsafe_allow_html=True)
+    
     datasets = ['good', 'bad', 'worst']
     labels = {'good': '🟢 GOOD', 'bad': '🟡 BAD', 'worst': '🔴 WORST'}
     
+    # Gauges
     st.markdown('<div class="section-header">📈 Overall Quality Scores</div>', unsafe_allow_html=True)
     cols = st.columns(3)
     for i, ds in enumerate(datasets):
@@ -392,6 +533,8 @@ elif page == "📊 Dataset Quality":
                 st.plotly_chart(fig, width='stretch', key=f"gauge_{ds}")
     
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    # Detailed
     st.markdown('<div class="section-header">📋 Detailed Metrics</div>', unsafe_allow_html=True)
     
     for ds in datasets:
@@ -417,8 +560,12 @@ elif page == "📊 Dataset Quality":
                         with cols_img[i]:
                             st.image(str(img), caption=img.name, width='stretch')
 
+# ============================================================
+# PAGE: MODEL PERFORMANCE
+# ============================================================
 elif page == "🤖 Model Performance":
     st.markdown('<div class="main-title" style="font-size:2.2rem;">🤖 Model Performance</div>', unsafe_allow_html=True)
+    
     data = get_model_data()
     if data:
         rows = []
@@ -433,39 +580,56 @@ elif page == "🤖 Model Performance":
             })
         
         df = pd.DataFrame(rows)
+        
         st.markdown('<div class="section-header">📋 Performance Table</div>', unsafe_allow_html=True)
         st.dataframe(df, width='stretch', hide_index=True)
+        
         st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
         
+        # Charts
         col1, col2 = st.columns(2)
         with col1:
             st.markdown('<div class="section-header">📊 Bar Chart</div>', unsafe_allow_html=True)
-            fig = px.bar(df, x='Model', y=['Precision', 'Recall', 'mAP50'], barmode='group',
-                         color_discrete_sequence=['#00ff87', '#ffd700', '#60efff'])
-            fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                              font={'color': '#fff'}, height=400)
+            fig = px.bar(df, x='Model', y=['Precision', 'Recall', 'mAP50'],
+                         barmode='group', color_discrete_sequence=['#00ff87', '#ffd700', '#60efff'])
+            fig.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                font={'color': '#fff'}, height=400, legend=dict(bgcolor='rgba(0,0,0,0)')
+            )
             st.plotly_chart(fig, width='stretch')
+        
         with col2:
             st.markdown('<div class="section-header">🕸️ Radar Chart</div>', unsafe_allow_html=True)
             fig = create_radar_chart(df)
             st.plotly_chart(fig, width='stretch')
         
         st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+        
+        # Trend
         st.markdown('<div class="section-header">📈 Performance Trend</div>', unsafe_allow_html=True)
         fig = px.line(df, x='Model', y=['Precision', 'Recall', 'mAP50', 'mAP50-95'],
                       markers=True, color_discrete_sequence=['#00ff87', '#ffd700', '#60efff', '#ff4757'])
-        fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                          font={'color': '#fff'}, height=400)
+        fig.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+            font={'color': '#fff'}, height=400, legend=dict(bgcolor='rgba(0,0,0,0)')
+        )
         st.plotly_chart(fig, width='stretch')
+        
         st.info("📌 **Observation:** Jaisa dataset quality girti hai, waisa model performance bhi girti hai!")
     else:
         st.warning("No model data found.")
 
+# ============================================================
+# PAGE: ROBUSTNESS TESTING
+# ============================================================
 elif page == "🧪 Robustness Testing":
     st.markdown('<div class="main-title" style="font-size:2.2rem;">🧪 Robustness Testing</div>', unsafe_allow_html=True)
+    
     robustness_data = get_robustness_data()
+    
     if robustness_data:
         st.markdown('<div class="section-header">🛡️ Model Stability Under Transformations</div>', unsafe_allow_html=True)
+        
         rows = []
         for model, info in robustness_data.items():
             rows.append({
@@ -475,13 +639,18 @@ elif page == "🧪 Robustness Testing":
                 'Max': round(info.get('max_robustness', 0), 2),
                 'Samples': info.get('samples_tested', 0)
             })
+        
         df = pd.DataFrame(rows)
         st.dataframe(df, width='stretch', hide_index=True)
-        fig = px.bar(df, x='Model', y=['Avg Robustness', 'Min', 'Max'], barmode='group',
-                     color_discrete_sequence=['#00ff87', '#ff4757', '#60efff'])
-        fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                          font={'color': '#fff'}, height=400)
+        
+        fig = px.bar(df, x='Model', y=['Avg Robustness', 'Min', 'Max'],
+                     barmode='group', color_discrete_sequence=['#00ff87', '#ff4757', '#60efff'])
+        fig.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+            font={'color': '#fff'}, height=400
+        )
         st.plotly_chart(fig, width='stretch')
+        
         st.markdown("""
         <div class="info-box">
             <h4>🧪 Transformations Tested:</h4>
@@ -490,12 +659,17 @@ elif page == "🧪 Robustness Testing":
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.warning("No robustness data found.")
+        st.warning("No robustness data found. Run: `python3 model/robustness/robustness_tester.py`")
 
+# ============================================================
+# PAGE: TRUST SCORE
+# ============================================================
 elif page == "🧠 Trust Score":
     st.markdown('<div class="main-title" style="font-size:2.2rem;">🧠 Final Trust Score</div>', unsafe_allow_html=True)
+    
     trust_data = get_trust_data()
     if trust_data:
+        # Gauges
         st.markdown('<div class="section-header">🎯 Trust Score Gauges</div>', unsafe_allow_html=True)
         cols = st.columns(3)
         for i, (ds, data) in enumerate(trust_data.items()):
@@ -505,6 +679,8 @@ elif page == "🧠 Trust Score":
                 st.plotly_chart(fig, width='stretch', key=f"trust_gauge_{ds}")
         
         st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+        
+        # Decision cards
         st.markdown('<div class="section-header">📋 Decision Summary</div>', unsafe_allow_html=True)
         cols = st.columns(3)
         for i, (ds, data) in enumerate(trust_data.items()):
@@ -513,12 +689,12 @@ elif page == "🧠 Trust Score":
                 decision = data.get('decision', 'N/A')
                 icon = data.get('icon', '🟢')
                 badge = 'badge-accept' if 'ACCEPT' in decision else 'badge-review' if 'REVIEW' in decision else 'badge-quarantine'
-                color = '#00ff87' if score >= 80 else '#ffd700' if score >= 60 else '#ff4757'
+                
                 st.markdown(f"""
                 <div class="metric-card">
                     <div style="font-size:2.5rem;">{icon}</div>
-                    <div style="font-size:1.4rem; font-weight:700; color:#fff; margin:0.5rem 0;">{ds.upper()}</div>
-                    <div style="font-size:2.5rem; font-weight:800; color:{color}; margin:0.5rem 0;">{score:.1f}%</div>
+                    <div style="font-size:1.4rem; font-weight:700; color:#fff; margin:0.5rem 0; letter-spacing:2px;">{ds.upper()}</div>
+                    <div style="font-size:2.5rem; font-weight:800; color:#fff; margin:0.5rem 0;">{score:.1f}%</div>
                     <div style="margin:0.5rem 0;"><span class="{badge}">{decision}</span></div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -527,10 +703,12 @@ elif page == "🧠 Trust Score":
                 for k, v in comps.items():
                     st.progress(v/100, text=f"{k.replace('_',' ').title()}: {v:.1f}%")
         
+        # Deployment Summary
         dec_data = get_decision_data()
         if dec_data:
             st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
             st.markdown('<div class="section-header">📊 Deployment Summary</div>', unsafe_allow_html=True)
+            
             summary = dec_data.get('summary', {})
             c1, c2, c3 = st.columns(3)
             with c1:
@@ -542,8 +720,130 @@ elif page == "🧠 Trust Score":
     else:
         st.warning("No trust data found.")
 
+
+# ============================================================
+# PAGE: BLOCKCHAIN
+# ============================================================
+elif page == "🔗 Blockchain":
+    st.markdown('<div class="main-title" style="font-size:2.2rem;">🔗 Blockchain Integrity</div>', unsafe_allow_html=True)
+    
+    blockchain_path = BASE / "outputs" / "reports" / "blockchain.json"
+    tamper_path = BASE / "outputs" / "reports" / "tamper_detection.json"
+    attack_path = BASE / "outputs" / "reports" / "cyber_attacks.json"
+    
+    if blockchain_path.exists():
+        with open(blockchain_path, 'r') as f:
+            blockchain_data = json.load(f)
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown(f'<div class="metric-card"><div class="metric-value">{blockchain_data.get("length", 0)}</div><div class="metric-label">📦 TOTAL BLOCKS</div></div>', unsafe_allow_html=True)
+        with col2:
+            is_valid = blockchain_data.get("is_valid", False)
+            color = "#00ff87" if is_valid else "#ff4757"
+            st.markdown(f'<div class="metric-card"><div class="metric-value" style="color:{color};">{"OK" if is_valid else "FAIL"}</div><div class="metric-label">CHAIN VALID</div></div>', unsafe_allow_html=True)
+        with col3:
+            st.markdown(f'<div class="metric-card"><div class="metric-value">{blockchain_data.get("difficulty", 2)}</div><div class="metric-label">⚙️ DIFFICULTY</div></div>', unsafe_allow_html=True)
+        with col4:
+            st.markdown('<div class="metric-card"><div class="metric-value">SHA-256</div><div class="metric-label">🔐 HASH</div></div>', unsafe_allow_html=True)
+        
+        st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">🔗 Chain Visualization</div>', unsafe_allow_html=True)
+        
+        chain = blockchain_data.get('chain', [])
+        
+        for block in chain:
+            block_data = block.get('data', {})
+            block_type = block_data.get('type', block_data.get('action', 'unknown'))
+            icons = {'dataset': '📊', 'model': '🤖', 'inference': '🧠',
+                     'DATASET_UPLOAD': '📤', 'MODEL_TRAINING': '🤖',
+                     'INFERENCE': '🧠', 'TAMPER_DETECTED': '⚠️'}
+            icon = icons.get(block_type, '📦')
+            
+            with st.expander(f"{icon} Block #{block['index']} - {block_type} - {block.get('datetime', 'N/A')}", expanded=(block['index'] <= 1)):
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(f"**Index:** `{block['index']}`")
+                    st.markdown(f"**Time:** `{block.get('datetime', 'N/A')}`")
+                    st.markdown(f"**Hash:**")
+                    st.code(block['hash'][:50] + "...", language="text")
+                with col2:
+                    st.markdown(f"**Prev Hash:**")
+                    prev = block['previous_hash']
+                    st.code(prev[:50] + "..." if prev != "0" else "GENESIS", language="text")
+                    st.markdown(f"**Nonce:** `{block.get('nonce', 0)}`")
+                st.markdown("**Data:**")
+                st.json(block_data)
+        
+        st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+        
+        if tamper_path.exists():
+            with open(tamper_path, 'r') as f:
+                tamper_data = json.load(f)
+            
+            st.markdown('<div class="section-header">🔍 Tamper Detection</div>', unsafe_allow_html=True)
+            
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.markdown(f'<div class="metric-card"><div class="metric-value" style="color:#00ff87;">{tamper_data.get("total_clean", 0)}</div><div class="metric-label">CLEAN</div></div>', unsafe_allow_html=True)
+            with c2:
+                st.markdown(f'<div class="metric-card"><div class="metric-value" style="color:#ff4757;">{tamper_data.get("total_tampered", 0)}</div><div class="metric-label">TAMPERED</div></div>', unsafe_allow_html=True)
+            with c3:
+                st.markdown(f'<div class="metric-card"><div class="metric-value" style="color:#60efff;font-size:1.2rem;">{tamper_data.get("verified_at", "N/A")[:16]}</div><div class="metric-label">VERIFIED AT</div></div>', unsafe_allow_html=True)
+        
+        if attack_path.exists():
+            with open(attack_path, 'r') as f:
+                attack_data = json.load(f)
+            
+            st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+            st.markdown('<div class="section-header">🛡️ Cybersecurity Attack Simulation</div>', unsafe_allow_html=True)
+            
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.markdown(f'<div class="metric-card"><div class="metric-value">{attack_data.get("total_attacks", 0)}</div><div class="metric-label">TOTAL ATTACKS</div></div>', unsafe_allow_html=True)
+            with c2:
+                detected = attack_data.get("detected", 0)
+                color = "#00ff87" if detected >= 4 else "#ffd700" if detected >= 2 else "#ff4757"
+                st.markdown(f'<div class="metric-card"><div class="metric-value" style="color:{color};">{detected}</div><div class="metric-label">DETECTED</div></div>', unsafe_allow_html=True)
+            with c3:
+                rate = attack_data.get("detection_rate", 0)
+                color = "#00ff87" if rate >= 80 else "#ffd700" if rate >= 50 else "#ff4757"
+                st.markdown(f'<div class="metric-card"><div class="metric-value" style="color:{color};">{rate:.0f}%</div><div class="metric-label">DETECTION RATE</div></div>', unsafe_allow_html=True)
+            
+            for attack in attack_data.get('attacks', []):
+                icon = 'WARN' if attack.get('detected') else 'FAIL'
+                with st.expander(f"{icon} {attack.get('name', 'Attack')} - {attack.get('severity', 'N/A')}"):
+                    st.markdown(f"**ID:** `{attack.get('id', 'N/A')}`")
+                    st.markdown(f"**Description:** {attack.get('description', 'N/A')}")
+                    st.markdown(f"**Result:** {attack.get('result', 'N/A')}")
+        
+        st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+        
+        if st.button("🔍 Verify Blockchain Integrity", type="primary", width='stretch'):
+            if is_valid:
+                st.success("Blockchain is VALID - All blocks verified!")
+                st.balloons()
+            else:
+                st.error("Blockchain is INVALID - Tampering detected!")
+        
+        st.info("""
+        **Blockchain Security Features:**
+        - SHA-256 Hashing - Tamper-proof data integrity
+        - Proof of Work - Mining difficulty prevents attacks
+        - Chain Linking - Each block linked to previous
+        - RSA Digital Signatures - Cryptographic verification
+        - Immutable Audit Trail
+        """)
+    else:
+        st.warning("No blockchain data found!")
+        st.code("python3 blockchain/audit_trail.py", language="bash")
+
+# ============================================================
+# PAGE: REPORTS
+# ============================================================
 else:
     st.markdown('<div class="main-title" style="font-size:2.2rem;">📁 All Reports</div>', unsafe_allow_html=True)
+    
     if REPORTS.exists():
         files = sorted(list(REPORTS.glob("*.json")))
         if files:
@@ -564,6 +864,9 @@ else:
     else:
         st.warning("Reports folder not found")
 
+# ============================================================
+# FOOTER
+# ============================================================
 st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
 st.markdown("""
 <div style="text-align:center; color:#666; font-size:0.85rem; padding:1rem 0;">
