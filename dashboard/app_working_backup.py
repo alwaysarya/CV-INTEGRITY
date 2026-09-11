@@ -56,43 +56,6 @@ st.markdown("""
     #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
     [data-testid="stSidebar"] { background: linear-gradient(180deg, #0a0e27 0%, #1a1f3a 100%); border-right: 1px solid #333355; }
     .stButton > button { background: linear-gradient(90deg, #00ff87, #60efff); color: #000; font-weight: 700; border: none; border-radius: 10px; padding: 0.6rem 1.5rem; width: 100%; }
-
-    .metric-card:hover {
-        transform: translateY(-8px) scale(1.03);
-        border-color: #00ff87 !important;
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.6), 0 0 40px rgba(0, 255, 135, 0.4), 0 0 60px rgba(0, 255, 135, 0.2) !important;
-    }
-    [data-testid="stSidebar"] .stRadio label:hover {
-        background: linear-gradient(90deg, rgba(0, 255, 135, 0.15), transparent) !important;
-        border-left: 4px solid #00ff87 !important;
-        box-shadow: 0 0 15px rgba(0, 255, 135, 0.5) !important;
-    }
-    .stButton > button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.7), 0 0 40px rgba(96, 239, 255, 0.5) !important;
-    }
-    [data-testid="stExpander"]:hover {
-        border-color: #00ff87 !important;
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.4) !important;
-    }
-    [data-testid="stDataFrame"]:hover {
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.3) !important;
-    }
-    [data-testid="stMetric"]:hover {
-        background: linear-gradient(145deg, #1e1e3a, #2a2a4a) !important;
-        border-radius: 15px;
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.4) !important;
-        padding: 1rem !important;
-    }
-    .info-box:hover {
-        border-color: #00ff87 !important;
-        box-shadow: 0 0 20px rgba(0, 255, 135, 0.4) !important;
-    }
-    .section-header:hover {
-        text-shadow: 0 0 10px rgba(0, 255, 135, 0.8), 0 0 20px rgba(0, 255, 135, 0.4);
-    }
-
-/* GLOW_ADDED */
 </style>
 """, unsafe_allow_html=True)
 
