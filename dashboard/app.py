@@ -563,6 +563,304 @@ st.markdown("""
     .badge-danger { background: var(--color-danger); color: white; }
     .badge-info { background: var(--color-secondary); color: white; }
 
+
+    /* ============================================================ */
+    /* COMPONENT LIBRARY v6.0 */
+    /* ============================================================ */
+    
+    /* ---------- METRIC CARDS (Glassmorphism) ---------- */
+    .metric-card {
+        background: linear-gradient(145deg, rgba(21, 26, 46, 0.8), rgba(26, 32, 56, 0.9)) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        padding: 1.75rem 1.5rem !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(42, 48, 80, 0.6) !important;
+        text-align: center !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 
+            0 4px 20px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    .metric-card::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 3px !important;
+        background: linear-gradient(90deg, #00D9A3, #5B8DEF, #FFB84D) !important;
+        transform: scaleX(0) !important;
+        transform-origin: left !important;
+        transition: transform 0.5s ease !important;
+    }
+    
+    .metric-card:hover::before {
+        transform: scaleX(1) !important;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-6px) scale(1.01) !important;
+        border-color: rgba(0, 217, 163, 0.5) !important;
+        box-shadow: 
+            0 12px 40px rgba(0, 0, 0, 0.4),
+            0 0 40px rgba(0, 217, 163, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* ---------- BUTTONS ---------- */
+    .stButton > button {
+        background: linear-gradient(135deg, #00D9A3 0%, #00B88A 100%) !important;
+        color: #0A0E1A !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1.75rem !important;
+        font-size: 0.95rem !important;
+        letter-spacing: 0.02em !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 15px rgba(0, 217, 163, 0.3) !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .stButton > button::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: -100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent) !important;
+        transition: left 0.5s !important;
+    }
+    
+    .stButton > button:hover::before {
+        left: 100% !important;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 
+            0 8px 25px rgba(0, 217, 163, 0.4),
+            0 0 40px rgba(0, 217, 163, 0.2) !important;
+    }
+    
+    .stButton > button:active {
+        transform: translateY(0) scale(0.98) !important;
+    }
+    
+    /* ---------- PROGRESS BARS ---------- */
+    .stProgress > div > div > div {
+        background: linear-gradient(90deg, #00D9A3, #5B8DEF, #00D9A3) !important;
+        background-size: 200% 100% !important;
+        animation: shimmer 2s linear infinite !important;
+        border-radius: 10px !important;
+        height: 8px !important;
+    }
+    
+    .stProgress > div > div {
+        background: rgba(21, 26, 46, 0.8) !important;
+        border-radius: 10px !important;
+        height: 8px !important;
+        overflow: hidden !important;
+    }
+    
+    /* ---------- TABS (Modern Pill) ---------- */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.5rem !important;
+        background: rgba(21, 26, 46, 0.5) !important;
+        padding: 0.5rem !important;
+        border-radius: 14px !important;
+        border: 1px solid #2A3050 !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 10px !important;
+        padding: 0.6rem 1.25rem !important;
+        background: transparent !important;
+        color: #A8B2C8 !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        border: none !important;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(0, 217, 163, 0.1) !important;
+        color: #00D9A3 !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #00D9A3 0%, #00B88A 100%) !important;
+        color: #0A0E1A !important;
+        font-weight: 700 !important;
+        box-shadow: 0 4px 15px rgba(0, 217, 163, 0.3) !important;
+    }
+    
+    /* ---------- INFO BOXES ---------- */
+    .info-box {
+        background: linear-gradient(145deg, rgba(21, 26, 46, 0.8), rgba(26, 32, 56, 0.9)) !important;
+        backdrop-filter: blur(10px) !important;
+        padding: 1.5rem !important;
+        border-radius: 16px !important;
+        border: 1px solid #2A3050 !important;
+        margin: 1rem 0 !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .info-box::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 4px !important;
+        height: 100% !important;
+        background: linear-gradient(180deg, #00D9A3, #5B8DEF) !important;
+    }
+    
+    .info-box:hover {
+        border-color: rgba(0, 217, 163, 0.5) !important;
+        box-shadow: 0 0 30px rgba(0, 217, 163, 0.15) !important;
+        transform: translateX(4px) !important;
+    }
+    
+    /* ---------- EXPANDERS ---------- */
+    [data-testid="stExpander"] {
+        background: linear-gradient(145deg, rgba(21, 26, 46, 0.8), rgba(26, 32, 56, 0.9)) !important;
+        border-radius: 16px !important;
+        border: 1px solid #2A3050 !important;
+        transition: all 0.3s ease !important;
+        overflow: hidden !important;
+    }
+    
+    [data-testid="stExpander"]:hover {
+        border-color: rgba(0, 217, 163, 0.5) !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3) !important;
+        transform: translateX(4px) !important;
+    }
+    
+    [data-testid="stExpander"] summary {
+        padding: 1rem 1.25rem !important;
+        font-weight: 600 !important;
+        color: #FFFFFF !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    [data-testid="stExpander"] summary:hover {
+        background: rgba(0, 217, 163, 0.05) !important;
+    }
+    
+    /* ---------- DATAFRAMES ---------- */
+    [data-testid="stDataFrame"] {
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        border: 1px solid #2A3050 !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    [data-testid="stDataFrame"]:hover {
+        border-color: rgba(91, 141, 239, 0.5) !important;
+        box-shadow: 0 8px 30px rgba(91, 141, 239, 0.2) !important;
+    }
+    
+    /* ---------- ALERTS ---------- */
+    .stAlert {
+        border-radius: 14px !important;
+        border-left-width: 4px !important;
+        backdrop-filter: blur(10px) !important;
+        padding: 1rem 1.25rem !important;
+        animation: fadeInUp 0.4s ease-out !important;
+    }
+    
+    .stAlert > div {
+        font-weight: 500 !important;
+    }
+    
+    /* ---------- SELECTBOX ---------- */
+    .stSelectbox > div > div {
+        background: rgba(21, 26, 46, 0.8) !important;
+        border: 1px solid #2A3050 !important;
+        border-radius: 12px !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stSelectbox > div > div:hover {
+        border-color: rgba(0, 217, 163, 0.5) !important;
+    }
+    
+    /* ---------- TEXT INPUT ---------- */
+    .stTextInput > div > div > input {
+        background: rgba(21, 26, 46, 0.8) !important;
+        border: 1px solid #2A3050 !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1rem !important;
+        color: #FFFFFF !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #00D9A3 !important;
+        box-shadow: 0 0 0 3px rgba(0, 217, 163, 0.1) !important;
+    }
+    
+    /* ---------- FILE UPLOADER ---------- */
+    [data-testid="stFileUploader"] {
+        background: linear-gradient(145deg, rgba(21, 26, 46, 0.6), rgba(26, 32, 56, 0.8)) !important;
+        border-radius: 16px !important;
+        border: 2px dashed #2A3050 !important;
+        padding: 2rem !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    [data-testid="stFileUploader"]:hover {
+        border-color: #00D9A3 !important;
+        background: linear-gradient(145deg, rgba(21, 26, 46, 0.8), rgba(26, 32, 56, 0.9)) !important;
+        box-shadow: 0 0 30px rgba(0, 217, 163, 0.1) !important;
+    }
+    
+    /* ---------- SPINNER ---------- */
+    .stSpinner > div {
+        border-top-color: #00D9A3 !important;
+    }
+    
+    /* ---------- TOGGLE ---------- */
+    [data-testid="stCheckbox"] {
+        transition: all 0.3s ease !important;
+    }
+    
+    /* ---------- SECTION HEADERS (Enhanced) ---------- */
+    .section-header {
+        position: relative !important;
+        padding: 0.75rem 0 0.75rem 1.25rem !important;
+        border-left: 4px solid #00D9A3 !important;
+        background: linear-gradient(90deg, rgba(0, 217, 163, 0.08), transparent 60%) !important;
+        border-radius: 0 12px 12px 0 !important;
+        margin: 2rem 0 1.25rem 0 !important;
+        font-size: 1.5rem !important;
+        font-weight: 800 !important;
+        color: #FFFFFF !important;
+        letter-spacing: -0.01em !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .section-header:hover {
+        background: linear-gradient(90deg, rgba(0, 217, 163, 0.15), transparent 70%) !important;
+        padding-left: 1.5rem !important;
+    }
+    
+    /* ---------- DIVIDERS ---------- */
+    .custom-divider {
+        border: none !important;
+        height: 1px !important;
+        background: linear-gradient(90deg, transparent, #2A3050 20%, #2A3050 80%, transparent) !important;
+        margin: 2rem 0 !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
