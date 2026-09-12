@@ -812,6 +812,409 @@ st.markdown("""
         border-right-color: rgba(0, 229, 160, 0.3) !important;
     }
 
+
+    /* ============================================================ */
+    /* PHASE 4: ANIMATIONS + MICRO-INTERACTIONS v7.0 */
+    /* ============================================================ */
+    
+    /* ---------- PAGE TRANSITIONS ---------- */
+    @keyframes pageEnter {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .main .block-container > div {
+        animation: pageEnter 0.5s ease-out;
+    }
+    
+    /* ---------- ELEMENT ENTRANCE ---------- */
+    @keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeSlideLeft {
+        from { opacity: 0; transform: translateX(-16px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes fadeSlideRight {
+        from { opacity: 0; transform: translateX(16px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.94); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    
+    /* Apply animations to common elements */
+    .element-container {
+        animation: fadeSlideUp 0.5s ease-out;
+    }
+    
+    [data-testid="column"]:nth-child(1) {
+        animation-delay: 0.05s;
+    }
+    
+    [data-testid="column"]:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+    
+    [data-testid="column"]:nth-child(3) {
+        animation-delay: 0.15s;
+    }
+    
+    [data-testid="column"]:nth-child(4) {
+        animation-delay: 0.2s;
+    }
+    
+    /* ---------- NUMBER COUNT-UP ---------- */
+    @keyframes countUp {
+        from { opacity: 0; transform: scale(0.5); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    
+    .metric-value, [data-testid="stMetricValue"] {
+        animation: countUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    /* ---------- ICON ANIMATIONS ---------- */
+    @keyframes iconFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+    
+    @keyframes iconPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.9; }
+    }
+    
+    @keyframes iconRotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .metric-card > div:first-child {
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+    
+    /* ---------- PULSING STATUS DOTS ---------- */
+    @keyframes statusPulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 229, 160, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(0, 229, 160, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 229, 160, 0); }
+    }
+    
+    .status-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #00E5A0;
+        animation: statusPulse 2s infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+    
+    .status-dot-yellow {
+        background: #FFC857;
+        animation: statusPulseYellow 2s infinite;
+    }
+    
+    @keyframes statusPulseYellow {
+        0% { box-shadow: 0 0 0 0 rgba(255, 200, 87, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 200, 87, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 200, 87, 0); }
+    }
+    
+    .status-dot-red {
+        background: #FF5566;
+        animation: statusPulseRed 2s infinite;
+    }
+    
+    @keyframes statusPulseRed {
+        0% { box-shadow: 0 0 0 0 rgba(255, 85, 102, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 85, 102, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 85, 102, 0); }
+    }
+    
+    /* ---------- GRADIENT BORDER ROTATION ---------- */
+    @keyframes borderRotate {
+        0% { --angle: 0deg; }
+        100% { --angle: 360deg; }
+    }
+    
+    /* ---------- SMOOTH HOVER LIFT ---------- */
+    .hover-lift {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* ---------- SHIMMER EFFECT ---------- */
+    @keyframes shimmerWave {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    .shimmer {
+        background: linear-gradient(90deg, 
+            rgba(18, 23, 43, 0.8) 0%, 
+            rgba(34, 42, 69, 0.9) 50%, 
+            rgba(18, 23, 43, 0.8) 100%);
+        background-size: 1000px 100%;
+        animation: shimmerWave 2s infinite;
+    }
+    
+    /* ---------- SKELETON LOADER ---------- */
+    @keyframes skeletonPulse {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 0.7; }
+    }
+    
+    .skeleton {
+        background: linear-gradient(90deg, #1A2038, #222A45, #1A2038);
+        background-size: 200% 100%;
+        animation: shimmerWave 1.5s infinite;
+        border-radius: 12px;
+    }
+    
+    /* ---------- SMOOTH SCROLL ---------- */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* ---------- LINK UNDERLINE ANIMATION ---------- */
+    a {
+        position: relative;
+    }
+    
+    a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: currentColor;
+        transition: width 0.3s ease;
+    }
+    
+    a:hover::after {
+        width: 100%;
+    }
+    
+    /* ---------- BUTTON CLICK RIPPLE ---------- */
+    .stButton > button {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* ---------- LOADING DOTS ---------- */
+    @keyframes loadingDot {
+        0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+        40% { transform: scale(1); opacity: 1; }
+    }
+    
+    .loading-dots span {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        margin: 0 3px;
+        border-radius: 50%;
+        background: #00E5A0;
+        animation: loadingDot 1.4s infinite ease-in-out both;
+    }
+    
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0s; }
+    
+    /* ---------- GRADIENT ANIMATION ---------- */
+    @keyframes gradientFlow {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .animated-gradient {
+        background: linear-gradient(-45deg, #00E5A0, #6BA5F5, #FFC857, #FF5566);
+        background-size: 400% 400%;
+        animation: gradientFlow 8s ease infinite;
+    }
+    
+    /* ---------- SCALE ON TAP ---------- */
+    .stButton > button:active {
+        transform: scale(0.97) !important;
+    }
+    
+    /* ---------- SMOOTH CHART LOADING ---------- */
+    .js-plotly-plot {
+        animation: chartSmoothIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    @keyframes chartSmoothIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            filter: blur(4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+        }
+    }
+    
+    /* ---------- TOOLTIP ANIMATION ---------- */
+    @keyframes tooltipFade {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ---------- FOCUS RING ANIMATION ---------- */
+    @keyframes focusRing {
+        0% { box-shadow: 0 0 0 0 rgba(0, 229, 160, 0.5); }
+        100% { box-shadow: 0 0 0 6px rgba(0, 229, 160, 0); }
+    }
+    
+    *:focus-visible {
+        animation: focusRing 1s ease-out;
+    }
+    
+    /* ---------- SIDEBAR ITEM ENTRANCE ---------- */
+    [data-testid="stSidebar"] .stRadio label {
+        animation: fadeSlideLeft 0.4s ease-out backwards;
+    }
+    
+    [data-testid="stSidebar"] .stRadio label:nth-child(1) { animation-delay: 0.02s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(2) { animation-delay: 0.04s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(3) { animation-delay: 0.06s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(4) { animation-delay: 0.08s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(5) { animation-delay: 0.10s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(6) { animation-delay: 0.12s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(7) { animation-delay: 0.14s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(8) { animation-delay: 0.16s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(9) { animation-delay: 0.18s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(10) { animation-delay: 0.20s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(11) { animation-delay: 0.22s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(12) { animation-delay: 0.24s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(13) { animation-delay: 0.26s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(14) { animation-delay: 0.28s; }
+    [data-testid="stSidebar"] .stRadio label:nth-child(15) { animation-delay: 0.30s; }
+    
+    /* ---------- TABLE ROW ENTRANCE ---------- */
+    [data-testid="stDataFrame"] tbody tr {
+        animation: fadeSlideRight 0.3s ease-out backwards;
+    }
+    
+    [data-testid="stDataFrame"] tbody tr:nth-child(1) { animation-delay: 0.02s; }
+    [data-testid="stDataFrame"] tbody tr:nth-child(2) { animation-delay: 0.04s; }
+    [data-testid="stDataFrame"] tbody tr:nth-child(3) { animation-delay: 0.06s; }
+    [data-testid="stDataFrame"] tbody tr:nth-child(4) { animation-delay: 0.08s; }
+    [data-testid="stDataFrame"] tbody tr:nth-child(5) { animation-delay: 0.10s; }
+    
+    /* ---------- REDUCE MOTION (Accessibility) ---------- */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+
+    /* ============================================================ */
+    /* PHASE 5.1: HOME PAGE POLISH v7.0 */
+    /* ============================================================ */
+    
+    /* ---------- INFO BOX (Home) ---------- */
+    .info-box {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 1.75rem !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        margin: 1rem 0 !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25) !important;
+    }
+    
+    .info-box::before {
+        content: '' !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 4px !important;
+        height: 100% !important;
+        background: linear-gradient(180deg, #00E5A0, #6BA5F5, #FFC857) !important;
+    }
+    
+    .info-box::after {
+        content: '' !important;
+        position: absolute !important;
+        top: -50% !important;
+        right: -50% !important;
+        width: 200% !important;
+        height: 200% !important;
+        background: radial-gradient(circle, rgba(0, 229, 160, 0.08), transparent 70%) !important;
+        opacity: 0 !important;
+        transition: opacity 0.4s !important;
+        pointer-events: none !important;
+    }
+    
+    .info-box:hover::after {
+        opacity: 1 !important;
+    }
+    
+    .info-box:hover {
+        border-color: rgba(0, 229, 160, 0.5) !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 0 40px rgba(0, 229, 160, 0.15) !important;
+        transform: translateY(-4px) !important;
+    }
+    
+    .info-box h4 {
+        color: #00E5A0 !important;
+        font-size: 1.15rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* ---------- STEPS (numbered) ---------- */
+    .step-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(42, 48, 80, 0.4);
+        transition: all 0.3s ease;
+    }
+    
+    .step-item:last-child {
+        border-bottom: none;
+    }
+    
+    .step-item:hover {
+        padding-left: 0.5rem;
+        background: linear-gradient(90deg, rgba(0, 229, 160, 0.05), transparent);
+    }
+    
+    .step-number {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
