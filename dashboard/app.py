@@ -1215,6 +1215,271 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
+
+    /* ============================================================ */
+    /* PHASE 5.2: DATASET QUALITY POLISH v7.0 */
+    /* ============================================================ */
+    
+    /* ---------- QUALITY CARDS ---------- */
+    .quality-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        backdrop-filter: blur(20px) !important;
+        padding: 2rem 1.5rem !important;
+        border-radius: 24px !important;
+        border: 2px solid !important;
+        text-align: center !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .quality-card::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 4px !important;
+        background: linear-gradient(90deg, currentColor, transparent) !important;
+    }
+    
+    .quality-card::after {
+        content: '' !important;
+        position: absolute !important;
+        top: -50% !important;
+        right: -50% !important;
+        width: 200% !important;
+        height: 200% !important;
+        background: radial-gradient(circle, currentColor, transparent 70%) !important;
+        opacity: 0.05 !important;
+        pointer-events: none !important;
+    }
+    
+    .quality-card:hover {
+        transform: translateY(-8px) scale(1.02) !important;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 50px currentColor !important;
+    }
+    
+    /* ---------- SAMPLE IMAGES GALLERY ---------- */
+    .sample-gallery {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 1.5rem !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        margin: 1rem 0 !important;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* ---------- IMAGES ---------- */
+    [data-testid="stImage"] {
+        border-radius: 14px !important;
+        overflow: hidden !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid rgba(42, 48, 80, 0.6) !important;
+    }
+    
+    [data-testid="stImage"]:hover {
+        transform: translateY(-4px) scale(1.03) !important;
+        box-shadow: 
+            0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 30px rgba(0, 229, 160, 0.2) !important;
+        border-color: rgba(0, 229, 160, 0.5) !important;
+    }
+    
+    [data-testid="stImage"] img {
+        transition: all 0.4s ease !important;
+    }
+    
+    [data-testid="stImage"]:hover img {
+        filter: brightness(1.1) contrast(1.05) !important;
+    }
+    
+    /* ---------- CAPTION ---------- */
+    [data-testid="stImage"] figcaption {
+        background: rgba(18, 23, 43, 0.9) !important;
+        color: #B8C0D4 !important;
+        padding: 0.5rem !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.05em !important;
+        border-top: 1px solid rgba(42, 48, 80, 0.5) !important;
+    }
+    
+    /* ---------- OVERALL SCORE (big display) ---------- */
+    .score-display {
+        font-size: 3.5rem !important;
+        font-weight: 900 !important;
+        line-height: 1 !important;
+        letter-spacing: -0.04em !important;
+        animation: scoreGlow 3s ease-in-out infinite !important;
+    }
+    
+    @keyframes scoreGlow {
+        0%, 100% { filter: brightness(1) drop-shadow(0 0 10px currentColor); }
+        50% { filter: brightness(1.15) drop-shadow(0 0 25px currentColor); }
+    }
+    
+    /* ---------- METRIC BREAKDOWN ---------- */
+    .metric-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(42, 48, 80, 0.4);
+    }
+    
+    .metric-row:last-child {
+        border-bottom: none;
+    }
+    
+    .metric-row-label {
+        color: #B8C0D4;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .metric-row-value {
+        color: #FFFFFF;
+        font-weight: 800;
+        font-size: 1.05rem;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+
+    /* ============================================================ */
+    /* PHASE 5.3: MODEL PERFORMANCE POLISH v7.0 */
+    /* ============================================================ */
+    
+    /* ---------- PERFORMANCE SUMMARY CARDS ---------- */
+    .perf-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        backdrop-filter: blur(20px) !important;
+        padding: 1.75rem 1.25rem !important;
+        border-radius: 24px !important;
+        border: 2px solid !important;
+        text-align: center !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .perf-card::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 4px !important;
+        background: linear-gradient(90deg, currentColor, transparent) !important;
+        animation: perfTopGlow 2.5s ease-in-out infinite !important;
+    }
+    
+    @keyframes perfTopGlow {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+    }
+    
+    .perf-card:hover {
+        transform: translateY(-8px) scale(1.02) !important;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 50px currentColor !important;
+    }
+    
+    /* ---------- METRIC GRID (inside perf-card) ---------- */
+    .perf-metric {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.5rem;
+    }
+    
+    .perf-metric-value {
+        font-size: 1.4rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        animation: perfCountUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    @keyframes perfCountUp {
+        from { opacity: 0; transform: scale(0.6); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    
+    .perf-metric-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #7A8299;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-top: 0.35rem;
+    }
+    
+    /* ---------- CHARTS CONTAINER ---------- */
+    .charts-container {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.7), rgba(26, 32, 56, 0.85)) !important;
+        padding: 1.5rem !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        margin: 1rem 0 !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .charts-container::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 2px !important;
+        background: linear-gradient(90deg, transparent, #00E5A0, #6BA5F5, transparent) !important;
+        opacity: 0.5 !important;
+    }
+    
+    .charts-container:hover {
+        border-color: rgba(0, 229, 160, 0.4) !important;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35), 0 0 60px rgba(0, 229, 160, 0.12) !important;
+    }
+    
+    /* ---------- OBSERVATION BOX ---------- */
+    .observation-box {
+        background: linear-gradient(145deg, rgba(0, 229, 160, 0.08), rgba(107, 165, 245, 0.08)) !important;
+        padding: 1.5rem !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(0, 229, 160, 0.3) !important;
+        margin: 1.5rem 0 !important;
+        text-align: center !important;
+        position: relative !important;
+        overflow: hidden !important;
+        animation: obsGlow 3s ease-in-out infinite !important;
+    }
+    
+    @keyframes obsGlow {
+        0%, 100% { box-shadow: 0 0 30px rgba(0, 229, 160, 0.15); }
+        50% { box-shadow: 0 0 50px rgba(0, 229, 160, 0.3); }
+    }
+    
+    .observation-box h3 {
+        color: #00E5A0 !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .observation-box p {
+        color: #FFFFFF !important;
+        font-size: 1.05rem !important;
+        font-weight: 500 !important;
+        margin: 0 !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
