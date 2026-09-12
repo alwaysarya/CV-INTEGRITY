@@ -344,7 +344,8 @@ with st.sidebar:
         "🧠 Trust Score",
         "📁 Reports",
         "🔗 Blockchain",
-        "👛 Wallet"
+        "👛 Wallet",
+        "🎨 XAI Visualizer"
     ])
     
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
@@ -360,6 +361,57 @@ with st.sidebar:
     st.markdown(f"🟢 **Datasets:** {datasets_count}")
     
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    st.markdown('<hr class="custom-divider" style="margin: 1rem 0;">', unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="color: #6B7394; font-size: 0.7rem; letter-spacing: 0.2em; 
+                padding-left: 0.5rem; margin-bottom: 0.75rem; font-weight: 700;">
+        🔌 REAL-TIME
+    </div>
+    """, unsafe_allow_html=True)
+    
+    import socket
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)
+        ws_result = sock.connect_ex(('localhost', 8765))
+        sock.close()
+        ws_status = "CONNECTED" if ws_result == 0 else "OFFLINE"
+        ws_color = "#00D9A3" if ws_result == 0 else "#FF4757"
+    except:
+        ws_status = "OFFLINE"
+        ws_color = "#FF4757"
+    
+    st.markdown(f"""
+    <div style="display: flex; justify-content: space-between; align-items: center;
+                padding: 0.6rem 0.75rem; background: rgba(0, 217, 163, 0.1);
+                border-radius: 10px; margin-bottom: 0.4rem; border-left: 3px solid {ws_color};">
+        <span style="color: #A8B2C8; font-size: 0.85rem;">WebSocket</span>
+        <span style="color: {ws_color}; font-weight: 700; font-size: 0.75rem;">{ws_status}</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    try:
+        api_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        api_sock.settimeout(1)
+        api_result = api_sock.connect_ex(('localhost', 8000))
+        api_sock.close()
+        api_status = "ONLINE" if api_result == 0 else "OFFLINE"
+        api_color = "#00D9A3" if api_result == 0 else "#FF4757"
+    except:
+        api_status = "OFFLINE"
+        api_color = "#FF4757"
+    
+    st.markdown(f"""
+    <div style="display: flex; justify-content: space-between; align-items: center;
+                padding: 0.6rem 0.75rem; background: rgba(91, 141, 239, 0.1);
+                border-radius: 10px; margin-bottom: 0.4rem; border-left: 3px solid {api_color};">
+        <span style="color: #A8B2C8; font-size: 0.85rem;">REST API</span>
+        <span style="color: {api_color}; font-weight: 700; font-size: 0.75rem;">{api_status}</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('<hr class="custom-divider" style="margin: 1rem 0;">', unsafe_allow_html=True)
     st.caption("🎓 SIH 2026 | v3.0")
 
 # ============================================================
@@ -1006,6 +1058,158 @@ elif page == "👛 Wallet":
         st.warning("⚠️ No wallet data found!")
         st.code("python3 blockchain/wallet.py", language="bash")
         st.info("Run the above command to create wallets and tokens.")
+
+
+
+# ============================================================
+# PAGE: XAI VISUALIZER
+# ============================================================
+elif page == "🎨 XAI Visualizer":
+    st.markdown("""
+    <div style="text-align: center; padding: 1rem 0 2rem 0;">
+        <h1 style="font-size: 3rem; font-weight: 900; 
+                   background: linear-gradient(135deg, #00D9A3 0%, #5B8DEF 100%);
+                   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                   background-clip: text; margin: 0;">
+            🎨 Explainable AI Visualizer
+        </h1>
+        <p style="color: #A8B2C8; font-size: 1.1rem; margin-top: 0.5rem;">
+            See exactly what the model looks at when making predictions
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    xai_dir = BASE / "outputs" / "xai_heatmaps"
+    
+    if xai_dir.exists():
+        heatmaps = sorted(list(xai_dir.glob("*.jpg")), key=lambda x: x.stat().st_mtime, reverse=True)
+        
+        if heatmaps:
+            # Stats
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.markdown(f"""
+                <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                            padding: 1.5rem; border-radius: 20px; border: 2px solid #00D9A3;
+                            text-align: center; box-shadow: 0 0 30px rgba(0, 217, 163, 0.2);">
+                    <div style="font-size: 2.5rem;">🔥</div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #00D9A3; margin: 0.5rem 0;">
+                        {len(heatmaps)}
+                    </div>
+                    <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">HEATMAPS</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown("""
+                <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                            padding: 1.5rem; border-radius: 20px; border: 2px solid #5B8DEF;
+                            text-align: center; box-shadow: 0 0 30px rgba(91, 141, 239, 0.2);">
+                    <div style="font-size: 2.5rem;">🎯</div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #5B8DEF; margin: 0.5rem 0;">
+                        Grad-CAM
+                    </div>
+                    <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">METHOD</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col3:
+                st.markdown("""
+                <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                            padding: 1.5rem; border-radius: 20px; border: 2px solid #FFB84D;
+                            text-align: center; box-shadow: 0 0 30px rgba(255, 184, 77, 0.2);">
+                    <div style="font-size: 2.5rem;">🧠</div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #FFB84D; margin: 0.5rem 0;">
+                        Real-time
+                    </div>
+                    <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">VISUALIZE</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+            
+            # Info box
+            st.markdown("""
+            <div class="info-box">
+                <h3 style="color: #00D9A3; margin-bottom: 1rem;">🔥 How to Read Heatmaps</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="background: rgba(255, 71, 87, 0.2); padding: 0.75rem; border-radius: 8px; border-left: 4px solid #FF4757;">
+                        <div style="color: #FFFFFF; font-weight: 700;">🔴 Red Areas</div>
+                        <div style="color: #A8B2C8; font-size: 0.9rem;">High attention — Model focuses here</div>
+                    </div>
+                    <div style="background: rgba(255, 184, 77, 0.2); padding: 0.75rem; border-radius: 8px; border-left: 4px solid #FFB84D;">
+                        <div style="color: #FFFFFF; font-weight: 700;">🟡 Yellow Areas</div>
+                        <div style="color: #A8B2C8; font-size: 0.9rem;">Medium attention — Partial focus</div>
+                    </div>
+                    <div style="background: rgba(91, 141, 239, 0.2); padding: 0.75rem; border-radius: 8px; border-left: 4px solid #5B8DEF;">
+                        <div style="color: #FFFFFF; font-weight: 700;">🔵 Blue Areas</div>
+                        <div style="color: #A8B2C8; font-size: 0.9rem;">Low attention — Ignored</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+            
+            # Heatmap Gallery
+            st.markdown('<div class="section-header">🖼️ Heatmap Gallery</div>', unsafe_allow_html=True)
+            
+            for i in range(0, min(len(heatmaps), 8), 2):
+                cols = st.columns(2)
+                for j, col in enumerate(cols):
+                    if i + j < len(heatmaps):
+                        heatmap_path = heatmaps[i + j]
+                        with col:
+                            st.image(str(heatmap_path), 
+                                    caption=f"🎨 {heatmap_path.name}", 
+                                    width='stretch')
+            
+            # Generate new heatmap section
+            st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+            st.markdown('<div class="section-header">🔄 Generate New Heatmaps</div>', unsafe_allow_html=True)
+            
+            if st.button("🎨 Generate Heatmaps from GOOD Dataset", type="primary", width='stretch'):
+                with st.spinner("🔄 Generating heatmaps..."):
+                    import subprocess
+                    result = subprocess.run(
+                        "python3 xai/gradcam.py",
+                        shell=True, cwd=str(BASE),
+                        capture_output=True, text=True
+                    )
+                    if "Grad-CAM ready" in result.stdout:
+                        st.success("✅ Heatmaps generated!")
+                        st.balloons()
+                        st.rerun()
+                    else:
+                        st.error("❌ Failed to generate heatmaps")
+                        st.code(result.stdout + result.stderr)
+            
+            # Stats
+            st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+            st.markdown('<div class="section-header">📊 XAI Statistics</div>', unsafe_allow_html=True)
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric("Total Heatmaps", len(heatmaps))
+            with col2:
+                st.metric("Method", "Grad-CAM")
+            with col3:
+                st.metric("Model", "YOLOv8n")
+            with col4:
+                st.metric("Classes", "4")
+        
+        else:
+            st.info("🎨 No heatmaps generated yet!")
+            if st.button("🎨 Generate First Heatmaps", type="primary"):
+                with st.spinner("Generating..."):
+                    import subprocess
+                    subprocess.run("python3 xai/gradcam.py", shell=True, cwd=str(BASE))
+                    st.rerun()
+    else:
+        st.warning("⚠️ XAI folder not found!")
+        st.code("python3 xai/gradcam.py", language="bash")
 
 
 # ============================================================
