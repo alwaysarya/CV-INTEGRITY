@@ -199,6 +199,32 @@ st.markdown("""
     .stProgress > div > div > div {
         background: linear-gradient(90deg, #00ff87, #60efff);
     }
+
+    /* ---------- FORCE SIDEBAR VISIBLE ---------- */
+    [data-testid="stSidebar"] {
+        display: block !important;
+        visibility: visible !important;
+        min-width: 280px !important;
+        width: 280px !important;
+        transform: none !important;
+        background: linear-gradient(180deg, #0A0E1A 0%, #151A2E 100%) !important;
+        border-right: 1px solid #2A3050 !important;
+    }
+    
+    [data-testid="stSidebar"][aria-expanded="false"] {
+        min-width: 280px !important;
+        width: 280px !important;
+        margin-left: 0 !important;
+    }
+    
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
+    
+    section[data-testid="stSidebar"] {
+        display: block !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
