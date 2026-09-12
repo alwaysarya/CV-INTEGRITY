@@ -345,7 +345,9 @@ with st.sidebar:
         "📁 Reports",
         "🔗 Blockchain",
         "👛 Wallet",
-        "🎨 XAI Visualizer"
+        "🎨 XAI Visualizer",
+        "🎥 Video Analysis",
+        "📈 Model Drift"
     ])
     
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
@@ -1210,6 +1212,442 @@ elif page == "🎨 XAI Visualizer":
     else:
         st.warning("⚠️ XAI folder not found!")
         st.code("python3 xai/gradcam.py", language="bash")
+
+
+
+# ============================================================
+# PAGE: VIDEO ANALYSIS
+# ============================================================
+elif page == "🎥 Video Analysis":
+    st.markdown("""
+    <div style="text-align: center; padding: 1rem 0 2rem 0;">
+        <h1 style="font-size: 3rem; font-weight: 900; 
+                   background: linear-gradient(135deg, #00D9A3 0%, #5B8DEF 100%);
+                   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                   background-clip: text; margin: 0;">
+            🎥 Video Analysis
+        </h1>
+        <p style="color: #A8B2C8; font-size: 1.1rem; margin-top: 0.5rem;">
+            Frame-by-frame object detection and tracking with YOLOv8
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    video_dir = BASE / "datasets" / "videos"
+    output_dir = BASE / "outputs" / "video_analysis"
+    
+    # Top Stats
+    col1, col2, col3 = st.columns(3)
+    
+    video_count = len(list(video_dir.glob("*.mp4"))) + len(list(video_dir.glob("*.avi"))) if video_dir.exists() else 0
+    analyzed_count = len(list(output_dir.glob("*_analysis.json"))) if output_dir.exists() else 0
+    
+    with col1:
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #5B8DEF;
+                    text-align: center; box-shadow: 0 0 30px rgba(91, 141, 239, 0.2);">
+            <div style="font-size: 2.5rem;">📹</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #5B8DEF; margin: 0.5rem 0;">
+                {video_count}
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">VIDEOS</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #00D9A3;
+                    text-align: center; box-shadow: 0 0 30px rgba(0, 217, 163, 0.2);">
+            <div style="font-size: 2.5rem;">✅</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #00D9A3; margin: 0.5rem 0;">
+                {analyzed_count}
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">ANALYZED</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #FFB84D;
+                    text-align: center; box-shadow: 0 0 30px rgba(255, 184, 77, 0.2);">
+            <div style="font-size: 2.5rem;">🎯</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFB84D; margin: 0.5rem 0;">
+                YOLOv8
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">DETECTOR</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    # Upload Section
+    st.markdown('<div class="section-header">📤 Upload Video</div>', unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="info-box">
+        <h4 style="color: #00D9A3;">📹 Supported Formats</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+            <div style="background: rgba(0, 217, 163, 0.1); padding: 0.75rem; border-radius: 8px; border-left: 4px solid #00D9A3;">
+                <div style="color: #FFFFFF; font-weight: 700;">MP4</div>
+                <div style="color: #A8B2C8; font-size: 0.85rem;">Best support</div>
+            </div>
+            <div style="background: rgba(91, 141, 239, 0.1); padding: 0.75rem; border-radius: 8px; border-left: 4px solid #5B8DEF;">
+                <div style="color: #FFFFFF; font-weight: 700;">AVI</div>
+                <div style="color: #A8B2C8; font-size: 0.85rem;">Good support</div>
+            </div>
+            <div style="background: rgba(255, 184, 77, 0.1); padding: 0.75rem; border-radius: 8px; border-left: 4px solid #FFB84D;">
+                <div style="color: #FFFFFF; font-weight: 700;">MOV</div>
+                <div style="color: #A8B2C8; font-size: 0.85rem;">Basic support</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # File uploader
+    uploaded_video = st.file_uploader("Choose a video file", type=['mp4', 'avi', 'mov'], key="video_upload")
+    
+    if uploaded_video is not None:
+        # Save video
+        video_dir.mkdir(parents=True, exist_ok=True)
+        video_path = video_dir / uploaded_video.name
+        
+        with open(video_path, 'wb') as f:
+            f.write(uploaded_video.getbuffer())
+        
+        st.success(f"✅ Video uploaded: {uploaded_video.name}")
+        
+        # Show video info
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"""
+            <div style="background: rgba(91, 141, 239, 0.1); padding: 1rem; 
+                        border-radius: 12px; border-left: 4px solid #5B8DEF;">
+                <div style="color: #6B7394; font-size: 0.8rem;">FILE NAME</div>
+                <div style="color: #FFFFFF; font-weight: 700;">{uploaded_video.name}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            size_mb = uploaded_video.size / 1024 / 1024
+            st.markdown(f"""
+            <div style="background: rgba(0, 217, 163, 0.1); padding: 1rem; 
+                        border-radius: 12px; border-left: 4px solid #00D9A3;">
+                <div style="color: #6B7394; font-size: 0.8rem;">FILE SIZE</div>
+                <div style="color: #FFFFFF; font-weight: 700;">{size_mb:.2f} MB</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Preview
+        st.markdown("**🎬 Video Preview:**")
+        st.video(str(video_path))
+        
+        # Analyze button
+        if st.button("🚀 Analyze Video", type="primary", width='stretch'):
+            with st.spinner("🔄 Analyzing video... This may take a few minutes..."):
+                import subprocess
+                
+                # Run analyzer with the uploaded video
+                import subprocess
+                result = subprocess.run(
+                    f"python3 video_analysis/analyzer.py",
+                    shell=True,
+                    cwd=str(BASE),
+                    capture_output=True,
+                    text=True
+                )
+                
+                if "Analysis complete" in result.stdout or "Video analysis complete" in result.stdout:
+                    st.success("✅ Video analysis complete!")
+                    st.balloons()
+                else:
+                    st.warning("⚠️ Analysis completed with issues")
+                    with st.expander("View Output"):
+                        st.code(result.stdout + result.stderr)
+    
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    # Previous Analyses
+    st.markdown('<div class="section-header">📊 Previous Analyses</div>', unsafe_allow_html=True)
+    
+    if output_dir.exists():
+        analysis_files = sorted(list(output_dir.glob("*_analysis.json")), key=lambda x: x.stat().st_mtime, reverse=True)
+        
+        if analysis_files:
+            for analysis_file in analysis_files[:5]:
+                with open(analysis_file, 'r') as f:
+                    data = json.load(f)
+                
+                video_name = data.get('video_name', 'Unknown')
+                results = data.get('results', {})
+                video_info = data.get('video_info', {})
+                
+                with st.expander(f"📹 {video_name} — {results.get('total_detections', 0)} detections"):
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.metric("Total Detections", results.get('total_detections', 0))
+                    with col2:
+                        st.metric("Detection Rate", f"{results.get('detection_rate_percent', 0):.1f}%")
+                    with col3:
+                        st.metric("Duration", f"{video_info.get('duration_seconds', 0):.1f}s")
+                    
+                    # Class distribution
+                    class_dist = results.get('class_distribution', {})
+                    if class_dist:
+                        st.markdown("**📊 Class Distribution:**")
+                        for cls, count in class_dist.items():
+                            st.markdown(f"- **{cls.upper()}**: {count} detections")
+                    
+                    # Show annotated video if exists
+                    annotated_path = data.get('output_files', {}).get('annotated_video')
+                    if annotated_path and Path(annotated_path).exists():
+                        st.markdown("**🎬 Annotated Video:**")
+                        st.video(annotated_path)
+                    
+                    # Download JSON
+                    st.download_button(
+                        label="⬇️ Download Analysis JSON",
+                        data=json.dumps(data, indent=2),
+                        file_name=analysis_file.name,
+                        mime="application/json",
+                        key=f"dl_{analysis_file.name}"
+                    )
+        else:
+            st.info("🎥 No videos analyzed yet. Upload a video above to get started!")
+            
+            st.markdown("""
+            <div class="info-box">
+                <h4 style="color: #FFB84D;">💡 Quick Start</h4>
+                <div style="color: #A8B2C8;">
+                    1. Download a sample video:<br>
+                    <code style="background: rgba(0,0,0,0.3); padding: 0.25rem 0.5rem; border-radius: 4px;">
+                    curl -L -k -o test_video.mp4 "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4"
+                    </code>
+                    <br><br>
+                    2. Upload the video above<br>
+                    3. Click "Analyze Video"<br>
+                    4. See results here!
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.info("🎥 Video analysis folder not found. Upload a video to get started!")
+
+
+
+# ============================================================
+# PAGE: MODEL DRIFT
+# ============================================================
+elif page == "📈 Model Drift":
+    st.markdown("""
+    <div style="text-align: center; padding: 1rem 0 2rem 0;">
+        <h1 style="font-size: 3rem; font-weight: 900; 
+                   background: linear-gradient(135deg, #00D9A3 0%, #5B8DEF 100%);
+                   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                   background-clip: text; margin: 0;">
+            📈 Model Drift Detection
+        </h1>
+        <p style="color: #A8B2C8; font-size: 1.1rem; margin-top: 0.5rem;">
+            Monitor model performance over time and detect degradation
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    history_dir = BASE / "outputs" / "model_history"
+    reports_dir = BASE / "outputs" / "reports"
+    
+    # Load drift reports
+    drift_reports = []
+    if reports_dir.exists():
+        for report_file in sorted(reports_dir.glob("drift_*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+            with open(report_file, 'r') as f:
+                drift_reports.append(json.load(f))
+    
+    # Get baseline snapshots
+    baselines = []
+    if history_dir.exists():
+        for baseline_file in history_dir.glob("*_baseline.json"):
+            with open(baseline_file, 'r') as f:
+                baselines.append(json.load(f))
+    
+    # Top Stats
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #5B8DEF;
+                    text-align: center; box-shadow: 0 0 30px rgba(91, 141, 239, 0.2);">
+            <div style="font-size: 2.5rem;">📊</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #5B8DEF; margin: 0.5rem 0;">
+                {len(baselines)}
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">BASELINES</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #00D9A3;
+                    text-align: center; box-shadow: 0 0 30px rgba(0, 217, 163, 0.2);">
+            <div style="font-size: 2.5rem;">✅</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #00D9A3; margin: 0.5rem 0;">
+                {len(drift_reports)}
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">REPORTS</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        stable_count = sum(1 for r in drift_reports if r.get('severity') == 'STABLE')
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #00D9A3;
+                    text-align: center; box-shadow: 0 0 30px rgba(0, 217, 163, 0.2);">
+            <div style="font-size: 2.5rem;">🎯</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #00D9A3; margin: 0.5rem 0;">
+                {stable_count}
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">STABLE</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        drifted_count = sum(1 for r in drift_reports if r.get('drift_detected'))
+        color = '#FF4757' if drifted_count > 0 else '#00D9A3'
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid {color};
+                    text-align: center; box-shadow: 0 0 30px {color}33;">
+            <div style="font-size: 2.5rem;">⚠️</div>
+            <div style="font-size: 2rem; font-weight: 900; color: {color}; margin: 0.5rem 0;">
+                {drifted_count}
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">DRIFTED</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    # Run Drift Analysis
+    st.markdown('<div class="section-header">🔍 Run Drift Analysis</div>', unsafe_allow_html=True)
+    
+    if st.button("📈 Analyze Model Drift", type="primary", width='stretch'):
+        with st.spinner("🔄 Analyzing drift..."):
+            import subprocess
+            result = subprocess.run(
+                "python3 model_drift/drift_detector.py",
+                shell=True, cwd=str(BASE),
+                capture_output=True, text=True
+            )
+            if "Drift detection complete" in result.stdout:
+                st.success("✅ Drift analysis complete!")
+                st.balloons()
+                st.rerun()
+            else:
+                st.error("❌ Analysis failed")
+                st.code(result.stdout + result.stderr)
+    
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    # Drift Reports
+    st.markdown('<div class="section-header">📋 Drift Reports</div>', unsafe_allow_html=True)
+    
+    if drift_reports:
+        for report in drift_reports[:10]:
+            model = report.get('model', 'unknown').upper()
+            severity = report.get('severity', 'N/A')
+            drift_percent = report.get('max_drift_percent', 0)
+            action = report.get('action', 'N/A')
+            color = report.get('color', '#5B8DEF')
+            
+            st.markdown(f"""
+            <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                        padding: 1.5rem; border-radius: 20px; border: 2px solid {color};
+                        margin-bottom: 1rem; box-shadow: 0 0 30px {color}22;">
+                <div style="display: flex; justify-content: space-between; align-items: center;
+                            flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="color: #FFFFFF; font-weight: 800; font-size: 1.2rem;">
+                            {model} Model
+                        </div>
+                        <div style="color: #6B7394; font-size: 0.85rem; margin-top: 0.25rem;">
+                            {report.get('analysis_timestamp', 'N/A')[:19]}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="background: {color}; color: #0A0E1A;
+                                    padding: 0.4rem 1rem; border-radius: 50px;
+                                    font-weight: 800; font-size: 0.85rem;
+                                    display: inline-block;">
+                            {severity}
+                        </div>
+                        <div style="color: {color}; font-weight: 900; font-size: 1.5rem; margin-top: 0.5rem;">
+                            {drift_percent:+.1f}%
+                        </div>
+                    </div>
+                </div>
+                <div style="color: #A8B2C8; margin-top: 1rem; padding-top: 1rem;
+                            border-top: 1px solid #2A3050;">
+                    <strong>Action:</strong> {action}
+                </div>
+                
+                <div style="margin-top: 1rem;">
+                    <strong style="color: #FFFFFF;">Metric Drifts:</strong>
+            """, unsafe_allow_html=True)
+            
+            metric_drifts = report.get('metric_drifts', {})
+            for metric, values in metric_drifts.items():
+                baseline = values.get('baseline', 0)
+                current = values.get('current', 0)
+                change = values.get('change_percent', 0)
+                change_color = '#00D9A3' if change >= 0 else '#FF4757'
+                
+                st.markdown(f"""
+                    <div style="display: flex; justify-content: space-between;
+                                padding: 0.5rem 0; border-bottom: 1px solid #2A3050;">
+                        <span style="color: #A8B2C8;">{metric}</span>
+                        <span style="color: #FFFFFF; font-family: monospace;">
+                            {baseline:.1f}% → {current:.1f}% 
+                            <span style="color: {change_color}; font-weight: 700;">
+                                ({change:+.1f}%)
+                            </span>
+                        </span>
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("</div></div>", unsafe_allow_html=True)
+    else:
+        st.info("📈 No drift reports yet. Click 'Analyze Model Drift' to get started!")
+    
+    # Info box
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="info-box">
+        <h3 style="color: #00D9A3; margin-bottom: 1rem;">📊 Drift Severity Levels</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div style="background: rgba(0, 217, 163, 0.1); padding: 1rem; border-radius: 12px; border-left: 4px solid #00D9A3;">
+                <div style="color: #FFFFFF; font-weight: 700;">🟢 STABLE</div>
+                <div style="color: #A8B2C8; font-size: 0.9rem;">Change > -2.5%</div>
+            </div>
+            <div style="background: rgba(91, 141, 239, 0.1); padding: 1rem; border-radius: 12px; border-left: 4px solid #5B8DEF;">
+                <div style="color: #FFFFFF; font-weight: 700;">🔵 MINOR</div>
+                <div style="color: #A8B2C8; font-size: 0.9rem;">Change -2.5% to -7.5%</div>
+            </div>
+            <div style="background: rgba(255, 184, 77, 0.1); padding: 1rem; border-radius: 12px; border-left: 4px solid #FFB84D;">
+                <div style="color: #FFFFFF; font-weight: 700;">🟡 WARNING</div>
+                <div style="color: #A8B2C8; font-size: 0.9rem;">Change -7.5% to -15%</div>
+            </div>
+            <div style="background: rgba(255, 71, 87, 0.1); padding: 1rem; border-radius: 12px; border-left: 4px solid #FF4757;">
+                <div style="color: #FFFFFF; font-weight: 700;">🔴 CRITICAL</div>
+                <div style="color: #A8B2C8; font-size: 0.9rem;">Change < -15%</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ============================================================

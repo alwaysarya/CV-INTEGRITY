@@ -1,0 +1,2294 @@
+{
+  "video_name": "test_video.mp4",
+  "analyzed_at": "2026-09-12T12:20:53.215607",
+  "video_info": {
+    "fps": 30,
+    "total_frames": 300,
+    "duration_seconds": 10.0,
+    "resolution": "1280x720"
+  },
+  "analysis_info": {
+    "processed_frames": 100,
+    "frame_skip": 2,
+    "confidence_threshold": 0.5,
+    "model": "good"
+  },
+  "results": {
+    "total_detections": 158,
+    "frames_with_detections": 75,
+    "detection_rate_percent": 75.0,
+    "avg_detections_per_frame": 1.58,
+    "class_distribution": {
+      "car": 158
+    }
+  },
+  "frame_details": [
+    {
+      "frame": 0,
+      "timestamp": 0.0,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.578,
+          "bbox": [
+            436.1,
+            243.8,
+            766.1,
+            500.5
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 3,
+      "timestamp": 0.1,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.524,
+          "bbox": [
+            435.5,
+            242.2,
+            766.1,
+            501.9
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 6,
+      "timestamp": 0.2,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.553,
+          "bbox": [
+            433.2,
+            240.6,
+            766.8,
+            503.7
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 9,
+      "timestamp": 0.3,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.57,
+          "bbox": [
+            428.7,
+            236.2,
+            767.8,
+            501.4
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 12,
+      "timestamp": 0.4,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.666,
+          "bbox": [
+            428.5,
+            235.6,
+            767.7,
+            503.0
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 15,
+      "timestamp": 0.5,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.794,
+          "bbox": [
+            428.8,
+            238.1,
+            767.9,
+            506.4
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.568,
+          "bbox": [
+            490.4,
+            232.5,
+            820.9,
+            518.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.529,
+          "bbox": [
+            296.5,
+            252.6,
+            730.5,
+            519.6
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 18,
+      "timestamp": 0.6,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.677,
+          "bbox": [
+            433.5,
+            237.4,
+            764.1,
+            504.2
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 24,
+      "timestamp": 0.8,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.644,
+          "bbox": [
+            437.7,
+            241.0,
+            762.3,
+            500.5
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 27,
+      "timestamp": 0.9,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.591,
+          "bbox": [
+            437.8,
+            239.9,
+            760.8,
+            497.1
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 30,
+      "timestamp": 1.0,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.736,
+          "bbox": [
+            436.4,
+            242.0,
+            761.6,
+            501.1
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 33,
+      "timestamp": 1.1,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.717,
+          "bbox": [
+            431.0,
+            238.0,
+            761.0,
+            506.2
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 36,
+      "timestamp": 1.2,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.794,
+          "bbox": [
+            430.7,
+            238.6,
+            761.3,
+            505.9
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.506,
+          "bbox": [
+            492.8,
+            236.5,
+            813.8,
+            518.1
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 39,
+      "timestamp": 1.3,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.749,
+          "bbox": [
+            431.8,
+            241.2,
+            757.5,
+            511.3
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 42,
+      "timestamp": 1.4,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.748,
+          "bbox": [
+            428.2,
+            237.5,
+            760.0,
+            513.0
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 45,
+      "timestamp": 1.5,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.766,
+          "bbox": [
+            429.7,
+            237.7,
+            761.8,
+            506.7
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.515,
+          "bbox": [
+            493.4,
+            236.4,
+            813.2,
+            520.5
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 48,
+      "timestamp": 1.6,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.736,
+          "bbox": [
+            427.7,
+            239.3,
+            763.0,
+            510.0
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 51,
+      "timestamp": 1.7,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.746,
+          "bbox": [
+            431.9,
+            244.9,
+            759.8,
+            515.3
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 54,
+      "timestamp": 1.8,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.805,
+          "bbox": [
+            436.6,
+            253.3,
+            756.9,
+            515.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.538,
+          "bbox": [
+            503.6,
+            252.3,
+            811.6,
+            528.2
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.529,
+          "bbox": [
+            303.7,
+            254.8,
+            699.6,
+            516.7
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 57,
+      "timestamp": 1.9,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.845,
+          "bbox": [
+            438.2,
+            255.8,
+            756.3,
+            516.3
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.821,
+          "bbox": [
+            369.0,
+            252.8,
+            711.8,
+            516.3
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.625,
+          "bbox": [
+            504.2,
+            254.7,
+            811.2,
+            529.0
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 60,
+      "timestamp": 2.0,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.883,
+          "bbox": [
+            431.7,
+            248.7,
+            760.3,
+            522.9
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.717,
+          "bbox": [
+            498.0,
+            247.1,
+            816.4,
+            529.7
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.612,
+          "bbox": [
+            300.2,
+            250.5,
+            714.9,
+            518.4
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 63,
+      "timestamp": 2.1,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.911,
+          "bbox": [
+            428.9,
+            250.9,
+            761.6,
+            529.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.763,
+          "bbox": [
+            493.1,
+            249.3,
+            817.1,
+            532.6
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.603,
+          "bbox": [
+            298.3,
+            251.2,
+            723.9,
+            522.9
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 66,
+      "timestamp": 2.2,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.903,
+          "bbox": [
+            429.3,
+            253.1,
+            762.8,
+            528.6
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.749,
+          "bbox": [
+            493.5,
+            251.1,
+            818.6,
+            531.9
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.557,
+          "bbox": [
+            299.6,
+            255.6,
+            721.4,
+            523.2
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 69,
+      "timestamp": 2.3,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.822,
+          "bbox": [
+            432.1,
+            254.5,
+            760.2,
+            528.2
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 72,
+      "timestamp": 2.4,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.814,
+          "bbox": [
+            436.6,
+            259.9,
+            759.4,
+            527.1
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.543,
+          "bbox": [
+            502.9,
+            256.3,
+            816.0,
+            531.6
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 75,
+      "timestamp": 2.5,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.757,
+          "bbox": [
+            440.2,
+            259.0,
+            758.1,
+            518.6
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.737,
+          "bbox": [
+            373.1,
+            257.0,
+            709.8,
+            514.4
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 78,
+      "timestamp": 2.6,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.75,
+          "bbox": [
+            439.7,
+            260.9,
+            758.7,
+            519.1
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.73,
+          "bbox": [
+            373.1,
+            258.8,
+            712.0,
+            512.8
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 81,
+      "timestamp": 2.7,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.772,
+          "bbox": [
+            373.0,
+            259.1,
+            708.6,
+            517.1
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.769,
+          "bbox": [
+            440.0,
+            263.4,
+            757.6,
+            525.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.51,
+          "bbox": [
+            507.9,
+            263.2,
+            815.4,
+            530.8
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 84,
+      "timestamp": 2.8,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.754,
+          "bbox": [
+            439.4,
+            263.1,
+            757.4,
+            528.3
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.744,
+          "bbox": [
+            372.8,
+            258.4,
+            708.8,
+            522.5
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 87,
+      "timestamp": 2.9,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.703,
+          "bbox": [
+            437.5,
+            258.2,
+            758.8,
+            526.6
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.622,
+          "bbox": [
+            372.0,
+            254.9,
+            717.5,
+            517.4
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 90,
+      "timestamp": 3.0,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.76,
+          "bbox": [
+            438.2,
+            256.4,
+            757.5,
+            522.5
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.683,
+          "bbox": [
+            372.3,
+            253.9,
+            711.9,
+            513.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.517,
+          "bbox": [
+            505.1,
+            256.4,
+            812.9,
+            531.1
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 93,
+      "timestamp": 3.1,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.771,
+          "bbox": [
+            436.6,
+            249.4,
+            758.6,
+            515.3
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.525,
+          "bbox": [
+            503.2,
+            248.3,
+            813.0,
+            528.5
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 96,
+      "timestamp": 3.2,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.769,
+          "bbox": [
+            437.8,
+            251.0,
+            759.4,
+            510.5
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.527,
+          "bbox": [
+            504.9,
+            250.1,
+            814.2,
+            525.0
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 99,
+      "timestamp": 3.3,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.845,
+          "bbox": [
+            435.4,
+            252.9,
+            758.9,
+            525.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.632,
+          "bbox": [
+            502.7,
+            252.4,
+            813.7,
+            530.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.632,
+          "bbox": [
+            301.2,
+            257.8,
+            705.3,
+            522.9
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 102,
+      "timestamp": 3.4,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.743,
+          "bbox": [
+            369.8,
+            251.3,
+            714.2,
+            523.3
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 105,
+      "timestamp": 3.5,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.713,
+          "bbox": [
+            371.6,
+            253.3,
+            711.3,
+            525.3
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 108,
+      "timestamp": 3.6,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.611,
+          "bbox": [
+            373.5,
+            251.3,
+            713.4,
+            519.8
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 111,
+      "timestamp": 3.7,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.777,
+          "bbox": [
+            371.5,
+            253.0,
+            712.5,
+            523.4
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 114,
+      "timestamp": 3.8,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.74,
+          "bbox": [
+            437.2,
+            257.2,
+            759.1,
+            528.2
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.508,
+          "bbox": [
+            505.8,
+            258.0,
+            814.3,
+            531.9
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 117,
+      "timestamp": 3.9,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.746,
+          "bbox": [
+            440.8,
+            258.9,
+            757.3,
+            524.4
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.692,
+          "bbox": [
+            373.8,
+            256.7,
+            710.0,
+            524.9
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.511,
+          "bbox": [
+            507.6,
+            259.5,
+            811.2,
+            530.9
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 120,
+      "timestamp": 4.0,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.675,
+          "bbox": [
+            441.1,
+            253.8,
+            757.2,
+            518.3
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.612,
+          "bbox": [
+            374.0,
+            252.6,
+            709.6,
+            521.0
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 123,
+      "timestamp": 4.1,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.599,
+          "bbox": [
+            442.8,
+            250.6,
+            757.3,
+            514.2
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 126,
+      "timestamp": 4.2,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.553,
+          "bbox": [
+            441.7,
+            247.5,
+            756.0,
+            515.5
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 129,
+      "timestamp": 4.3,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.539,
+          "bbox": [
+            445.6,
+            254.0,
+            753.6,
+            524.6
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 135,
+      "timestamp": 4.5,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.534,
+          "bbox": [
+            378.1,
+            249.4,
+            701.8,
+            505.8
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 162,
+      "timestamp": 5.4,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.518,
+          "bbox": [
+            373.8,
+            246.6,
+            713.1,
+            505.0
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 192,
+      "timestamp": 6.4,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.513,
+          "bbox": [
+            371.3,
+            239.2,
+            703.5,
+            512.8
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 195,
+      "timestamp": 6.5,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.504,
+          "bbox": [
+            370.1,
+            240.0,
+            704.7,
+            520.3
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 198,
+      "timestamp": 6.6,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.522,
+          "bbox": [
+            372.3,
+            239.2,
+            701.8,
+            511.1
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 207,
+      "timestamp": 6.9,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.507,
+          "bbox": [
+            374.9,
+            240.5,
+            700.1,
+            512.9
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 219,
+      "timestamp": 7.3,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.565,
+          "bbox": [
+            374.8,
+            239.5,
+            702.1,
+            499.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.502,
+          "bbox": [
+            441.9,
+            241.7,
+            751.6,
+            501.9
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 222,
+      "timestamp": 7.4,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.503,
+          "bbox": [
+            374.7,
+            239.0,
+            701.9,
+            499.5
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 228,
+      "timestamp": 7.6,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.592,
+          "bbox": [
+            371.8,
+            238.6,
+            702.4,
+            504.7
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.549,
+          "bbox": [
+            438.6,
+            241.3,
+            751.9,
+            510.2
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 231,
+      "timestamp": 7.7,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.578,
+          "bbox": [
+            371.6,
+            238.8,
+            702.2,
+            505.6
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.527,
+          "bbox": [
+            438.1,
+            241.7,
+            751.0,
+            510.8
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 234,
+      "timestamp": 7.8,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.596,
+          "bbox": [
+            371.0,
+            236.8,
+            701.8,
+            505.7
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.524,
+          "bbox": [
+            446.7,
+            234.6,
+            743.9,
+            490.9
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 237,
+      "timestamp": 7.9,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.571,
+          "bbox": [
+            371.2,
+            238.1,
+            702.8,
+            508.3
+          ]
+        }
+      ],
+      "count": 1
+    },
+    {
+      "frame": 240,
+      "timestamp": 8.0,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.679,
+          "bbox": [
+            372.4,
+            240.9,
+            701.7,
+            506.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.566,
+          "bbox": [
+            440.5,
+            242.8,
+            752.1,
+            509.4
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 243,
+      "timestamp": 8.1,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.667,
+          "bbox": [
+            372.0,
+            240.5,
+            702.6,
+            504.4
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.556,
+          "bbox": [
+            441.2,
+            242.7,
+            753.5,
+            506.3
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 246,
+      "timestamp": 8.2,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.676,
+          "bbox": [
+            371.6,
+            238.9,
+            702.6,
+            501.9
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.603,
+          "bbox": [
+            441.1,
+            241.1,
+            754.9,
+            505.4
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 249,
+      "timestamp": 8.3,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.664,
+          "bbox": [
+            370.3,
+            237.5,
+            702.8,
+            502.5
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.628,
+          "bbox": [
+            456.3,
+            235.7,
+            747.7,
+            489.2
+          ]
+        }
+      ],
+      "count": 2
+    },
+    {
+      "frame": 252,
+      "timestamp": 8.4,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.787,
+          "bbox": [
+            370.7,
+            240.1,
+            704.1,
+            500.3
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.766,
+          "bbox": [
+            450.9,
+            232.2,
+            749.9,
+            487.4
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.593,
+          "bbox": [
+            514.6,
+            238.5,
+            800.5,
+            489.8
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 255,
+      "timestamp": 8.5,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.756,
+          "bbox": [
+            370.2,
+            237.8,
+            704.1,
+            498.1
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.747,
+          "bbox": [
+            449.0,
+            230.0,
+            749.6,
+            487.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.545,
+          "bbox": [
+            513.4,
+            236.5,
+            798.6,
+            489.9
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 258,
+      "timestamp": 8.6,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.809,
+          "bbox": [
+            370.0,
+            237.3,
+            705.2,
+            497.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.802,
+          "bbox": [
+            446.3,
+            230.7,
+            751.3,
+            485.7
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.635,
+          "bbox": [
+            511.6,
+            233.9,
+            802.3,
+            488.3
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 261,
+      "timestamp": 8.7,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.85,
+          "bbox": [
+            448.1,
+            233.3,
+            751.7,
+            485.4
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.844,
+          "bbox": [
+            372.1,
+            239.0,
+            703.9,
+            498.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.728,
+          "bbox": [
+            513.6,
+            235.2,
+            804.3,
+            487.7
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 264,
+      "timestamp": 8.8,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.783,
+          "bbox": [
+            373.4,
+            240.6,
+            702.8,
+            497.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.779,
+          "bbox": [
+            453.8,
+            234.8,
+            750.7,
+            485.2
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.649,
+          "bbox": [
+            514.9,
+            239.0,
+            803.1,
+            487.0
+          ]
+        }
+      ],
+      "count": 3
+    },
+    {
+      "frame": 267,
+      "timestamp": 8.9,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.855,
+          "bbox": [
+            374.9,
+            242.0,
+            701.0,
+            498.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.835,
+          "bbox": [
+            456.3,
+            234.0,
+            749.3,
+            485.1
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.684,
+          "bbox": [
+            517.5,
+            238.3,
+            801.7,
+            486.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.532,
+          "bbox": [
+            248.5,
+            261.4,
+            622.9,
+            504.7
+          ]
+        }
+      ],
+      "count": 4
+    },
+    {
+      "frame": 270,
+      "timestamp": 9.0,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.91,
+          "bbox": [
+            451.7,
+            224.4,
+            750.3,
+            482.6
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.901,
+          "bbox": [
+            377.9,
+            224.7,
+            695.3,
+            483.2
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.822,
+          "bbox": [
+            309.5,
+            242.5,
+            660.3,
+            496.3
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.768,
+          "bbox": [
+            515.8,
+            227.1,
+            802.6,
+            484.5
+          ]
+        }
+      ],
+      "count": 4
+    },
+    {
+      "frame": 273,
+      "timestamp": 9.1,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.914,
+          "bbox": [
+            457.1,
+            229.1,
+            749.3,
+            482.3
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.902,
+          "bbox": [
+            382.2,
+            229.1,
+            694.3,
+            482.2
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.759,
+          "bbox": [
+            518.3,
+            231.6,
+            801.5,
+            485.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.752,
+          "bbox": [
+            310.7,
+            241.1,
+            651.4,
+            491.8
+          ]
+        }
+      ],
+      "count": 4
+    },
+    {
+      "frame": 276,
+      "timestamp": 9.2,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.894,
+          "bbox": [
+            384.2,
+            228.5,
+            692.4,
+            481.3
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.889,
+          "bbox": [
+            465.6,
+            231.5,
+            747.8,
+            481.9
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.75,
+          "bbox": [
+            310.4,
+            238.8,
+            646.6,
+            488.7
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.679,
+          "bbox": [
+            525.6,
+            240.3,
+            800.1,
+            485.2
+          ]
+        }
+      ],
+      "count": 4
+    },
+    {
+      "frame": 279,
+      "timestamp": 9.3,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.85,
+          "bbox": [
+            383.3,
+            230.3,
+            692.0,
+            483.1
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.849,
+          "bbox": [
+            465.5,
+            233.9,
+            747.8,
+            483.1
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.752,
+          "bbox": [
+            310.9,
+            240.8,
+            644.8,
+            491.2
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.644,
+          "bbox": [
+            525.9,
+            242.6,
+            800.5,
+            486.1
+          ]
+        }
+      ],
+      "count": 4
+    },
+    {
+      "frame": 282,
+      "timestamp": 9.4,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.833,
+          "bbox": [
+            382.1,
+            228.2,
+            691.5,
+            484.7
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.832,
+          "bbox": [
+            465.9,
+            233.2,
+            746.6,
+            483.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.757,
+          "bbox": [
+            309.2,
+            239.8,
+            645.4,
+            495.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.629,
+          "bbox": [
+            524.8,
+            242.6,
+            799.4,
+            485.8
+          ]
+        }
+      ],
+      "count": 4
+    },
+    {
+      "frame": 285,
+      "timestamp": 9.5,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.8,
+          "bbox": [
+            467.9,
+            236.7,
+            746.5,
+            485.1
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.787,
+          "bbox": [
+            383.6,
+            229.5,
+            691.1,
+            485.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.689,
+          "bbox": [
+            309.5,
+            240.0,
+            644.8,
+            495.6
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.596,
+          "bbox": [
+            515.3,
+            246.9,
+            807.6,
+            499.2
+          ]
+        }
+      ],
+      "count": 4
+    },
+    {
+      "frame": 288,
+      "timestamp": 9.6,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.852,
+          "bbox": [
+            309.7,
+            242.3,
+            642.8,
+            501.7
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.851,
+          "bbox": [
+            383.8,
+            231.1,
+            691.1,
+            486.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.837,
+          "bbox": [
+            463.8,
+            235.3,
+            745.0,
+            485.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.615,
+          "bbox": [
+            524.2,
+            244.5,
+            798.5,
+            487.2
+          ]
+        }
+      ],
+      "count": 4
+    },
+    {
+      "frame": 291,
+      "timestamp": 9.7,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.892,
+          "bbox": [
+            461.7,
+            231.5,
+            745.5,
+            485.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.891,
+          "bbox": [
+            380.5,
+            229.0,
+            692.3,
+            486.8
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.829,
+          "bbox": [
+            307.7,
+            240.8,
+            650.1,
+            502.6
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.734,
+          "bbox": [
+            525.3,
+            239.8,
+            798.4,
+            487.0
+          ]
+        }
+      ],
+      "count": 4
+    },
+    {
+      "frame": 294,
+      "timestamp": 9.8,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.901,
+          "bbox": [
+            465.5,
+            231.3,
+            744.7,
+            485.4
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.898,
+          "bbox": [
+            385.4,
+            230.0,
+            692.5,
+            486.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.809,
+          "bbox": [
+            309.9,
+            242.2,
+            647.6,
+            500.2
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.736,
+          "bbox": [
+            527.8,
+            240.0,
+            797.1,
+            486.7
+          ]
+        }
+      ],
+      "count": 4
+    },
+    {
+      "frame": 297,
+      "timestamp": 9.9,
+      "detections": [
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.931,
+          "bbox": [
+            380.1,
+            226.9,
+            693.4,
+            484.0
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.93,
+          "bbox": [
+            462.6,
+            226.5,
+            746.9,
+            483.2
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.84,
+          "bbox": [
+            307.2,
+            239.8,
+            654.3,
+            499.9
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.798,
+          "bbox": [
+            524.4,
+            235.6,
+            798.3,
+            484.9
+          ]
+        },
+        {
+          "class": "car",
+          "class_id": 0,
+          "confidence": 0.503,
+          "bbox": [
+            576.0,
+            252.5,
+            866.7,
+            501.7
+          ]
+        }
+      ],
+      "count": 5
+    }
+  ],
+  "output_files": {
+    "annotated_video": "outputs/video_analysis/test_video_122047_annotated.mp4",
+    "analysis_json": "outputs/video_analysis/test_video_122047_analysis.json"
+  }
+}
