@@ -306,6 +306,277 @@ st.markdown("""
         padding-left: 1rem !important;
     }
 
+
+    /* ============================================================ */
+    /* PHASE 2: HERO + NAVIGATION UPGRADE v7.0 */
+    /* ============================================================ */
+    
+    /* ---------- MAIN TITLE (Hero) ---------- */
+    .main-title {
+        font-size: 3.5rem !important;
+        font-weight: 900 !important;
+        background: linear-gradient(135deg, #00E5A0 0%, #6BA5F5 50%, #00E5A0 100%) !important;
+        background-size: 200% auto !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        animation: gradientFlow 5s linear infinite !important;
+        text-align: center !important;
+        letter-spacing: -0.03em !important;
+        line-height: 1.1 !important;
+        padding: 0.5rem 0 !important;
+    }
+    
+    @keyframes gradientFlow {
+        0% { background-position: 0% center; }
+        100% { background-position: 200% center; }
+    }
+    
+    /* ---------- SUB TITLE ---------- */
+    .sub-title {
+        text-align: center !important;
+        color: #B8C0D4 !important;
+        font-size: 1.15rem !important;
+        font-weight: 400 !important;
+        margin-bottom: 2.5rem !important;
+        letter-spacing: 0.01em !important;
+        line-height: 1.6 !important;
+    }
+    
+    /* ---------- METRIC CARDS ---------- */
+    .metric-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.85), rgba(26, 32, 56, 0.95)) !important;
+        backdrop-filter: blur(24px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+        padding: 1.75rem 1.5rem !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        text-align: center !important;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 
+            0 4px 24px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+        animation: cardFadeIn 0.6s ease-out both !important;
+    }
+    
+    @keyframes cardFadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .metric-card::before {
+        content: '' !important;
+        position: absolute !important;
+        top: -50% !important;
+        right: -50% !important;
+        width: 200% !important;
+        height: 200% !important;
+        background: radial-gradient(circle, rgba(0, 229, 160, 0.15), transparent 70%) !important;
+        opacity: 0 !important;
+        transition: opacity 0.5s ease !important;
+        pointer-events: none !important;
+    }
+    
+    .metric-card:hover::before {
+        opacity: 1 !important;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-8px) scale(1.02) !important;
+        border-color: rgba(0, 229, 160, 0.6) !important;
+        box-shadow: 
+            0 20px 50px rgba(0, 0, 0, 0.5),
+            0 0 60px rgba(0, 229, 160, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* ---------- METRIC VALUE ---------- */
+    .metric-value {
+        font-size: 2.75rem !important;
+        font-weight: 900 !important;
+        background: linear-gradient(135deg, #00E5A0 0%, #6BA5F5 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        line-height: 1.1 !important;
+        letter-spacing: -0.03em !important;
+        margin: 0.5rem 0 !important;
+    }
+    
+    /* ---------- METRIC LABEL ---------- */
+    .metric-label {
+        color: #7A8299 !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.18em !important;
+        text-transform: uppercase !important;
+        margin-top: 0.5rem !important;
+    }
+    
+    /* ---------- BADGES ---------- */
+    .badge-accept {
+        background: linear-gradient(135deg, #00E5A0 0%, #00B880 100%) !important;
+        color: #0A0E1A !important;
+        padding: 0.5rem 1.5rem !important;
+        border-radius: 50px !important;
+        font-weight: 800 !important;
+        display: inline-block !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.12em !important;
+        text-transform: uppercase !important;
+        box-shadow: 0 4px 20px rgba(0, 229, 160, 0.4) !important;
+        animation: badgePulse 2.5s ease-in-out infinite !important;
+    }
+    
+    .badge-review {
+        background: linear-gradient(135deg, #FFC857 0%, #FF9500 100%) !important;
+        color: #0A0E1A !important;
+        padding: 0.5rem 1.5rem !important;
+        border-radius: 50px !important;
+        font-weight: 800 !important;
+        display: inline-block !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.12em !important;
+        text-transform: uppercase !important;
+        box-shadow: 0 4px 20px rgba(255, 200, 87, 0.4) !important;
+        animation: badgePulseYellow 2.5s ease-in-out infinite !important;
+    }
+    
+    .badge-quarantine {
+        background: linear-gradient(135deg, #FF5566 0%, #E63946 100%) !important;
+        color: #FFFFFF !important;
+        padding: 0.5rem 1.5rem !important;
+        border-radius: 50px !important;
+        font-weight: 800 !important;
+        display: inline-block !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.12em !important;
+        text-transform: uppercase !important;
+        box-shadow: 0 4px 20px rgba(255, 85, 102, 0.4) !important;
+        animation: badgePulseRed 2.5s ease-in-out infinite !important;
+    }
+    
+    @keyframes badgePulse {
+        0%, 100% { box-shadow: 0 4px 20px rgba(0, 229, 160, 0.4), 0 0 0 0 rgba(0, 229, 160, 0.7); }
+        50% { box-shadow: 0 4px 20px rgba(0, 229, 160, 0.6), 0 0 0 8px rgba(0, 229, 160, 0); }
+    }
+    
+    @keyframes badgePulseYellow {
+        0%, 100% { box-shadow: 0 4px 20px rgba(255, 200, 87, 0.4), 0 0 0 0 rgba(255, 200, 87, 0.7); }
+        50% { box-shadow: 0 4px 20px rgba(255, 200, 87, 0.6), 0 0 0 8px rgba(255, 200, 87, 0); }
+    }
+    
+    @keyframes badgePulseRed {
+        0%, 100% { box-shadow: 0 4px 20px rgba(255, 85, 102, 0.4), 0 0 0 0 rgba(255, 85, 102, 0.7); }
+        50% { box-shadow: 0 4px 20px rgba(255, 85, 102, 0.6), 0 0 0 8px rgba(255, 85, 102, 0); }
+    }
+    
+    /* ---------- BUTTONS ---------- */
+    .stButton > button {
+        background: linear-gradient(135deg, #00E5A0 0%, #00B880 100%) !important;
+        color: #0A0E1A !important;
+        font-weight: 800 !important;
+        border: none !important;
+        border-radius: 14px !important;
+        padding: 0.85rem 2rem !important;
+        font-size: 0.95rem !important;
+        letter-spacing: 0.03em !important;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 20px rgba(0, 229, 160, 0.35) !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .stButton > button::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: -100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent) !important;
+        transition: left 0.6s ease !important;
+    }
+    
+    .stButton > button:hover::before {
+        left: 100% !important;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 
+            0 12px 32px rgba(0, 229, 160, 0.45),
+            0 0 60px rgba(0, 229, 160, 0.25) !important;
+    }
+    
+    .stButton > button:active {
+        transform: translateY(-1px) scale(0.98) !important;
+    }
+    
+    /* ---------- SIDEBAR ---------- */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0A0E1A 0%, #12172B 100%) !important;
+        border-right: 1px solid #2A3050 !important;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    [data-testid="stSidebar"] .stRadio label {
+        padding: 0.85rem 1rem !important;
+        border-radius: 12px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        margin: 4px 0 !important;
+        cursor: pointer !important;
+        border-left: 3px solid transparent !important;
+        font-weight: 500 !important;
+        color: #B8C0D4 !important;
+    }
+    
+    [data-testid="stSidebar"] .stRadio label:hover {
+        background: linear-gradient(90deg, rgba(0, 229, 160, 0.15), transparent) !important;
+        border-left: 3px solid #00E5A0 !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 4px 20px rgba(0, 229, 160, 0.15) !important;
+        transform: translateX(4px) !important;
+    }
+    
+    [data-testid="stSidebar"] .stRadio [aria-checked="true"] label {
+        background: linear-gradient(90deg, rgba(0, 229, 160, 0.2), rgba(107, 165, 245, 0.1)) !important;
+        border-left: 3px solid #00E5A0 !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+    
+    /* ---------- INFO BOXES ---------- */
+    .info-box {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 1.75rem !important;
+        border-radius: 18px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        margin: 1rem 0 !important;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .info-box::before {
+        content: '' !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 4px !important;
+        height: 100% !important;
+        background: linear-gradient(180deg, #00E5A0, #6BA5F5) !important;
+    }
+    
+    .info-box:hover {
+        border-color: rgba(0, 229, 160, 0.5) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 229, 160, 0.15) !important;
+        transform: translateX(4px) !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
