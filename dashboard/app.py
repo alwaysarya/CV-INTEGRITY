@@ -306,6 +306,263 @@ st.markdown("""
         padding-left: 1rem !important;
     }
 
+
+    /* ============================================================ */
+    /* GLOBAL DESIGN SYSTEM v6.0 - PROFESSIONAL */
+    /* ============================================================ */
+    
+    /* ---------- COLOR VARIABLES ---------- */
+    :root {
+        --color-bg-primary: #0A0E1A;
+        --color-bg-secondary: #151A2E;
+        --color-bg-tertiary: #1A2038;
+        --color-border: #2A3050;
+        --color-border-hover: #00D9A3;
+        
+        --color-primary: #00D9A3;
+        --color-secondary: #5B8DEF;
+        --color-accent: #FFB84D;
+        --color-danger: #FF4757;
+        
+        --color-text-primary: #FFFFFF;
+        --color-text-secondary: #A8B2C8;
+        --color-text-muted: #6B7394;
+        
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+        --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.25);
+        --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.35);
+        --shadow-glow: 0 0 30px rgba(0, 217, 163, 0.3);
+        
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+        --radius-full: 9999px;
+        
+        --space-xs: 0.25rem;
+        --space-sm: 0.5rem;
+        --space-md: 1rem;
+        --space-lg: 1.5rem;
+        --space-xl: 2rem;
+        --space-2xl: 3rem;
+    }
+    
+    /* ---------- GLOBAL TYPOGRAPHY ---------- */
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--color-text-primary) !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+    }
+    
+    h1 { font-size: 3rem; font-weight: 900; }
+    h2 { font-size: 2rem; font-weight: 800; }
+    h3 { font-size: 1.5rem; font-weight: 700; }
+    h4 { font-size: 1.25rem; font-weight: 700; }
+    h5 { font-size: 1.1rem; font-weight: 600; }
+    
+    p, span, div, label {
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+        color: var(--color-text-secondary);
+        line-height: 1.6;
+    }
+    
+    /* ---------- SMOOTH SCROLLING ---------- */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* ---------- SELECTION COLOR ---------- */
+    ::selection {
+        background: var(--color-primary);
+        color: var(--color-bg-primary);
+    }
+    
+    /* ---------- FOCUS STATES ---------- */
+    *:focus {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+    }
+    
+    /* ---------- SCROLLBAR ---------- */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: var(--color-bg-primary);
+        border-radius: var(--radius-sm);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, var(--color-primary), var(--color-secondary));
+        border-radius: var(--radius-sm);
+        border: 2px solid var(--color-bg-primary);
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, var(--color-secondary), var(--color-primary));
+    }
+    
+    /* ---------- LINK STYLING ---------- */
+    a {
+        color: var(--color-primary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-bottom: 1px solid transparent;
+    }
+    
+    a:hover {
+        color: var(--color-secondary);
+        border-bottom-color: var(--color-secondary);
+    }
+    
+    /* ---------- BUTTONS UNIFIED ---------- */
+    button, .stButton > button {
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* ---------- INPUT FIELDS ---------- */
+    input, textarea, select {
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+        background: var(--color-bg-secondary) !important;
+        border: 1px solid var(--color-border) !important;
+        color: var(--color-text-primary) !important;
+        border-radius: var(--radius-md) !important;
+        transition: all 0.3s ease;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+        border-color: var(--color-primary) !important;
+        box-shadow: 0 0 0 3px rgba(0, 217, 163, 0.1) !important;
+    }
+    
+    /* ---------- CODE BLOCKS ---------- */
+    code, pre {
+        font-family: 'JetBrains Mono', 'Menlo', 'Monaco', monospace;
+        background: var(--color-bg-secondary);
+        color: var(--color-primary);
+        border-radius: var(--radius-sm);
+        padding: 0.25rem 0.5rem;
+    }
+    
+    pre {
+        padding: 1rem;
+        border-left: 4px solid var(--color-primary);
+        overflow-x: auto;
+    }
+    
+    /* ---------- TABLE STYLING ---------- */
+    table {
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        border: 1px solid var(--color-border);
+    }
+    
+    th {
+        background: var(--color-bg-tertiary);
+        color: var(--color-text-primary);
+        font-weight: 700;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+    }
+    
+    td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+    
+    tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* ---------- ANIMATIONS ---------- */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-30px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(0, 217, 163, 0.3); }
+        50% { box-shadow: 0 0 40px rgba(0, 217, 163, 0.6); }
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    /* ---------- UTILITY CLASSES ---------- */
+    .fade-in-up { animation: fadeInUp 0.5s ease-out; }
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    .slide-in-left { animation: slideInLeft 0.4s ease-out; }
+    .pulse { animation: pulse 2s infinite; }
+    .float { animation: float 3s ease-in-out infinite; }
+    .glow { animation: glow 2s ease-in-out infinite; }
+    
+    /* ---------- TEXT UTILITIES ---------- */
+    .text-gradient {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .text-primary { color: var(--color-primary) !important; }
+    .text-secondary { color: var(--color-secondary) !important; }
+    .text-accent { color: var(--color-accent) !important; }
+    .text-danger { color: var(--color-danger) !important; }
+    .text-muted { color: var(--color-text-muted) !important; }
+    
+    /* ---------- BADGE STYLES ---------- */
+    .badge {
+        display: inline-block;
+        padding: 0.35rem 0.85rem;
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    
+    .badge-success { background: var(--color-primary); color: var(--color-bg-primary); }
+    .badge-warning { background: var(--color-accent); color: var(--color-bg-primary); }
+    .badge-danger { background: var(--color-danger); color: white; }
+    .badge-info { background: var(--color-secondary); color: white; }
+
 </style>
 """, unsafe_allow_html=True)
 
