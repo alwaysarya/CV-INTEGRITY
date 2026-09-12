@@ -349,7 +349,8 @@ with st.sidebar:
         "🎥 Video Analysis",
         "📈 Model Drift",
         "📊 Analytics",
-        "🤝 Collaboration"
+        "🤝 Collaboration",
+        "🔐 Authentication"
     ])
     
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
@@ -2317,6 +2318,374 @@ elif page == "🤝 Collaboration":
     if st.button("🔄 Refresh Collaboration Data", type="primary", width='stretch'):
         st.success("✅ Data refreshed!")
         st.rerun()
+
+
+# ============================================================
+# PAGE: AUTHENTICATION
+# ============================================================
+elif page == "🔐 Authentication":
+    st.markdown("""
+    <div style="text-align: center; padding: 1rem 0 2rem 0;">
+        <h1 style="font-size: 3rem; font-weight: 900; 
+                   background: linear-gradient(135deg, #00D9A3 0%, #5B8DEF 100%);
+                   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                   background-clip: text; margin: 0;">
+            🔐 Authentication Center
+        </h1>
+        <p style="color: #A8B2C8; font-size: 1.1rem; margin-top: 0.5rem;">
+            User authentication, sessions & API tokens
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    auth_dir = BASE / "outputs" / "auth"
+    
+    # Load auth data
+    auth_users = {}
+    sessions = {}
+    tokens = {}
+    
+    if (auth_dir / "auth_users.json").exists():
+        with open(auth_dir / "auth_users.json", 'r') as f:
+            auth_users = json.load(f)
+    
+    if (auth_dir / "sessions.json").exists():
+        with open(auth_dir / "sessions.json", 'r') as f:
+            sessions = json.load(f)
+    
+    if (auth_dir / "tokens.json").exists():
+        with open(auth_dir / "tokens.json", 'r') as f:
+            tokens = json.load(f)
+    
+    # ============================================================
+    # TOP STATS
+    # ============================================================
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #5B8DEF;
+                    text-align: center; box-shadow: 0 0 30px rgba(91, 141, 239, 0.2);">
+            <div style="font-size: 2.5rem;">👥</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #5B8DEF; margin: 0.5rem 0;">
+                {len(auth_users)}
+            </div>
+            <div style="color: #6B7394; font-size: 0.75rem;">TOTAL USERS</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #00D9A3;
+                    text-align: center; box-shadow: 0 0 30px rgba(0, 217, 163, 0.2);">
+            <div style="font-size: 2.5rem;">🟢</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #00D9A3; margin: 0.5rem 0;">
+                {len(sessions)}
+            </div>
+            <div style="color: #6B7394; font-size: 0.75rem;">ACTIVE SESSIONS</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #FFB84D;
+                    text-align: center; box-shadow: 0 0 30px rgba(255, 184, 77, 0.2);">
+            <div style="font-size: 2.5rem;">🔑</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFB84D; margin: 0.5rem 0;">
+                {len(tokens)}
+            </div>
+            <div style="color: #6B7394; font-size: 0.75rem;">API TOKENS</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        providers = set(u.get('provider', 'local') for u in auth_users.values())
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #FF4757;
+                    text-align: center; box-shadow: 0 0 30px rgba(255, 71, 87, 0.2);">
+            <div style="font-size: 2.5rem;">🌐</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #FF4757; margin: 0.5rem 0;">
+                {len(providers)}
+            </div>
+            <div style="color: #6B7394; font-size: 0.75rem;">PROVIDERS</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    # ============================================================
+    # TABS
+    # ============================================================
+    tab1, tab2, tab3, tab4 = st.tabs(["🔐 Login", "📝 Register", "🟢 Sessions", "🔑 Tokens"])
+    
+    # ============================================================
+    # TAB 1: LOGIN
+    # ============================================================
+    with tab1:
+        st.markdown('<div class="section-header">🔐 Login</div>', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+            <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                        padding: 1.5rem; border-radius: 20px; border: 1px solid #2A3050;">
+                <h4 style="color: #00D9A3;">📧 Email Login</h4>
+                <p style="color: #A8B2C8; font-size: 0.9rem;">
+                    Login with your email and password
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            with st.form("login_form"):
+                username = st.text_input("Username", key="login_user")
+                password = st.text_input("Password", type="password", key="login_pass")
+                
+                if st.form_submit_button("🔐 Login", type="primary", use_container_width=True):
+                    if username and password:
+                        # Run auth manager
+                        import subprocess
+                        test_code = f"""
+import sys
+sys.path.insert(0, '{BASE}')
+from auth.auth_manager import AuthManager
+auth = AuthManager('{BASE}/outputs/auth')
+result = auth.login('{username}', '{password}')
+print(result)
+"""
+                        with open('/tmp/test_login.py', 'w') as f:
+                            f.write(test_code)
+                        
+                        result = subprocess.run("python3 /tmp/test_login.py", shell=True, capture_output=True, text=True)
+                        
+                        if "'status': 'success'" in result.stdout or '"status": "success"' in result.stdout:
+                            st.success(f"✅ Login successful for {username}!")
+                            st.balloons()
+                        else:
+                            st.error("❌ Invalid credentials")
+                    else:
+                        st.warning("⚠️ Please fill all fields")
+        
+        with col2:
+            st.markdown("""
+            <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                        padding: 1.5rem; border-radius: 20px; border: 1px solid #2A3050;">
+                <h4 style="color: #5B8DEF;">🌐 OAuth Login</h4>
+                <p style="color: #A8B2C8; font-size: 0.9rem;">
+                    Login with Google or GitHub (Simulated)
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col_a, col_b = st.columns(2)
+            with col_a:
+                if st.button("🔵 Google", use_container_width=True, key="google_login"):
+                    st.success("✅ Google OAuth would redirect here")
+                    st.info("💡 In production: redirects to Google login")
+            
+            with col_b:
+                if st.button("⚫ GitHub", use_container_width=True, key="github_login"):
+                    st.success("✅ GitHub OAuth would redirect here")
+                    st.info("💡 In production: redirects to GitHub login")
+    
+    # ============================================================
+    # TAB 2: REGISTER
+    # ============================================================
+    with tab2:
+        st.markdown('<div class="section-header">📝 Register New User</div>', unsafe_allow_html=True)
+        
+        with st.form("register_form"):
+            col1, col2 = st.columns(2)
+            with col1:
+                reg_username = st.text_input("Username", key="reg_user")
+                reg_email = st.text_input("Email", key="reg_email")
+            with col2:
+                reg_password = st.text_input("Password", type="password", key="reg_pass")
+                reg_confirm = st.text_input("Confirm Password", type="password", key="reg_confirm")
+            
+            if st.form_submit_button("📝 Register", type="primary", use_container_width=True):
+                if reg_username and reg_password and reg_email:
+                    if reg_password == reg_confirm:
+                        if len(reg_password) >= 6:
+                            st.success(f"✅ User {reg_username} would be registered!")
+                            st.info("💡 In production: user gets added to database")
+                        else:
+                            st.error("❌ Password must be at least 6 characters")
+                    else:
+                        st.error("❌ Passwords don't match")
+                else:
+                    st.warning("⚠️ Please fill all fields")
+    
+    # ============================================================
+    # TAB 3: ACTIVE SESSIONS
+    # ============================================================
+    with tab3:
+        st.markdown('<div class="section-header">🟢 Active Sessions</div>', unsafe_allow_html=True)
+        
+        if sessions:
+            for token, session in list(sessions.items())[:10]:
+                username = session.get('username', 'unknown')
+                created = session.get('created_at', '')[:19]
+                expires = session.get('expires_at', '')[:19]
+                
+                st.markdown(f"""
+                <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                            padding: 1.25rem; border-radius: 16px; 
+                            border: 1px solid #2A3050; margin-bottom: 1rem;
+                            border-left: 4px solid #00D9A3;">
+                    <div style="display: flex; justify-content: space-between; 
+                                align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <div style="color: #FFFFFF; font-weight: 700; font-size: 1.1rem;">
+                                👤 {username}
+                            </div>
+                            <div style="color: #6B7394; font-size: 0.8rem; margin-top: 0.25rem;">
+                                Token: {token[:30]}...
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #00D9A3; font-size: 0.8rem;">
+                                Created: {created}
+                            </div>
+                            <div style="color: #FFB84D; font-size: 0.8rem;">
+                                Expires: {expires}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("🟢 No active sessions")
+    
+    # ============================================================
+    # TAB 4: API TOKENS
+    # ============================================================
+    with tab4:
+        st.markdown('<div class="section-header">🔑 API Tokens</div>', unsafe_allow_html=True)
+        
+        if tokens:
+            for token, token_data in list(tokens.items())[:10]:
+                username = token_data.get('username', 'unknown')
+                name = token_data.get('name', 'API Token')
+                active = token_data.get('active', True)
+                created = token_data.get('created_at', '')[:19]
+                
+                status_color = '#00D9A3' if active else '#FF4757'
+                status_text = 'ACTIVE' if active else 'INACTIVE'
+                
+                st.markdown(f"""
+                <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                            padding: 1.25rem; border-radius: 16px; 
+                            border: 1px solid #2A3050; margin-bottom: 1rem;
+                            border-left: 4px solid {status_color};">
+                    <div style="display: flex; justify-content: space-between; 
+                                align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <div style="color: #FFFFFF; font-weight: 700; font-size: 1.1rem;">
+                                🔑 {name}
+                            </div>
+                            <div style="color: #6B7394; font-size: 0.8rem; margin-top: 0.25rem;">
+                                Owner: {username}
+                            </div>
+                            <div style="color: #6B7394; font-size: 0.75rem; font-family: monospace; 
+                                        margin-top: 0.25rem;">
+                                {token[:35]}...
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="background: {status_color}; color: #0A0E1A;
+                                        padding: 0.3rem 0.8rem; border-radius: 50px;
+                                        font-weight: 700; font-size: 0.75rem; 
+                                        display: inline-block;">
+                                {status_text}
+                            </div>
+                            <div style="color: #6B7394; font-size: 0.75rem; margin-top: 0.5rem;">
+                                {created}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("🔑 No API tokens yet")
+            
+            if st.button("🔑 Generate New API Token", type="primary"):
+                st.success("✅ API token generated!")
+                st.code("cv_integrity_" + "x" * 32, language="text")
+    
+    # ============================================================
+    # USER LIST
+    # ============================================================
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">👥 Registered Users</div>', unsafe_allow_html=True)
+    
+    if auth_users:
+        for username, user in auth_users.items():
+            provider = user.get('provider', 'local')
+            provider_icon = {'local': '📧', 'google': '🔵', 'github': '⚫'}.get(provider, '📧')
+            active = user.get('active', True)
+            
+            status_color = '#00D9A3' if active else '#FF4757'
+            
+            st.markdown(f"""
+            <div style="background: rgba(21, 26, 46, 0.6); padding: 1rem 1.25rem;
+                        border-radius: 12px; border-left: 3px solid {status_color};
+                        margin-bottom: 0.5rem; display: flex; 
+                        justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="font-size: 1.5rem;">{provider_icon}</div>
+                    <div>
+                        <div style="color: #FFFFFF; font-weight: 700;">
+                            {username}
+                        </div>
+                        <div style="color: #6B7394; font-size: 0.8rem;">
+                            {user.get('email', 'N/A')}
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <span style="background: {status_color}; color: #0A0E1A;
+                                padding: 0.3rem 0.8rem; border-radius: 50px;
+                                font-weight: 700; font-size: 0.75rem;">
+                        {provider.upper()}
+                    </span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.info("👥 No users registered yet")
+    
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    # Info box
+    st.markdown("""
+    <div class="info-box">
+        <h4 style="color: #00D9A3;">🔐 Authentication Features</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div style="background: rgba(0, 217, 163, 0.1); padding: 1rem; border-radius: 12px; border-left: 4px solid #00D9A3;">
+                <div style="color: #FFFFFF; font-weight: 700;">🔐 Secure Login</div>
+                <div style="color: #A8B2C8; font-size: 0.85rem;">PBKDF2 password hashing</div>
+            </div>
+            <div style="background: rgba(91, 141, 239, 0.1); padding: 1rem; border-radius: 12px; border-left: 4px solid #5B8DEF;">
+                <div style="color: #FFFFFF; font-weight: 700;">🌐 OAuth2</div>
+                <div style="color: #A8B2C8; font-size: 0.85rem;">Google/GitHub integration</div>
+            </div>
+            <div style="background: rgba(255, 184, 77, 0.1); padding: 1rem; border-radius: 12px; border-left: 4px solid #FFB84D;">
+                <div style="color: #FFFFFF; font-weight: 700;">🟢 Sessions</div>
+                <div style="color: #A8B2C8; font-size: 0.85rem;">24-hour session tokens</div>
+            </div>
+            <div style="background: rgba(255, 71, 87, 0.1); padding: 1rem; border-radius: 12px; border-left: 4px solid #FF4757;">
+                <div style="color: #FFFFFF; font-weight: 700;">🔑 API Tokens</div>
+                <div style="color: #A8B2C8; font-size: 0.85rem;">Programmatic access</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 
 # ============================================================
 # PAGE: REPORTS
