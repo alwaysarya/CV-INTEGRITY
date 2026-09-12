@@ -1837,6 +1837,218 @@ st.markdown("""
         color: #FFFFFF;
     }
 
+
+    /* ============================================================ */
+    /* PHASE 5.6-5.8: XAI + ANALYTICS + COLLABORATION POLISH v7.0 */
+    /* ============================================================ */
+    
+    /* ---------- HEATMAP CARDS (XAI) ---------- */
+    .heatmap-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 1.25rem !important;
+        border-radius: 20px !important;
+        border: 2px solid rgba(42, 48, 80, 0.8) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    }
+    
+    .heatmap-card::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 3px !important;
+        background: linear-gradient(90deg, #FF5566, #FFC857, #00E5A0) !important;
+        transform: scaleX(0) !important;
+        transform-origin: left !important;
+        transition: transform 0.5s ease !important;
+    }
+    
+    .heatmap-card:hover::before {
+        transform: scaleX(1) !important;
+    }
+    
+    .heatmap-card:hover {
+        transform: translateY(-6px) scale(1.02) !important;
+        border-color: rgba(255, 85, 102, 0.5) !important;
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.4),
+            0 0 40px rgba(255, 85, 102, 0.2) !important;
+    }
+    
+    /* ---------- ANALYTICS CHART CONTAINERS ---------- */
+    .analytics-chart {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.7), rgba(26, 32, 56, 0.85)) !important;
+        padding: 1.5rem !important;
+        border-radius: 22px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        margin: 1rem 0 !important;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2) !important;
+        transition: all 0.4s ease !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .analytics-chart::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 2px !important;
+        background: linear-gradient(90deg, transparent, #6BA5F5, #00E5A0, transparent) !important;
+        opacity: 0.6 !important;
+    }
+    
+    .analytics-chart:hover {
+        border-color: rgba(107, 165, 245, 0.4) !important;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3), 0 0 40px rgba(107, 165, 245, 0.15) !important;
+        transform: translateY(-3px) !important;
+    }
+    
+    /* ---------- USER CARDS (Collaboration) ---------- */
+    .user-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 1.5rem !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        margin-bottom: 1rem !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .user-card::before {
+        content: '' !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 4px !important;
+        height: 100% !important;
+        background: linear-gradient(180deg, #00E5A0, #6BA5F5) !important;
+    }
+    
+    .user-card:hover {
+        transform: translateX(6px) !important;
+        border-color: rgba(0, 229, 160, 0.5) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 229, 160, 0.15) !important;
+    }
+    
+    /* ---------- TASK CARDS (Collaboration) ---------- */
+    .task-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 1rem 1.25rem !important;
+        border-radius: 16px !important;
+        border-left: 4px solid !important;
+        margin-bottom: 0.75rem !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2) !important;
+        position: relative !important;
+    }
+    
+    .task-card:hover {
+        transform: translateX(6px) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .task-card-title {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+    }
+    
+    .task-card-meta {
+        color: #7A8299 !important;
+        font-size: 0.8rem !important;
+        margin-top: 0.25rem !important;
+    }
+    
+    /* ---------- COMMENT CARDS (Collaboration) ---------- */
+    .comment-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 1.25rem !important;
+        border-radius: 18px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        margin-bottom: 1rem !important;
+        transition: all 0.35s ease !important;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .comment-card:hover {
+        border-color: rgba(107, 165, 245, 0.5) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 30px rgba(107, 165, 245, 0.15) !important;
+        transform: translateY(-3px) !important;
+    }
+    
+    /* ---------- ACTIVITY ITEMS ---------- */
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: rgba(18, 23, 43, 0.6) !important;
+        border-radius: 12px;
+        border-left: 3px solid #6BA5F5;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .activity-item:hover {
+        background: rgba(18, 23, 43, 0.9) !important;
+        border-left-color: #00E5A0;
+        transform: translateX(4px);
+    }
+    
+    /* ---------- ANALYTICS STATS ---------- */
+    .analytics-stat {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.95), rgba(26, 32, 56, 0.98)) !important;
+        padding: 1.5rem !important;
+        border-radius: 20px !important;
+        border: 2px solid !important;
+        text-align: center !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25) !important;
+    }
+    
+    .analytics-stat::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 3px !important;
+        background: linear-gradient(90deg, currentColor, transparent) !important;
+    }
+    
+    .analytics-stat:hover {
+        transform: translateY(-6px) scale(1.02) !important;
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.4),
+            0 0 40px currentColor !important;
+    }
+    
+    /* ---------- PIE CHART CONTAINER ---------- */
+    .pie-chart-container {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.7), rgba(26, 32, 56, 0.85)) !important;
+        padding: 1.5rem !important;
+        border-radius: 22px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        margin: 1rem 0 !important;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2) !important;
+        transition: all 0.35s ease !important;
+    }
+    
+    .pie-chart-container:hover {
+        border-color: rgba(255, 200, 87, 0.4) !important;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3), 0 0 40px rgba(255, 200, 87, 0.15) !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
