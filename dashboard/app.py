@@ -2049,6 +2049,472 @@ st.markdown("""
         box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3), 0 0 40px rgba(255, 200, 87, 0.15) !important;
     }
 
+
+    /* ============================================================ */
+    /* PHASE 6: FINAL POLISH + RESPONSIVE v7.0 */
+    /* ============================================================ */
+    
+    /* ---------- ENHANCED LOADING STATE ---------- */
+    @keyframes loadingPulse {
+        0%, 100% { opacity: 0.6; transform: scale(0.98); }
+        50% { opacity: 1; transform: scale(1); }
+    }
+    
+    .loading-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        animation: loadingPulse 1.5s ease-in-out infinite;
+    }
+    
+    /* ---------- ENHANCED TOOLTIPS ---------- */
+    [title] {
+        position: relative;
+        cursor: help;
+    }
+    
+    /* ---------- BETTER FOCUS STATES ---------- */
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+        outline: 3px solid rgba(0, 229, 160, 0.5) !important;
+        outline-offset: 3px !important;
+        border-radius: 8px !important;
+    }
+    
+    /* ---------- SMOOTH APPEARANCE FOR ALL ELEMENTS ---------- */
+    .element-container {
+        animation: elementFadeIn 0.5s ease-out;
+    }
+    
+    @keyframes elementFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ---------- RESPONSIVE: TABLET (max-width: 1024px) ---------- */
+    @media (max-width: 1024px) {
+        .main .block-container {
+            padding: 1.5rem 1.5rem !important;
+        }
+        
+        .main-title {
+            font-size: 2.5rem !important;
+        }
+        
+        .metric-value {
+            font-size: 2.2rem !important;
+        }
+        
+        .section-header {
+            font-size: 1.25rem !important;
+        }
+        
+        [data-testid="stSidebar"] {
+            min-width: 260px !important;
+            width: 260px !important;
+        }
+    }
+    
+    /* ---------- RESPONSIVE: MOBILE (max-width: 768px) ---------- */
+    @media (max-width: 768px) {
+        .main .block-container {
+            padding: 1rem 0.75rem !important;
+            max-width: 100% !important;
+        }
+        
+        .main-title {
+            font-size: 1.9rem !important;
+            letter-spacing: -0.02em !important;
+        }
+        
+        .sub-title {
+            font-size: 0.95rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .metric-card {
+            padding: 1.25rem 1rem !important;
+            border-radius: 18px !important;
+        }
+        
+        .metric-value {
+            font-size: 1.75rem !important;
+        }
+        
+        .metric-label {
+            font-size: 0.65rem !important;
+            letter-spacing: 0.12em !important;
+        }
+        
+        .section-header {
+            font-size: 1.05rem !important;
+            padding: 0.6rem 0.9rem !important;
+            margin: 1.5rem 0 1rem 0 !important;
+        }
+        
+        .section-header::after {
+            width: 30px !important;
+        }
+        
+        .badge-accept, .badge-review, .badge-quarantine {
+            padding: 0.4rem 1rem !important;
+            font-size: 0.7rem !important;
+        }
+        
+        .stButton > button {
+            padding: 0.75rem 1.25rem !important;
+            font-size: 0.9rem !important;
+            min-height: 46px !important;
+            border-radius: 12px !important;
+        }
+        
+        .info-box {
+            padding: 1.15rem !important;
+            border-radius: 14px !important;
+        }
+        
+        .custom-divider {
+            margin: 1.5rem 0 !important;
+        }
+        
+        [data-testid="column"] {
+            width: 100% !important;
+            flex: 100% !important;
+            min-width: 100% !important;
+        }
+        
+        [data-testid="stSidebar"] {
+            min-width: 250px !important;
+            width: 250px !important;
+        }
+        
+        .js-plotly-plot {
+            height: auto !important;
+            min-height: 260px !important;
+        }
+        
+        [data-testid="stDataFrame"] {
+            font-size: 0.85rem !important;
+        }
+        
+        [data-testid="stMetric"] {
+            padding: 0.9rem !important;
+        }
+        
+        [data-testid="stMetricValue"] {
+            font-size: 1.35rem !important;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            font-size: 0.7rem !important;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.8rem !important;
+        }
+        
+        [data-testid="stExpander"] summary {
+            font-size: 0.9rem !important;
+            padding: 0.85rem 1rem !important;
+        }
+        
+        .deploy-value {
+            font-size: 2.25rem !important;
+        }
+        
+        .decision-score {
+            font-size: 2.75rem !important;
+        }
+        
+        .formula-text {
+            font-size: 0.9rem !important;
+            padding: 1rem !important;
+        }
+    }
+    
+    /* ---------- RESPONSIVE: SMALL MOBILE (max-width: 480px) ---------- */
+    @media (max-width: 480px) {
+        .main .block-container {
+            padding: 0.75rem 0.5rem !important;
+        }
+        
+        .main-title {
+            font-size: 1.5rem !important;
+        }
+        
+        .sub-title {
+            font-size: 0.85rem !important;
+        }
+        
+        .metric-card {
+            padding: 1rem 0.75rem !important;
+            border-radius: 16px !important;
+        }
+        
+        .metric-value {
+            font-size: 1.45rem !important;
+        }
+        
+        .metric-label {
+            font-size: 0.6rem !important;
+            letter-spacing: 0.1em !important;
+        }
+        
+        .section-header {
+            font-size: 0.95rem !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+        
+        [data-testid="column"] {
+            width: 100% !important;
+        }
+        
+        .stButton > button {
+            width: 100% !important;
+            padding: 0.7rem 1rem !important;
+            font-size: 0.85rem !important;
+        }
+        
+        .js-plotly-plot {
+            min-height: 220px !important;
+        }
+        
+        .deploy-value {
+            font-size: 1.85rem !important;
+        }
+        
+        .decision-score {
+            font-size: 2.25rem !important;
+        }
+        
+        .formula-text {
+            font-size: 0.75rem !important;
+            padding: 0.75rem !important;
+        }
+        
+        .badge-accept, .badge-review, .badge-quarantine {
+            padding: 0.35rem 0.85rem !important;
+            font-size: 0.65rem !important;
+        }
+    }
+    
+    /* ---------- TOUCH DEVICE IMPROVEMENTS ---------- */
+    @media (hover: none) and (pointer: coarse) {
+        .stButton > button {
+            min-height: 50px !important;
+            font-size: 1rem !important;
+        }
+        
+        [data-testid="stSidebar"] .stRadio label {
+            padding: 1rem 1.1rem !important;
+            min-height: 52px !important;
+        }
+        
+        .stTextInput > div > div > input,
+        .stSelectbox > div > div {
+            min-height: 48px !important;
+            font-size: 1rem !important;
+        }
+        
+        .metric-card:hover {
+            transform: none !important;
+        }
+        
+        .stButton > button:hover::before {
+            left: -100% !important;
+        }
+    }
+    
+    /* ---------- LANDSCAPE MOBILE ---------- */
+    @media (max-width: 900px) and (orientation: landscape) {
+        .main-title {
+            font-size: 1.6rem !important;
+            padding: 0.25rem 0 !important;
+        }
+        
+        .js-plotly-plot {
+            min-height: 220px !important;
+        }
+    }
+    
+    /* ---------- PREVENT HORIZONTAL SCROLL ---------- */
+    html, body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+    
+    .stApp {
+        overflow-x: hidden !important;
+    }
+    
+    /* ---------- VIEWPORT META ---------- */
+    html {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+    }
+    
+    /* ---------- PRINT STYLES ---------- */
+    @media print {
+        [data-testid="stSidebar"],
+        .stButton,
+        [data-testid="collapsedControl"] {
+            display: none !important;
+        }
+        
+        .main .block-container {
+            padding: 0 !important;
+            max-width: 100% !important;
+        }
+        
+        .main-title {
+            color: #000 !important;
+            -webkit-text-fill-color: #000 !important;
+        }
+    }
+
+
+    /* ============================================================ */
+    /* FINAL UI IMPROVEMENTS v8.0 */
+    /* ============================================================ */
+    
+    /* ---------- BIGGER CHARTS ---------- */
+    .js-plotly-plot {
+        min-height: 400px !important;
+        padding: 1rem !important;
+        border-radius: 20px !important;
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.5), rgba(26, 32, 56, 0.7)) !important;
+        border: 1px solid rgba(42, 48, 80, 0.6) !important;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    .js-plotly-plot:hover {
+        border-color: rgba(0, 229, 160, 0.4) !important;
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.4),
+            0 0 60px rgba(0, 229, 160, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+        transform: translateY(-3px) !important;
+    }
+    
+    /* ---------- ENHANCED CARDS (Stronger Glow) ---------- */
+    .metric-card {
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(255, 255, 255, 0.03),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(42, 48, 80, 0.9) !important;
+    }
+    
+    .metric-card:hover {
+        box-shadow: 
+            0 24px 64px rgba(0, 0, 0, 0.5),
+            0 0 80px rgba(0, 229, 160, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        border-color: rgba(0, 229, 160, 0.7) !important;
+        transform: translateY(-10px) scale(1.03) !important;
+    }
+    
+    /* ---------- BETTER GAUGE ---------- */
+    .js-plotly-plot .plotly .gauge {
+        filter: drop-shadow(0 0 20px currentColor) !important;
+    }
+    
+    /* ---------- ENHANCED CARD ENTRANCE ---------- */
+    @keyframes cardPop {
+        0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    
+    .metric-card {
+        animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
+    }
+    
+    /* ---------- BETTER CHARTS BACKGROUND ---------- */
+    .stPlotlyChart {
+        background: transparent !important;
+        padding: 0 !important;
+    }
+    
+    /* ---------- ENHANCED BUTTONS ---------- */
+    .stButton > button {
+        background: linear-gradient(135deg, #00E5A0 0%, #00B880 50%, #00E5A0 100%) !important;
+        background-size: 200% auto !important;
+        animation: buttonShine 3s linear infinite !important;
+        box-shadow: 
+            0 4px 20px rgba(0, 229, 160, 0.4),
+            0 0 40px rgba(0, 229, 160, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    @keyframes buttonShine {
+        to { background-position: 200% center; }
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-4px) scale(1.02) !important;
+        box-shadow: 
+            0 16px 48px rgba(0, 229, 160, 0.5),
+            0 0 80px rgba(0, 229, 160, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+    }
+    
+    /* ---------- ENHANCED STAT CARDS ---------- */
+    .bc-stat-card, .analytics-stat, .perf-card, .quality-card {
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(255, 255, 255, 0.03),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    .bc-stat-card:hover, .analytics-stat:hover, .perf-card:hover, .quality-card:hover {
+        box-shadow: 
+            0 24px 64px rgba(0, 0, 0, 0.55),
+            0 0 80px currentColor !important;
+    }
+    
+    /* ---------- SECTION HEADERS GLOW ---------- */
+    .section-header {
+        box-shadow: 
+            inset 0 0 30px rgba(0, 229, 160, 0.05),
+            0 4px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* ---------- DIVIDER IMPROVEMENT ---------- */
+    .custom-divider {
+        height: 2px !important;
+        background: linear-gradient(90deg, transparent, #00E5A0 30%, #6BA5F5 70%, transparent) !important;
+        opacity: 0.3 !important;
+    }
+    
+    /* ---------- BADGE PULSING ---------- */
+    .badge-accept, .badge-review, .badge-quarantine {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .badge-accept::after, .badge-review::after, .badge-quarantine::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: badgeShine 3s infinite;
+    }
+    
+    @keyframes badgeShine {
+        0% { left: -100%; }
+        100% { left: 200%; }
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
