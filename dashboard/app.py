@@ -577,6 +577,241 @@ st.markdown("""
         transform: translateX(4px) !important;
     }
 
+
+    /* ============================================================ */
+    /* PHASE 3: CHARTS + DATA VIZ POLISH v7.0 */
+    /* ============================================================ */
+    
+    /* ---------- CHARTS CONTAINER ---------- */
+    .js-plotly-plot {
+        border-radius: 20px !important;
+        overflow: hidden !important;
+        transition: all 0.4s ease !important;
+        animation: chartFadeIn 0.7s ease-out !important;
+    }
+    
+    @keyframes chartFadeIn {
+        from { opacity: 0; transform: scale(0.98); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    
+    .js-plotly-plot:hover {
+        transform: translateY(-3px) !important;
+        filter: drop-shadow(0 10px 30px rgba(0, 229, 160, 0.15)) !important;
+    }
+    
+    /* ---------- METRICS (st.metric) ---------- */
+    [data-testid="stMetric"] {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 1.25rem !important;
+        border-radius: 18px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    [data-testid="stMetric"]::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 2px !important;
+        background: linear-gradient(90deg, #00E5A0, #6BA5F5) !important;
+        opacity: 0 !important;
+        transition: opacity 0.3s ease !important;
+    }
+    
+    [data-testid="stMetric"]:hover {
+        border-color: rgba(0, 229, 160, 0.5) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 229, 160, 0.15) !important;
+        transform: translateY(-3px) !important;
+    }
+    
+    [data-testid="stMetric"]:hover::before {
+        opacity: 1 !important;
+    }
+    
+    [data-testid="stMetricValue"] {
+        color: #00E5A0 !important;
+        font-weight: 900 !important;
+        font-size: 1.85rem !important;
+        letter-spacing: -0.02em !important;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        color: #7A8299 !important;
+        font-weight: 700 !important;
+        font-size: 0.75rem !important;
+        letter-spacing: 0.15em !important;
+        text-transform: uppercase !important;
+    }
+    
+    [data-testid="stMetricDelta"] {
+        font-weight: 700 !important;
+    }
+    
+    /* ---------- DATAFRAMES ---------- */
+    [data-testid="stDataFrame"] {
+        border-radius: 18px !important;
+        overflow: hidden !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        transition: all 0.35s ease !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+        animation: chartFadeIn 0.6s ease-out !important;
+    }
+    
+    [data-testid="stDataFrame"]:hover {
+        border-color: rgba(107, 165, 245, 0.5) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 40px rgba(107, 165, 245, 0.15) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    /* DataFrame header */
+    [data-testid="stDataFrame"] thead tr th {
+        background: linear-gradient(135deg, #1A2038, #222A45) !important;
+        color: #FFFFFF !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.05em !important;
+        text-transform: uppercase !important;
+        font-size: 0.75rem !important;
+        border-bottom: 2px solid #00E5A0 !important;
+        padding: 0.75rem 1rem !important;
+    }
+    
+    /* DataFrame cells */
+    [data-testid="stDataFrame"] tbody tr td {
+        padding: 0.65rem 1rem !important;
+        color: #B8C0D4 !important;
+        border-bottom: 1px solid rgba(42, 48, 80, 0.4) !important;
+        font-size: 0.9rem !important;
+    }
+    
+    [data-testid="stDataFrame"] tbody tr:hover {
+        background: rgba(0, 229, 160, 0.05) !important;
+    }
+    
+    /* ---------- PROGRESS BARS ---------- */
+    .stProgress {
+        margin: 0.75rem 0 !important;
+    }
+    
+    .stProgress > div > div {
+        background: rgba(18, 23, 43, 0.8) !important;
+        border-radius: 10px !important;
+        height: 10px !important;
+        overflow: hidden !important;
+        border: 1px solid rgba(42, 48, 80, 0.5) !important;
+    }
+    
+    .stProgress > div > div > div {
+        background: linear-gradient(90deg, #00E5A0, #6BA5F5, #00E5A0) !important;
+        background-size: 200% 100% !important;
+        animation: progressShimmer 2.5s linear infinite !important;
+        border-radius: 10px !important;
+        height: 10px !important;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    @keyframes progressShimmer {
+        0% { background-position: 0% 0; }
+        100% { background-position: 200% 0; }
+    }
+    
+    /* ---------- TABS ---------- */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.5rem !important;
+        background: rgba(18, 23, 43, 0.7) !important;
+        padding: 0.5rem !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 12px !important;
+        padding: 0.7rem 1.35rem !important;
+        background: transparent !important;
+        color: #B8C0D4 !important;
+        font-weight: 600 !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border: none !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(0, 229, 160, 0.1) !important;
+        color: #00E5A0 !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #00E5A0 0%, #00B880 100%) !important;
+        color: #0A0E1A !important;
+        font-weight: 800 !important;
+        box-shadow: 0 4px 20px rgba(0, 229, 160, 0.35) !important;
+    }
+    
+    .stTabs [data-baseweb="tab-highlight"] {
+        display: none !important;
+    }
+    
+    /* ---------- EXPANDERS ---------- */
+    [data-testid="stExpander"] {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        border-radius: 18px !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        overflow: hidden !important;
+        margin-bottom: 0.75rem !important;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    [data-testid="stExpander"]:hover {
+        border-color: rgba(0, 229, 160, 0.5) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 229, 160, 0.12) !important;
+        transform: translateX(4px) !important;
+    }
+    
+    [data-testid="stExpander"] summary {
+        padding: 1.1rem 1.35rem !important;
+        font-weight: 600 !important;
+        color: #FFFFFF !important;
+        transition: all 0.3s ease !important;
+        font-size: 0.95rem !important;
+    }
+    
+    [data-testid="stExpander"] summary:hover {
+        background: linear-gradient(90deg, rgba(0, 229, 160, 0.08), transparent) !important;
+    }
+    
+    [data-testid="stExpander"] summary::marker {
+        color: #00E5A0 !important;
+    }
+    
+    /* ---------- ALERTS ---------- */
+    .stAlert {
+        border-radius: 14px !important;
+        padding: 1.1rem 1.35rem !important;
+        animation: alertSlideIn 0.4s ease-out !important;
+        backdrop-filter: blur(10px) !important;
+        border-left-width: 4px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    @keyframes alertSlideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    /* ---------- SPINNER ---------- */
+    .stSpinner > div {
+        border-top-color: #00E5A0 !important;
+        border-right-color: rgba(0, 229, 160, 0.3) !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
