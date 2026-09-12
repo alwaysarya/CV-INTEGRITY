@@ -1681,6 +1681,162 @@ st.markdown("""
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 229, 160, 0.15) !important;
     }
 
+
+    /* ============================================================ */
+    /* PHASE 5.5: BLOCKCHAIN PAGE POLISH v7.0 */
+    /* ============================================================ */
+    
+    /* ---------- STATS CARDS (Blockchain) ---------- */
+    .bc-stat-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.95), rgba(26, 32, 56, 0.98)) !important;
+        backdrop-filter: blur(24px) !important;
+        padding: 1.75rem 1.25rem !important;
+        border-radius: 24px !important;
+        border: 2px solid !important;
+        text-align: center !important;
+        transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .bc-stat-card::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 4px !important;
+        background: linear-gradient(90deg, currentColor, transparent) !important;
+    }
+    
+    .bc-stat-card::after {
+        content: '' !important;
+        position: absolute !important;
+        bottom: -30px !important;
+        right: -30px !important;
+        width: 120px !important;
+        height: 120px !important;
+        background: radial-gradient(circle, currentColor, transparent 70%) !important;
+        opacity: 0.1 !important;
+        border-radius: 50% !important;
+        filter: blur(20px) !important;
+        pointer-events: none !important;
+        transition: all 0.5s ease !important;
+    }
+    
+    .bc-stat-card:hover::after {
+        opacity: 0.3 !important;
+        transform: scale(1.5) !important;
+    }
+    
+    .bc-stat-card:hover {
+        transform: translateY(-8px) scale(1.02) !important;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 50px currentColor !important;
+    }
+    
+    /* ---------- CHAIN BLOCKS ---------- */
+    .chain-block {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 1.5rem !important;
+        border-radius: 20px !important;
+        border: 2px solid rgba(42, 48, 80, 0.8) !important;
+        margin: 0.75rem 0 !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .chain-block::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 4px !important;
+        height: 100% !important;
+        background: linear-gradient(180deg, #00E5A0, #6BA5F5) !important;
+    }
+    
+    .chain-block:hover {
+        border-color: rgba(0, 229, 160, 0.5) !important;
+        box-shadow: 
+            0 12px 40px rgba(0, 0, 0, 0.35),
+            0 0 40px rgba(0, 229, 160, 0.15) !important;
+        transform: translateX(6px) !important;
+    }
+    
+    /* ---------- ATTACK CARDS ---------- */
+    .attack-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 1.5rem !important;
+        border-radius: 20px !important;
+        border-left: 5px solid !important;
+        margin: 0.75rem 0 !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .attack-card:hover {
+        transform: translateX(6px) !important;
+        box-shadow: 
+            0 12px 40px rgba(0, 0, 0, 0.35),
+            0 0 40px rgba(255, 85, 102, 0.15) !important;
+    }
+    
+    /* ---------- VERIFY BUTTON (Blockchain) ---------- */
+    .verify-button-container {
+        background: linear-gradient(145deg, rgba(0, 229, 160, 0.05), rgba(107, 165, 245, 0.05)) !important;
+        padding: 2rem !important;
+        border-radius: 24px !important;
+        border: 2px solid rgba(0, 229, 160, 0.3) !important;
+        text-align: center !important;
+        margin: 2rem 0 !important;
+        position: relative !important;
+        overflow: hidden !important;
+        animation: verifyGlow 3s ease-in-out infinite !important;
+    }
+    
+    @keyframes verifyGlow {
+        0%, 100% { box-shadow: 0 0 30px rgba(0, 229, 160, 0.15); }
+        50% { box-shadow: 0 0 60px rgba(0, 229, 160, 0.3); }
+    }
+    
+    /* ---------- BLOCK TYPE BADGES ---------- */
+    .block-badge {
+        display: inline-block;
+        padding: 0.35rem 0.85rem;
+        border-radius: 50px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+    
+    .block-badge-dataset {
+        background: linear-gradient(135deg, #00E5A0, #00B880);
+        color: #0A0E1A;
+    }
+    
+    .block-badge-model {
+        background: linear-gradient(135deg, #6BA5F5, #4A7BD9);
+        color: #FFFFFF;
+    }
+    
+    .block-badge-inference {
+        background: linear-gradient(135deg, #FFC857, #FF9500);
+        color: #0A0E1A;
+    }
+    
+    .block-badge-tamper {
+        background: linear-gradient(135deg, #FF5566, #E63946);
+        color: #FFFFFF;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
