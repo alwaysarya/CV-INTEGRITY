@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "recipient": "contributor1",
+    "message": "New task assigned: Train YOLOv8 on new dataset",
+    "type": "task",
+    "data": {
+      "task_id": 1,
+      "priority": "high"
+    },
+    "read": false,
+    "created_at": "2026-09-12T12:39:38.327811"
+  },
+  {
+    "id": 2,
+    "recipient": "reviewer1",
+    "message": "New task assigned: Review blockchain integrity",
+    "type": "task",
+    "data": {
+      "task_id": 2,
+      "priority": "critical"
+    },
+    "read": false,
+    "created_at": "2026-09-12T12:39:38.328443"
+  }
+]

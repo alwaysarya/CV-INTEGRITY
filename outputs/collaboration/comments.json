@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "username": "arya",
+    "resource_type": "dataset",
+    "resource_id": "good_dataset",
+    "text": "Great dataset! Quality is excellent.",
+    "created_at": "2026-09-12T12:39:38.325925",
+    "likes": 1,
+    "replies": []
+  },
+  {
+    "id": 2,
+    "username": "reviewer1",
+    "resource_type": "dataset",
+    "resource_id": "good_dataset",
+    "text": "Reviewed and approved.",
+    "created_at": "2026-09-12T12:39:38.326379",
+    "likes": 0,
+    "replies": []
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "testuser": {
+    "username": "testuser",
+    "email": "test@example.com",
+    "password_hash": "71c783b544cd0d6de31c18ed9d2ffd56c835dc350d2c7d3d0990c0943d4abf42",
+    "salt": "6afd6188d967b632ad30df0dcc1e1afa",
+    "provider": "local",
+    "created_at": "2026-09-12T12:42:28.203300",
+    "last_login": "2026-09-12T12:42:28.235495",
+    "active": true,
+    "avatar": "T",
+    "role": "viewer"
+  },
+  "oauth": {
+    "username": "oauth",
+    "email": "oauth@example.com",
+    "password_hash": null,
+    "salt": null,
+    "provider": "google",
+    "created_at": "2026-09-12T12:42:28.508435",
+    "last_login": "2026-09-12T12:42:28.508439",
+    "active": true,
+    "avatar": "O",
+    "role": "contributor"
+  }
+}

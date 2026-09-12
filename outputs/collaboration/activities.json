@@ -1,0 +1,68 @@
+[
+  {
+    "id": 1,
+    "username": "arya",
+    "action": "comment_added",
+    "details": {
+      "resource_type": "dataset",
+      "resource_id": "good_dataset",
+      "comment_id": 1
+    },
+    "timestamp": "2026-09-12T12:39:38.326170"
+  },
+  {
+    "id": 2,
+    "username": "reviewer1",
+    "action": "comment_added",
+    "details": {
+      "resource_type": "dataset",
+      "resource_id": "good_dataset",
+      "comment_id": 2
+    },
+    "timestamp": "2026-09-12T12:39:38.326563"
+  },
+  {
+    "id": 3,
+    "username": "arya",
+    "action": "task_created",
+    "details": {
+      "task_id": 1,
+      "assignee": "contributor1",
+      "title": "Train YOLOv8 on new dataset"
+    },
+    "timestamp": "2026-09-12T12:39:38.327547"
+  },
+  {
+    "id": 4,
+    "username": "arya",
+    "action": "task_created",
+    "details": {
+      "task_id": 2,
+      "assignee": "reviewer1",
+      "title": "Review blockchain integrity"
+    },
+    "timestamp": "2026-09-12T12:39:38.328219"
+  },
+  {
+    "id": 5,
+    "username": "contributor1",
+    "action": "task_updated",
+    "details": {
+      "task_id": 1,
+      "old_status": "pending",
+      "new_status": "in_progress"
+    },
+    "timestamp": "2026-09-12T12:39:38.328905"
+  },
+  {
+    "id": 6,
+    "username": "contributor1",
+    "action": "task_updated",
+    "details": {
+      "task_id": 1,
+      "old_status": "in_progress",
+      "new_status": "completed"
+    },
+    "timestamp": "2026-09-12T12:39:38.329225"
+  }
+]

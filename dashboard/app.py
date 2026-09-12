@@ -347,7 +347,9 @@ with st.sidebar:
         "👛 Wallet",
         "🎨 XAI Visualizer",
         "🎥 Video Analysis",
-        "📈 Model Drift"
+        "📈 Model Drift",
+        "📊 Analytics",
+        "🤝 Collaboration"
     ])
     
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
@@ -1649,6 +1651,672 @@ elif page == "📈 Model Drift":
     </div>
     """, unsafe_allow_html=True)
 
+
+
+# ============================================================
+# PAGE: ANALYTICS
+# ============================================================
+elif page == "📊 Analytics":
+    st.markdown("""
+    <div style="text-align: center; padding: 1rem 0 2rem 0;">
+        <h1 style="font-size: 3rem; font-weight: 900; 
+                   background: linear-gradient(135deg, #00D9A3 0%, #5B8DEF 100%);
+                   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                   background-clip: text; margin: 0;">
+            📊 Advanced Analytics
+        </h1>
+        <p style="color: #A8B2C8; font-size: 1.1rem; margin-top: 0.5rem;">
+            Comprehensive insights across all system components
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    analytics_path = BASE / "outputs" / "reports" / "analytics_summary.json"
+    
+    # Auto-generate if not exists
+    if not analytics_path.exists():
+        with st.spinner("📊 Collecting analytics data..."):
+            import subprocess
+            subprocess.run("python3 analytics/collector.py", shell=True, cwd=str(BASE))
+    
+    if analytics_path.exists():
+        with open(analytics_path, 'r') as f:
+            analytics = json.load(f)
+        
+        # ============================================================
+        # KEY METRICS
+        # ============================================================
+        st.markdown('<div class="section-header">🎯 Key Metrics</div>', unsafe_allow_html=True)
+        
+        training = analytics.get('training_metrics', {})
+        quality = analytics.get('dataset_quality', {})
+        trust = analytics.get('trust_scores', {})
+        blockchain = analytics.get('blockchain_stats', {})
+        attacks = analytics.get('attack_stats', {})
+        wallets = analytics.get('wallet_stats', {})
+        
+        # Calculate averages
+        avg_map50 = sum(m.get('mAP50', 0) for m in training.values()) / len(training) if training else 0
+        avg_quality = sum(q.get('overall', 0) for q in quality.values()) / len(quality) if quality else 0
+        avg_trust = sum(t.get('score', 0) for t in trust.values()) / len(trust) if trust else 0
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.markdown(f"""
+            <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                        padding: 1.5rem; border-radius: 20px; border: 2px solid #00D9A3;
+                        text-align: center;">
+                <div style="font-size: 2rem;">🎯</div>
+                <div style="font-size: 1.8rem; font-weight: 900; color: #00D9A3; margin: 0.5rem 0;">
+                    {avg_map50:.1f}%
+                </div>
+                <div style="color: #6B7394; font-size: 0.75rem;">AVG mAP50</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(f"""
+            <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                        padding: 1.5rem; border-radius: 20px; border: 2px solid #5B8DEF;
+                        text-align: center;">
+                <div style="font-size: 2rem;">📊</div>
+                <div style="font-size: 1.8rem; font-weight: 900; color: #5B8DEF; margin: 0.5rem 0;">
+                    {avg_quality:.1f}%
+                </div>
+                <div style="color: #6B7394; font-size: 0.75rem;">AVG QUALITY</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(f"""
+            <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                        padding: 1.5rem; border-radius: 20px; border: 2px solid #FFB84D;
+                        text-align: center;">
+                <div style="font-size: 2rem;">🧠</div>
+                <div style="font-size: 1.8rem; font-weight: 900; color: #FFB84D; margin: 0.5rem 0;">
+                    {avg_trust:.1f}%
+                </div>
+                <div style="color: #6B7394; font-size: 0.75rem;">AVG TRUST</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col4:
+            st.markdown(f"""
+            <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                        padding: 1.5rem; border-radius: 20px; border: 2px solid #FF4757;
+                        text-align: center;">
+                <div style="font-size: 2rem;">🛡️</div>
+                <div style="font-size: 1.8rem; font-weight: 900; color: #FF4757; margin: 0.5rem 0;">
+                    {attacks.get('detection_rate', 0):.0f}%
+                </div>
+                <div style="color: #6B7394; font-size: 0.75rem;">DETECTION</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+        
+        # ============================================================
+        # TRAINING METRICS CHART
+        # ============================================================
+        if training:
+            st.markdown('<div class="section-header">📈 Training Metrics</div>', unsafe_allow_html=True)
+            
+            import pandas as pd
+            import plotly.express as px
+            
+            df_train = pd.DataFrame([
+                {
+                    'Model': name.upper(),
+                    'Precision': data.get('precision', 0),
+                    'Recall': data.get('recall', 0),
+                    'mAP50': data.get('mAP50', 0),
+                    'mAP50-95': data.get('mAP50_95', 0)
+                }
+                for name, data in training.items()
+            ])
+            
+            fig = px.bar(df_train, x='Model', y=['Precision', 'Recall', 'mAP50'],
+                         barmode='group', text_auto='.1f',
+                         color_discrete_sequence=['#00D9A3', '#FFB84D', '#5B8DEF'])
+            fig.update_layout(
+                plot_bgcolor='rgba(21, 26, 46, 0.3)', paper_bgcolor='rgba(0,0,0,0)',
+                font={'color': '#FFFFFF'}, height=400,
+                legend=dict(bgcolor='rgba(21, 26, 46, 0.8)', bordercolor='#2A3050', borderwidth=1),
+                xaxis=dict(gridcolor='#2A3050'), yaxis=dict(gridcolor='#2A3050')
+            )
+            st.plotly_chart(fig, width='stretch')
+        
+        # ============================================================
+        # TWO COLUMNS - DATASET + TRUST
+        # ============================================================
+        st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown('<div class="section-header">📊 Dataset Quality</div>', unsafe_allow_html=True)
+            
+            if quality:
+                import pandas as pd
+                import plotly.graph_objects as go
+                
+                fig = go.Figure()
+                
+                for ds, data in quality.items():
+                    fig.add_trace(go.Bar(
+                        name=ds.upper(),
+                        x=['Overall', 'Blur', 'Duplicate', 'Noise'],
+                        y=[data.get('overall', 0), data.get('blur', 0),
+                           data.get('duplicate', 0), data.get('noise', 0)],
+                        marker_color={'good': '#00D9A3', 'bad': '#FFB84D', 'worst': '#FF4757'}.get(ds, '#5B8DEF')
+                    ))
+                
+                fig.update_layout(
+                    barmode='group',
+                    plot_bgcolor='rgba(21, 26, 46, 0.3)', paper_bgcolor='rgba(0,0,0,0)',
+                    font={'color': '#FFFFFF'}, height=350,
+                    legend=dict(bgcolor='rgba(21, 26, 46, 0.8)'),
+                    xaxis=dict(gridcolor='#2A3050'), yaxis=dict(gridcolor='#2A3050')
+                )
+                st.plotly_chart(fig, width='stretch')
+        
+        with col2:
+            st.markdown('<div class="section-header">🧠 Trust Scores</div>', unsafe_allow_html=True)
+            
+            if trust:
+                import plotly.graph_objects as go
+                
+                labels = [ds.upper() for ds in trust.keys()]
+                values = [t.get('score', 0) for t in trust.values()]
+                colors = ['#00D9A3' if v >= 80 else '#FFB84D' if v >= 50 else '#FF4757' for v in values]
+                
+                fig = go.Figure(go.Pie(
+                    labels=labels,
+                    values=values,
+                    hole=0.5,
+                    marker=dict(colors=colors, line=dict(color='#0A0E1A', width=2)),
+                    textinfo='label+value',
+                    textfont=dict(color='#FFFFFF', size=14)
+                ))
+                
+                fig.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                    font={'color': '#FFFFFF'}, height=350,
+                    showlegend=False
+                )
+                st.plotly_chart(fig, width='stretch')
+        
+        # ============================================================
+        # BLOCKCHAIN + ATTACKS
+        # ============================================================
+        st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown('<div class="section-header">🔗 Blockchain Stats</div>', unsafe_allow_html=True)
+            
+            col_a, col_b = st.columns(2)
+            with col_a:
+                st.metric("Total Blocks", blockchain.get('total_blocks', 0))
+                st.metric("Difficulty", blockchain.get('difficulty', 2))
+            with col_b:
+                st.metric("Chain Status", "VALID" if blockchain.get('is_valid') else "INVALID")
+                st.metric("Block Types", len(blockchain.get('block_types', {})))
+            
+            if blockchain.get('block_types'):
+                st.markdown("**Block Distribution:**")
+                for btype, count in blockchain['block_types'].items():
+                    st.markdown(f"- **{btype}**: {count}")
+        
+        with col2:
+            st.markdown('<div class="section-header">🛡️ Attack Detection</div>', unsafe_allow_html=True)
+            
+            col_a, col_b = st.columns(2)
+            with col_a:
+                st.metric("Total Attacks", attacks.get('total_attacks', 0))
+            with col_b:
+                st.metric("Detected", attacks.get('detected', 0))
+            
+            st.markdown("**By Severity:**")
+            for severity, count in attacks.get('by_severity', {}).items():
+                color = {'CRITICAL': '#FF4757', 'HIGH': '#FFB84D', 'MEDIUM': '#5B8DEF'}.get(severity, '#A8B2C8')
+                st.markdown(f"""
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem;
+                            background: rgba(21, 26, 46, 0.5); border-radius: 8px;
+                            margin-bottom: 0.25rem; border-left: 3px solid {color};">
+                    <span style="color: #FFFFFF;">{severity}</span>
+                    <span style="color: {color}; font-weight: 700;">{count}</span>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        # ============================================================
+        # WALLET STATS
+        # ============================================================
+        if wallets:
+            st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+            st.markdown('<div class="section-header">💰 Token Economy</div>', unsafe_allow_html=True)
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric("Token", wallets.get('token_name', 'CVIT'))
+            with col2:
+                st.metric("Total Wallets", wallets.get('total_wallets', 0))
+            with col3:
+                st.metric("Circulating", f"{wallets.get('circulating', 0):,}")
+            
+            if wallets.get('top_holders'):
+                st.markdown("**Top Holders:**")
+                for i, (name, balance) in enumerate(wallets['top_holders'], 1):
+                    st.markdown(f"{i}. **{name}** — {balance:,} CVIT")
+        
+        # ============================================================
+        # ROBUSTNESS
+        # ============================================================
+        robustness = analytics.get('robustness_data', {})
+        if robustness:
+            st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+            st.markdown('<div class="section-header">🧪 Robustness Scores</div>', unsafe_allow_html=True)
+            
+            import plotly.graph_objects as go
+            
+            fig = go.Figure()
+            
+            for model, data in robustness.items():
+                fig.add_trace(go.Bar(
+                    name=model.upper(),
+                    x=['Average', 'Min', 'Max'],
+                    y=[data.get('average', 0), data.get('min', 0), data.get('max', 0)],
+                    marker_color={'good': '#00D9A3', 'bad': '#FFB84D', 'worst': '#FF4757'}.get(model, '#5B8DEF')
+                ))
+            
+            fig.update_layout(
+                barmode='group',
+                plot_bgcolor='rgba(21, 26, 46, 0.3)', paper_bgcolor='rgba(0,0,0,0)',
+                font={'color': '#FFFFFF'}, height=350,
+                legend=dict(bgcolor='rgba(21, 26, 46, 0.8)'),
+                xaxis=dict(gridcolor='#2A3050'), yaxis=dict(gridcolor='#2A3050')
+            )
+            st.plotly_chart(fig, width='stretch')
+        
+        # ============================================================
+        # REFRESH BUTTON
+        # ============================================================
+        st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+        
+        if st.button("🔄 Refresh Analytics", type="primary", width='stretch'):
+            with st.spinner("Refreshing..."):
+                import subprocess
+                subprocess.run("python3 analytics/collector.py", shell=True, cwd=str(BASE))
+                st.success("✅ Analytics refreshed!")
+                st.rerun()
+    
+    else:
+        st.warning("⚠️ Analytics data not found!")
+        if st.button("📊 Generate Analytics", type="primary"):
+            import subprocess
+            subprocess.run("python3 analytics/collector.py", shell=True, cwd=str(BASE))
+            st.rerun()
+
+
+
+# ============================================================
+# PAGE: COLLABORATION
+# ============================================================
+elif page == "🤝 Collaboration":
+    st.markdown("""
+    <div style="text-align: center; padding: 1rem 0 2rem 0;">
+        <h1 style="font-size: 3rem; font-weight: 900; 
+                   background: linear-gradient(135deg, #00D9A3 0%, #5B8DEF 100%);
+                   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                   background-clip: text; margin: 0;">
+            🤝 Team Collaboration
+        </h1>
+        <p style="color: #A8B2C8; font-size: 1.1rem; margin-top: 0.5rem;">
+            Multi-user workspace with tasks, comments & activity feed
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Load collaboration data
+    collab_dir = BASE / "outputs" / "collaboration"
+    users_file = BASE / "outputs" / "reports" / "users.json"
+    
+    # Load users
+    users = {}
+    if users_file.exists():
+        with open(users_file, 'r') as f:
+            users = json.load(f)
+    
+    # Load collaboration data
+    comments = []
+    tasks = []
+    activities = []
+    notifications = []
+    
+    if collab_dir.exists():
+        if (collab_dir / "comments.json").exists():
+            with open(collab_dir / "comments.json", 'r') as f:
+                comments = json.load(f)
+        if (collab_dir / "tasks.json").exists():
+            with open(collab_dir / "tasks.json", 'r') as f:
+                tasks = json.load(f)
+        if (collab_dir / "activities.json").exists():
+            with open(collab_dir / "activities.json", 'r') as f:
+                activities = json.load(f)
+        if (collab_dir / "notifications.json").exists():
+            with open(collab_dir / "notifications.json", 'r') as f:
+                notifications = json.load(f)
+    
+    # ============================================================
+    # TOP STATS
+    # ============================================================
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #5B8DEF;
+                    text-align: center; box-shadow: 0 0 30px rgba(91, 141, 239, 0.2);">
+            <div style="font-size: 2.5rem;">👥</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #5B8DEF; margin: 0.5rem 0;">
+                {len(users)}
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">TEAM MEMBERS</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        pending = len([t for t in tasks if t.get('status') == 'pending'])
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #FFB84D;
+                    text-align: center; box-shadow: 0 0 30px rgba(255, 184, 77, 0.2);">
+            <div style="font-size: 2.5rem;">📋</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #FFB84D; margin: 0.5rem 0;">
+                {pending}
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">PENDING TASKS</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #00D9A3;
+                    text-align: center; box-shadow: 0 0 30px rgba(0, 217, 163, 0.2);">
+            <div style="font-size: 2.5rem;">💬</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #00D9A3; margin: 0.5rem 0;">
+                {len(comments)}
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">COMMENTS</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        unread = len([n for n in notifications if not n.get('read')])
+        st.markdown(f"""
+        <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                    padding: 1.5rem; border-radius: 20px; border: 2px solid #FF4757;
+                    text-align: center; box-shadow: 0 0 30px rgba(255, 71, 87, 0.2);">
+            <div style="font-size: 2.5rem;">🔔</div>
+            <div style="font-size: 2rem; font-weight: 900; color: #FF4757; margin: 0.5rem 0;">
+                {unread}
+            </div>
+            <div style="color: #6B7394; font-size: 0.8rem; letter-spacing: 0.15em;">NOTIFICATIONS</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    # ============================================================
+    # TABS
+    # ============================================================
+    tab1, tab2, tab3, tab4 = st.tabs(["👥 Team", "📋 Tasks", "💬 Comments", "📊 Activity"])
+    
+    # ============================================================
+    # TAB 1: TEAM MEMBERS
+    # ============================================================
+    with tab1:
+        st.markdown('<div class="section-header">👥 Team Members</div>', unsafe_allow_html=True)
+        
+        if users:
+            for username, user in users.items():
+                role = user.get('role', 'viewer')
+                active = user.get('active', True)
+                avatar = user.get('avatar', username[0].upper())
+                
+                role_colors = {
+                    'admin': '#FF4757',
+                    'contributor': '#00D9A3',
+                    'reviewer': '#FFB84D',
+                    'viewer': '#5B8DEF'
+                }
+                role_color = role_colors.get(role, '#5B8DEF')
+                status_icon = "🟢" if active else "🔴"
+                
+                st.markdown(f"""
+                <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                            padding: 1.5rem; border-radius: 20px; 
+                            border: 1px solid #2A3050; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;
+                                flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 50px; height: 50px; border-radius: 50%;
+                                        background: linear-gradient(135deg, {role_color}, #5B8DEF);
+                                        display: flex; align-items: center; justify-content: center;
+                                        color: #0A0E1A; font-weight: 900; font-size: 1.3rem;">
+                                {avatar}
+                            </div>
+                            <div>
+                                <div style="color: #FFFFFF; font-weight: 800; font-size: 1.1rem;">
+                                    {username} {status_icon}
+                                </div>
+                                <div style="color: #6B7394; font-size: 0.85rem;">
+                                    {user.get('email', 'N/A')}
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <span style="background: {role_color}; color: #0A0E1A;
+                                        padding: 0.4rem 1rem; border-radius: 50px;
+                                        font-weight: 800; font-size: 0.8rem;
+                                        letter-spacing: 0.1em;">
+                                {role.upper()}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("👥 No team members yet!")
+    
+    # ============================================================
+    # TAB 2: TASKS
+    # ============================================================
+    with tab2:
+        st.markdown('<div class="section-header">📋 Task Board</div>', unsafe_allow_html=True)
+        
+        if tasks:
+            # Group by status
+            pending = [t for t in tasks if t.get('status') == 'pending']
+            in_progress = [t for t in tasks if t.get('status') == 'in_progress']
+            completed = [t for t in tasks if t.get('status') == 'completed']
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.markdown(f"""
+                <div style="background: rgba(255, 184, 77, 0.1); padding: 1rem; 
+                            border-radius: 12px; border-left: 4px solid #FFB84D;
+                            margin-bottom: 1rem;">
+                    <div style="color: #FFB84D; font-weight: 800; font-size: 1.2rem;">
+                        📋 PENDING ({len(pending)})
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                for task in pending:
+                    priority_color = {'low': '#5B8DEF', 'medium': '#FFB84D', 'high': '#FF4757', 'critical': '#FF1744'}.get(task.get('priority', 'medium'), '#5B8DEF')
+                    st.markdown(f"""
+                    <div style="background: #151A2E; padding: 1rem; border-radius: 12px;
+                                border-left: 4px solid {priority_color}; margin-bottom: 0.5rem;">
+                        <div style="color: #FFFFFF; font-weight: 700;">{task.get('title', 'Untitled')}</div>
+                        <div style="color: #6B7394; font-size: 0.85rem; margin-top: 0.25rem;">
+                            Assigned to: {task.get('assignee', 'N/A')}
+                        </div>
+                        <div style="color: {priority_color}; font-size: 0.75rem; margin-top: 0.5rem;
+                                    text-transform: uppercase; font-weight: 700;">
+                            {task.get('priority', 'medium')}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown(f"""
+                <div style="background: rgba(91, 141, 239, 0.1); padding: 1rem; 
+                            border-radius: 12px; border-left: 4px solid #5B8DEF;
+                            margin-bottom: 1rem;">
+                    <div style="color: #5B8DEF; font-weight: 800; font-size: 1.2rem;">
+                        🔄 IN PROGRESS ({len(in_progress)})
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                for task in in_progress:
+                    st.markdown(f"""
+                    <div style="background: #151A2E; padding: 1rem; border-radius: 12px;
+                                border-left: 4px solid #5B8DEF; margin-bottom: 0.5rem;">
+                        <div style="color: #FFFFFF; font-weight: 700;">{task.get('title', 'Untitled')}</div>
+                        <div style="color: #6B7394; font-size: 0.85rem; margin-top: 0.25rem;">
+                            Assigned to: {task.get('assignee', 'N/A')}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            with col3:
+                st.markdown(f"""
+                <div style="background: rgba(0, 217, 163, 0.1); padding: 1rem; 
+                            border-radius: 12px; border-left: 4px solid #00D9A3;
+                            margin-bottom: 1rem;">
+                    <div style="color: #00D9A3; font-weight: 800; font-size: 1.2rem;">
+                        ✅ COMPLETED ({len(completed)})
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                for task in completed:
+                    st.markdown(f"""
+                    <div style="background: #151A2E; padding: 1rem; border-radius: 12px;
+                                border-left: 4px solid #00D9A3; margin-bottom: 0.5rem;
+                                opacity: 0.7;">
+                        <div style="color: #FFFFFF; font-weight: 700;
+                                    text-decoration: line-through;">
+                            {task.get('title', 'Untitled')}
+                        </div>
+                        <div style="color: #6B7394; font-size: 0.85rem; margin-top: 0.25rem;">
+                            By: {task.get('assignee', 'N/A')}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+        else:
+            st.info("📋 No tasks yet!")
+    
+    # ============================================================
+    # TAB 3: COMMENTS
+    # ============================================================
+    with tab3:
+        st.markdown('<div class="section-header">💬 Recent Comments</div>', unsafe_allow_html=True)
+        
+        if comments:
+            for comment in sorted(comments, key=lambda x: x.get('created_at', ''), reverse=True)[:10]:
+                st.markdown(f"""
+                <div style="background: linear-gradient(145deg, #151A2E, #1A2038);
+                            padding: 1.25rem; border-radius: 16px; 
+                            border: 1px solid #2A3050; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; 
+                                align-items: start; margin-bottom: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div style="width: 35px; height: 35px; border-radius: 50%;
+                                        background: linear-gradient(135deg, #00D9A3, #5B8DEF);
+                                        display: flex; align-items: center; justify-content: center;
+                                        color: #0A0E1A; font-weight: 900;">
+                                {comment.get('username', 'U')[0].upper()}
+                            </div>
+                            <div>
+                                <div style="color: #FFFFFF; font-weight: 700;">
+                                    {comment.get('username', 'Unknown')}
+                                </div>
+                                <div style="color: #6B7394; font-size: 0.75rem;">
+                                    on {comment.get('resource_type', 'N/A')}: {comment.get('resource_id', 'N/A')}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="color: #00D9A3; font-size: 0.85rem;">
+                            👍 {comment.get('likes', 0)}
+                        </div>
+                    </div>
+                    <div style="color: #A8B2C8;">
+                        {comment.get('text', '')}
+                    </div>
+                    <div style="color: #6B7394; font-size: 0.75rem; margin-top: 0.75rem;">
+                        {comment.get('created_at', '')[:19]}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("💬 No comments yet!")
+    
+    # ============================================================
+    # TAB 4: ACTIVITY FEED
+    # ============================================================
+    with tab4:
+        st.markdown('<div class="section-header">📊 Activity Feed</div>', unsafe_allow_html=True)
+        
+        if activities:
+            activity_icons = {
+                'comment_added': '💬',
+                'task_created': '📋',
+                'task_updated': '🔄',
+                'dataset_uploaded': '📤',
+                'model_trained': '🤖'
+            }
+            
+            for activity in sorted(activities, key=lambda x: x.get('timestamp', ''), reverse=True)[:20]:
+                action = activity.get('action', 'unknown')
+                icon = activity_icons.get(action, '📌')
+                username = activity.get('username', 'Unknown')
+                timestamp = activity.get('timestamp', '')[:19]
+                
+                st.markdown(f"""
+                <div style="background: rgba(21, 26, 46, 0.6); padding: 0.75rem 1rem;
+                            border-radius: 12px; border-left: 3px solid #5B8DEF;
+                            margin-bottom: 0.5rem; display: flex; 
+                            justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="font-size: 1.3rem;">{icon}</div>
+                        <div>
+                            <div style="color: #FFFFFF;">
+                                <strong>{username}</strong> → {action.replace('_', ' ')}
+                            </div>
+                            <div style="color: #6B7394; font-size: 0.75rem;">{timestamp}</div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("📊 No activities yet!")
+    
+    # ============================================================
+    # REFRESH BUTTON
+    # ============================================================
+    st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+    
+    if st.button("🔄 Refresh Collaboration Data", type="primary", width='stretch'):
+        st.success("✅ Data refreshed!")
+        st.rerun()
 
 # ============================================================
 # PAGE: REPORTS
