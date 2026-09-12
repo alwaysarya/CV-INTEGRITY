@@ -200,29 +200,110 @@ st.markdown("""
         background: linear-gradient(90deg, #00ff87, #60efff);
     }
 
-    /* ---------- FORCE SIDEBAR VISIBLE ---------- */
+    /* ============================================================ */
+    /* FORCE SIDEBAR VISIBLE - CRITICAL FIX */
+    /* ============================================================ */
+    
     [data-testid="stSidebar"] {
         display: block !important;
         visibility: visible !important;
+        transform: translateX(0) !important;
         min-width: 280px !important;
         width: 280px !important;
-        transform: none !important;
+        margin-left: 0 !important;
+        opacity: 1 !important;
         background: linear-gradient(180deg, #0A0E1A 0%, #151A2E 100%) !important;
         border-right: 1px solid #2A3050 !important;
     }
     
-    [data-testid="stSidebar"][aria-expanded="false"] {
+    [data-testid="stSidebar"][aria-expanded="false"],
+    [data-testid="stSidebar"][aria-expanded="true"] {
+        display: block !important;
+        visibility: visible !important;
+        transform: translateX(0) !important;
         min-width: 280px !important;
         width: 280px !important;
         margin-left: 0 !important;
+    }
+    
+    section[data-testid="stSidebar"] {
+        display: block !important;
+        visibility: visible !important;
     }
     
     [data-testid="collapsedControl"] {
         display: none !important;
     }
     
-    section[data-testid="stSidebar"] {
+    .main {
+        margin-left: 280px !important;
+    }
+    
+    .main .block-container {
+        margin-left: 0 !important;
+    }
+    
+    @media (max-width: 768px) {
+        [data-testid="stSidebar"] {
+            min-width: 260px !important;
+            width: 260px !important;
+        }
+        .main {
+            margin-left: 0 !important;
+        }
+    }
+
+
+    /* ============================================================ */
+    /* PREVENT SIDEBAR COLLAPSE */
+    /* ============================================================ */
+    
+    /* Hide the collapse arrow button */
+    [data-testid="stSidebarCollapseButton"],
+    button[kind="header"],
+    [data-testid="collapsedControl"],
+    [data-testid="baseButton-headerNoPadding"] {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    
+    /* Force sidebar always visible */
+    [data-testid="stSidebar"] {
         display: block !important;
+        visibility: visible !important;
+        transform: translateX(0) !important;
+        min-width: 280px !important;
+        width: 280px !important;
+        margin-left: 0 !important;
+        opacity: 1 !important;
+        position: relative !important;
+    }
+    
+    [data-testid="stSidebar"][aria-expanded="false"],
+    [data-testid="stSidebar"][aria-expanded="true"],
+    [data-testid="stSidebar"][aria-expanded] {
+        display: block !important;
+        visibility: visible !important;
+        transform: translateX(0) !important;
+        min-width: 280px !important;
+        width: 280px !important;
+        margin-left: 0 !important;
+        opacity: 1 !important;
+    }
+    
+    /* Make sure main content shifts properly */
+    section.main {
+        margin-left: 280px !important;
+    }
+    
+    section.main > div {
+        padding-left: 1rem !important;
     }
 
 </style>
