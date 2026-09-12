@@ -1480,6 +1480,207 @@ st.markdown("""
         margin: 0 !important;
     }
 
+
+    /* ============================================================ */
+    /* PHASE 5.4: TRUST SCORE POLISH v7.0 */
+    /* ============================================================ */
+    
+    /* ---------- DECISION CARDS (Trust Score) ---------- */
+    .decision-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.95), rgba(26, 32, 56, 0.98)) !important;
+        backdrop-filter: blur(24px) !important;
+        padding: 2.5rem 1.5rem !important;
+        border-radius: 28px !important;
+        border: 2px solid !important;
+        text-align: center !important;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    .decision-card::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 5px !important;
+        background: linear-gradient(90deg, currentColor, transparent) !important;
+        animation: decisionGlow 3s ease-in-out infinite !important;
+    }
+    
+    @keyframes decisionGlow {
+        0%, 100% { opacity: 0.7; filter: brightness(1); }
+        50% { opacity: 1; filter: brightness(1.3); }
+    }
+    
+    .decision-card::after {
+        content: '' !important;
+        position: absolute !important;
+        top: -50% !important;
+        right: -50% !important;
+        width: 200% !important;
+        height: 200% !important;
+        background: radial-gradient(circle, currentColor, transparent 70%) !important;
+        opacity: 0.08 !important;
+        pointer-events: none !important;
+        animation: decisionRotate 20s linear infinite !important;
+    }
+    
+    @keyframes decisionRotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .decision-card:hover {
+        transform: translateY(-10px) scale(1.03) !important;
+        box-shadow: 
+            0 24px 80px rgba(0, 0, 0, 0.6),
+            0 0 80px currentColor !important;
+    }
+    
+    /* ---------- SCORE VALUE ---------- */
+    .decision-score {
+        font-size: 3.75rem !important;
+        font-weight: 900 !important;
+        line-height: 1 !important;
+        letter-spacing: -0.04em !important;
+        animation: scorePulse 3s ease-in-out infinite !important;
+    }
+    
+    @keyframes scorePulse {
+        0%, 100% { 
+            filter: brightness(1) drop-shadow(0 0 15px currentColor);
+            transform: scale(1);
+        }
+        50% { 
+            filter: brightness(1.2) drop-shadow(0 0 30px currentColor);
+            transform: scale(1.02);
+        }
+    }
+    
+    /* ---------- DEPLOYMENT SUMMARY CARDS ---------- */
+    .deploy-card {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        padding: 2rem 1.5rem !important;
+        border-radius: 24px !important;
+        border: 2px solid !important;
+        text-align: center !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        animation: deployCardEntry 0.6s ease-out backwards !important;
+    }
+    
+    @keyframes deployCardEntry {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    
+    .deploy-card:hover {
+        transform: translateY(-6px) scale(1.02) !important;
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.5),
+            0 0 40px currentColor !important;
+    }
+    
+    .deploy-value {
+        font-size: 3rem !important;
+        font-weight: 900 !important;
+        line-height: 1 !important;
+        letter-spacing: -0.03em !important;
+        margin: 0.5rem 0 !important;
+    }
+    
+    .deploy-label {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.18em !important;
+        text-transform: uppercase !important;
+    }
+    
+    /* ---------- FORMULA BOX ---------- */
+    .formula-box {
+        background: linear-gradient(145deg, rgba(0, 229, 160, 0.1), rgba(107, 165, 245, 0.1)) !important;
+        padding: 2rem !important;
+        border-radius: 24px !important;
+        border: 2px solid rgba(0, 229, 160, 0.4) !important;
+        margin: 2rem 0 !important;
+        text-align: center !important;
+        position: relative !important;
+        overflow: hidden !important;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 0 60px rgba(0, 229, 160, 0.05) !important;
+    }
+    
+    .formula-box::before {
+        content: '🧮' !important;
+        position: absolute !important;
+        top: -20px !important;
+        right: 20px !important;
+        font-size: 8rem !important;
+        opacity: 0.05 !important;
+        pointer-events: none !important;
+    }
+    
+    .formula-text {
+        font-family: 'JetBrains Mono', 'Monaco', monospace !important;
+        color: #FFFFFF !important;
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.02em !important;
+        background: rgba(0, 229, 160, 0.08) !important;
+        padding: 1.25rem 1.5rem !important;
+        border-radius: 14px !important;
+        border: 1px solid rgba(0, 229, 160, 0.2) !important;
+        display: inline-block !important;
+        margin-top: 0.75rem !important;
+    }
+    
+    .formula-highlight-primary {
+        color: #00E5A0 !important;
+        font-weight: 900 !important;
+    }
+    
+    .formula-highlight-secondary {
+        color: #6BA5F5 !important;
+        font-weight: 900 !important;
+    }
+    
+    .formula-highlight-accent {
+        color: #FFC857 !important;
+        font-weight: 900 !important;
+    }
+    
+    .formula-highlight-danger {
+        color: #FF5566 !important;
+        font-weight: 900 !important;
+    }
+    
+    /* ---------- PROGRESS BARS (breakdown) ---------- */
+    .stProgress {
+        margin: 0.6rem 0 1rem 0 !important;
+    }
+    
+    /* ---------- METRIC CARDS ---------- */
+    [data-testid="stMetric"] {
+        background: linear-gradient(145deg, rgba(18, 23, 43, 0.9), rgba(26, 32, 56, 0.95)) !important;
+        border: 1px solid rgba(42, 48, 80, 0.8) !important;
+        border-radius: 18px !important;
+        padding: 1.25rem !important;
+        transition: all 0.35s ease !important;
+    }
+    
+    [data-testid="stMetric"]:hover {
+        transform: translateY(-4px) !important;
+        border-color: rgba(0, 229, 160, 0.5) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 229, 160, 0.15) !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
