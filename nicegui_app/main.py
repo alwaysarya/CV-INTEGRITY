@@ -6,6 +6,8 @@ FIXED NAVIGATION - All links working
 from nicegui import ui, app
 from blockchain_page import create_blockchain_page  # noqa
 from trust_page import create_trust_page  # noqa
+from xai_page import create_xai_page  # noqa
+from upload_page import create_upload_page  # noqa
 import sys
 from pathlib import Path
 
@@ -81,6 +83,7 @@ def navigation():
                 ('Datasets', '/datasets'),
                 ('Blockchain', '/blockchain'),
                 ('Trust', '/trust'),
+                ('XAI', '/xai'),
                 ('Upload', '/upload'),
                 ('About', '/about'),
             ]
@@ -248,7 +251,7 @@ def datasets():
 # ============================================================
 # UPLOAD
 # ============================================================
-@ui.page('/upload')
+# [REPLACED] Old upload route
 def upload():
     setup_page()
     navigation()
@@ -339,6 +342,15 @@ def about():
 # Register blockchain page
 create_blockchain_page()
 create_trust_page()
+create_xai_page()
+create_upload_page()
+
+
+# Serve static files (heatmaps, images, reports)
+from pathlib import Path as _Path
+_project_root = _Path(__file__).parent.parent
+app.add_static_files('/outputs', str(_project_root / 'outputs'))
+app.add_static_files('/datasets', str(_project_root / 'datasets'))
 
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(
