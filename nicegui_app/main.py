@@ -1,9 +1,25 @@
 """
 CV-INTEGRITY AI - NiceGUI 3.x App
-Design #09 - COMPLETE (Home + Upload + Datasets)
+FIXED NAVIGATION - All links working
 """
 
-from nicegui import ui
+from nicegui import ui, app
+from blockchain_page import create_blockchain_page  # noqa
+from trust_page import create_trust_page  # noqa
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+try:
+    from blockchain.blockchain import Block, Blockchain
+    from blockchain.file_hasher import FileHasher
+    from auth.auth_manager import AuthManager
+    BACKEND_OK = True
+except Exception as e:
+    print(f"Backend import error: {e}")
+    BACKEND_OK = False
+
 
 # ============================================================
 # SHARED SETUP
@@ -13,398 +29,172 @@ def setup_page():
     ui.add_head_html('''
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        
-        * {
+        body, .q-page {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-        }
-        
-        body {
             background: linear-gradient(180deg, #0A0A14 0%, #0F0F1F 100%) !important;
-            margin: 0;
-            padding: 0;
         }
-        
         .q-page-container { padding: 0 !important; }
         .nicegui-content { padding: 0 !important; }
-        
-        .q-uploader {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            max-width: 100% !important;
+        .q-icon { display: inline-flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important; }
+        .q-card { background: transparent !important; box-shadow: none !important; }
+        .section-tight { padding: 32px 64px !important; }
+        .section-hero { padding: 60px 64px !important; }
+        .nav-btn {
+            color: #9CA3AF !important;
+            font-weight: 500 !important;
+            font-size: 0.875rem !important;
+            text-decoration: none !important;
+            cursor: pointer !important;
+            padding: 6px 10px !important;
+            border-radius: 6px !important;
+            transition: all 0.2s !important;
         }
-        
-        .q-uploader__header {
+        .nav-btn:hover {
+            color: #A78BFA !important;
             background: rgba(139, 92, 246, 0.1) !important;
-            color: #FFFFFF !important;
-            border-radius: 12px !important;
         }
+        .nav-btn.active { color: white !important; }
     </style>
     ''')
 
 
-# ============================================================
-# NAVIGATION
-# ============================================================
 def navigation():
-    with ui.row().classes('w-full items-center justify-between px-8 py-4').style(
+    with ui.row().classes('w-full items-center justify-between px-8 py-3').style(
         'background: rgba(10, 10, 20, 0.95); border-bottom: 1px solid rgba(139, 92, 246, 0.2); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 100;'
     ):
-        with ui.row().classes('items-center gap-3').style('flex-shrink: 0;'):
+        with ui.row().classes('items-center gap-3'):
             ui.html('''
-                <div style="width: 40px; height: 40px; border-radius: 50%; 
+                <div style="width: 36px; height: 36px; border-radius: 50%; 
                             background: linear-gradient(135deg, #8B5CF6, #7C3AED); 
                             display: flex; align-items: center; justify-content: center;
-                            font-size: 1.2rem;">🧠</div>
+                            font-size: 1.1rem;">🧠</div>
             ''')
             with ui.column().classes('gap-0'):
-                ui.label('CV-INTEGRITY AI').classes('text-white font-bold text-base').style('line-height: 1.2;')
-                ui.label('AI TRUST PLATFORM').classes('text-gray-500 text-xs tracking-wider').style('line-height: 1.2;')
+                ui.label('CV-INTEGRITY AI').classes('text-white font-bold text-sm')
+                ui.label('AI TRUST PLATFORM').classes('text-gray-500 text-xs tracking-wider')
         
-        with ui.row().classes('items-center gap-6').style('flex-shrink: 0;'):
-            ui.link('Home', '/').classes('text-white font-medium no-underline text-sm')
-            ui.link('Solutions', '/solutions').classes('text-gray-400 no-underline hover:text-purple-400 text-sm')
-            ui.link('Datasets', '/datasets').classes('text-gray-400 no-underline hover:text-purple-400 text-sm')
-            ui.link('Research', '/research').classes('text-gray-400 no-underline hover:text-purple-400 text-sm')
-            ui.link('Pricing', '/pricing').classes('text-gray-400 no-underline hover:text-purple-400 text-sm')
-            ui.link('About', '/about').classes('text-gray-400 no-underline hover:text-purple-400 text-sm')
+        # NAVIGATION - using ui.button with navigate
+        with ui.row().classes('items-center gap-1'):
+            nav_items = [
+                ('Home', '/'),
+                ('Solutions', '/solutions'),
+                ('Datasets', '/datasets'),
+                ('Blockchain', '/blockchain'),
+                ('Trust', '/trust'),
+                ('Upload', '/upload'),
+                ('About', '/about'),
+            ]
+            for label, path in nav_items:
+                ui.button(label, on_click=lambda p=path: ui.navigate.to(p)).classes('nav-btn').props('flat no-caps')
         
-        with ui.row().classes('items-center gap-4').style('flex-shrink: 0;'):
-            with ui.row().classes('items-center gap-2 px-3 py-2 rounded-lg').style(
-                'background: rgba(21, 21, 42, 0.8); border: 1px solid #252540; width: 220px; height: 40px;'
+        with ui.row().classes('items-center gap-3'):
+            with ui.row().classes('items-center gap-2 px-3 py-1 rounded-lg').style(
+                'background: rgba(21, 21, 42, 0.8); border: 1px solid #252540; width: 220px;'
             ):
-                ui.icon('search').classes('text-gray-500').style('font-size: 18px;')
-                ui.html('<span style="color: #6B7280; font-size: 0.85rem;">Search...</span>')
-            
+                ui.icon('search').classes('text-gray-500 text-sm')
+                ui.label('Search...').classes('text-gray-500 text-xs')
+            ui.icon('notifications_none').classes('text-gray-400')
             ui.html('''
-                <div style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-                            color: #9CA3AF; cursor: pointer; font-size: 1.2rem;">
-                    🔔
-                </div>
+                <div style="width: 32px; height: 32px; border-radius: 50%; 
+                            background: linear-gradient(135deg, #8B5CF6, #7C3AED); 
+                            display: flex; align-items: center; justify-content: center;
+                            color: white; font-weight: 700; font-size: 0.75rem;">AT</div>
             ''')
-            
-            with ui.row().classes('items-center gap-2').style('flex-shrink: 0;'):
-                ui.html('''
-                    <div style="width: 36px; height: 36px; border-radius: 50%; 
-                                background: linear-gradient(135deg, #8B5CF6, #7C3AED); 
-                                display: flex; align-items: center; justify-content: center;
-                                color: white; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">AT</div>
-                ''')
-                with ui.column().classes('gap-0').style('line-height: 1.2;'):
-                    ui.label('Aryan Thakur').classes('text-white text-xs font-medium').style('line-height: 1.2;')
-                    ui.label('Administrator').classes('text-gray-500 text-xs').style('line-height: 1.2;')
+
+
+def footer():
+    with ui.row().classes('w-full items-center justify-between px-16 py-4').style(
+        'border-top: 1px solid #252540; margin-top: 40px;'
+    ):
+        ui.label('© 2026 CV-INTEGRITY AI. All rights reserved.').classes('text-gray-500 text-xs')
+        ui.label(f'Backend: {"✅ Connected" if BACKEND_OK else "❌ Not connected"}').classes('text-gray-500 text-xs')
 
 
 # ============================================================
-# HERO SECTION
+# HOME
 # ============================================================
 def hero_section():
-    with ui.row().classes('w-full items-center justify-between px-16 py-12 gap-12').style(
-        'min-height: 520px;'
-    ):
-        with ui.column().classes('gap-6').style('flex: 1; max-width: 600px;'):
-            ui.label('VISION FOR A MORE TRUSTWORTHY TOMORROW').classes(
-                'text-purple-400 text-xs font-bold tracking-widest'
-            )
-            
-            ui.html('''
-                <div style="font-size: 3.5rem; font-weight: 900; line-height: 1.1; 
-                            color: #FFFFFF; letter-spacing: -0.03em;">
-                    Evaluate Today.
-                </div>
-                <div style="font-size: 3.5rem; font-weight: 900; line-height: 1.1; 
-                            background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%);
-                            -webkit-background-clip: text;
-                            -webkit-text-fill-color: transparent;
-                            background-clip: text;
-                            letter-spacing: -0.03em; margin-top: 8px;">
-                    A Fairer Tomorrow.
-                </div>
-            ''')
-            
-            ui.label(
-                'An intelligent platform to evaluate, verify and ensure the integrity of computer vision models.'
-            ).classes('text-gray-400 text-base leading-relaxed')
-            
-            with ui.row().classes('gap-3 mt-4'):
-                ui.button('Upload Dataset →', on_click=lambda: ui.navigate.to('/upload')).classes(
-                    'px-6 py-3 rounded-xl font-semibold'
-                ).style(
-                    'background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); color: #FFFFFF;'
-                )
-                
-                ui.button('▶ Watch Demo').classes(
-                    'px-6 py-3 rounded-xl font-semibold'
-                ).style(
-                    'background: transparent; color: #FFFFFF; border: 1px solid #252540;'
-                )
+    with ui.row().classes('w-full items-center justify-between gap-8 section-hero'):
+        with ui.column().classes('gap-5').style('max-width: 560px;'):
+            with ui.row().classes('items-center gap-2 px-3 py-1 rounded-full').style(
+                'background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); width: fit-content;'
+            ):
+                ui.label('⚡').classes('text-purple-400 text-sm')
+                ui.label('AI-Powered Dataset Integrity').classes('text-purple-400 text-xs font-medium')
+            ui.label('Verify Your AI Datasets with Confidence').classes('text-white font-bold').style('font-size: 2.75rem; line-height: 1.15;')
+            ui.label('Detect tampering, ensure authenticity, and build trust in your AI models with blockchain-verified dataset integrity.').classes('text-gray-400 text-base').style('line-height: 1.6;')
+            with ui.row().classes('gap-3 mt-2'):
+                ui.button('Upload Dataset →', on_click=lambda: ui.navigate.to('/upload')).classes('px-5 py-2 rounded-lg font-medium text-sm').style('background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white;')
+                ui.button('▶ View Blockchain', on_click=lambda: ui.navigate.to('/blockchain')).classes('px-5 py-2 rounded-lg font-medium text-sm').style('background: transparent; border: 1px solid #252540; color: white;')
+            with ui.row().classes('items-center gap-6 mt-3'):
+                for val, label in [('99.9%', 'Accuracy'), ('50K+', 'Datasets'), ('1M+', 'Verifications')]:
+                    with ui.column().classes('gap-0'):
+                        ui.label(val).classes('text-white font-bold text-xl')
+                        ui.label(label).classes('text-gray-500 text-xs')
         
-        with ui.column().classes('gap-4 items-center justify-center').style('flex: 1; max-width: 500px;'):
-            with ui.column().classes('gap-3'):
-                with ui.card().classes('p-4 rounded-xl').style(
-                    'background: rgba(21, 21, 42, 0.9); border: 1px solid rgba(139, 92, 246, 0.3); width: 320px; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);'
-                ):
-                    with ui.row().classes('items-center gap-3'):
-                        ui.html('''<div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(139, 92, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🖼️</div>''')
-                        with ui.column().classes('gap-0'):
-                            ui.label('INPUT IMAGE').classes('text-purple-400 text-xs font-bold tracking-wider')
-                            ui.label('Raw data received').classes('text-gray-400 text-xs')
-                
-                with ui.card().classes('p-4 rounded-xl').style(
-                    'background: rgba(21, 21, 42, 0.9); border: 1px solid rgba(139, 92, 246, 0.3); width: 320px; margin-left: 30px; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);'
-                ):
-                    with ui.row().classes('items-center gap-3'):
-                        ui.html('''<div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(139, 92, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🧠</div>''')
-                        with ui.column().classes('gap-0'):
-                            ui.label('AI ANALYSIS').classes('text-purple-400 text-xs font-bold tracking-wider')
-                            ui.label('Model processing...').classes('text-gray-400 text-xs')
-                
-                with ui.card().classes('p-4 rounded-xl').style(
-                    'background: rgba(21, 21, 42, 0.9); border: 1px solid rgba(139, 92, 246, 0.3); width: 320px; margin-left: 60px; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);'
-                ):
-                    with ui.row().classes('items-center gap-3'):
-                        ui.html('''<div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">⚖️</div>''')
-                        with ui.column().classes('gap-0'):
-                            ui.label('FAIRNESS CHECK').classes('text-green-400 text-xs font-bold tracking-wider')
-                            ui.label('Bias validation').classes('text-gray-400 text-xs')
-                
-                with ui.card().classes('p-4 rounded-xl').style(
-                    'background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.1)); border: 1px solid rgba(139, 92, 246, 0.5); width: 320px; margin-left: 90px; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);'
-                ):
-                    with ui.row().classes('items-center gap-3'):
-                        ui.html('''<div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">✅</div>''')
-                        with ui.column().classes('gap-0'):
-                            ui.label('TRUSTED OUTPUT').classes('text-white text-xs font-bold tracking-wider')
-                            ui.label('VERIFIED').classes('text-green-400 text-xs font-bold')
-            
-            ui.label('SAME IMAGES. DEEPER ANSWERS.').classes(
-                'text-gray-500 text-xs tracking-widest mt-4'
-            )
-        
-        with ui.column().classes('gap-1').style('max-width: 150px; text-align: right;'):
-            ui.label('TRANSPARENCY').classes('text-gray-400 text-xs tracking-wider')
-            ui.label('INTEGRITY').classes('text-gray-400 text-xs tracking-wider')
-            ui.label('FAIRNESS').classes('text-gray-400 text-xs tracking-wider')
-            ui.label('REAL IMPACT').classes('text-gray-400 text-xs tracking-wider')
-            ui.html('<hr style="border-color: #252540; margin: 12px 0;">')
-            ui.label('COMPUTER VISION FOR A MORE EQUITABLE WORLD.').classes(
-                'text-gray-500 text-xs tracking-wider leading-relaxed'
-            )
+        with ui.card().classes('p-6').style('background: rgba(21, 21, 42, 0.6); border: 1px solid #252540; border-radius: 16px; min-width: 320px; max-width: 380px;'):
+            for icon, title, sub, color in [('verified', 'Dataset Verified', 'Blockchain confirmed', 'green'), ('fingerprint', 'Hash: 0x7a3f...9b2c', 'SHA-256', 'purple'), ('schedule', 'Last verified', '2 minutes ago', 'blue')]:
+                with ui.row().classes('items-center gap-3 mb-4'):
+                    ui.icon(icon).classes(f'text-{color}-400 text-2xl')
+                    with ui.column().classes('gap-0'):
+                        ui.label(title).classes('text-white font-semibold text-sm')
+                        ui.label(sub).classes('text-gray-500 text-xs')
 
 
-# ============================================================
-# STATS ROW
-# ============================================================
 def stats_row():
-    with ui.row().classes('w-full items-center justify-between px-16 py-8 gap-6'):
-        stats = [
-            ('📊', '3', 'Datasets'),
-            ('📦', '3', 'YOLO Models'),
-            ('🖼️', '909', 'Images'),
-            ('🛡️', '67%', 'Avg Trust')
-        ]
-        
-        for icon, value, label in stats:
-            with ui.row().classes('items-center gap-3'):
-                ui.label(icon).classes('text-3xl')
-                with ui.column().classes('gap-0'):
-                    ui.label(value).classes('text-white font-bold text-2xl')
-                    ui.label(label).classes('text-gray-400 text-xs')
+    with ui.row().classes('w-full items-center justify-between gap-4 section-tight'):
+        for icon, title, subtitle, color in [('shield', 'Blockchain Secured', 'Immutable records', '#8B5CF6'), ('psychology', 'XAI Powered', 'Explainable AI', '#3B82F6'), ('videocam', 'Video Analysis', 'Deepfake detection', '#10B981'), ('trending_up', 'Drift Detection', 'Model monitoring', '#F59E0B')]:
+            with ui.card().classes('flex-1 p-4').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+                with ui.row().classes('items-center gap-3'):
+                    ui.icon(icon).classes('text-2xl').style(f'color: {color};')
+                    with ui.column().classes('gap-0'):
+                        ui.label(title).classes('text-white font-semibold text-sm')
+                        ui.label(subtitle).classes('text-gray-500 text-xs')
 
 
-# ============================================================
-# TRUST SCORE + DATASET INSIGHTS + RESPONSIBLE AI
-# ============================================================
 def trust_and_insights():
-    with ui.row().classes('w-full px-16 gap-6'):
-        
-        with ui.card().classes('p-6 rounded-2xl').style(
-            'flex: 2; background: rgba(21, 21, 42, 0.8); border: 1px solid #252540;'
-        ):
-            with ui.row().classes('w-full items-center justify-between mb-6'):
+    with ui.row().classes('w-full gap-6 section-tight'):
+        with ui.card().classes('flex-1 p-5').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+            with ui.row().classes('w-full items-center justify-between mb-4'):
                 with ui.row().classes('items-center gap-2'):
-                    ui.html('<div style="width: 3px; height: 20px; background: #8B5CF6; border-radius: 2px;"></div>')
-                    ui.label('Trust Score Overview').classes('text-white font-bold text-lg')
-                ui.html('<span style="color: #6B7280; font-size: 1.2rem;">ⓘ</span>')
-            
-            with ui.row().classes('w-full gap-8 items-center'):
-                with ui.column().classes('items-center justify-center'):
+                    ui.icon('verified_user').classes('text-purple-400 text-xl')
+                    ui.label('Trust Score').classes('text-white font-semibold text-base')
+            with ui.row().classes('w-full gap-6 items-center'):
+                with ui.column().classes('items-center'):
                     ui.html('''
-                        <div style="position: relative; width: 180px; height: 180px;">
-                            <svg viewBox="0 0 100 100" style="transform: rotate(-90deg);">
-                                <circle cx="50" cy="50" r="42" fill="none" stroke="#252540" stroke-width="8"/>
-                                <circle cx="50" cy="50" r="42" fill="none" stroke="url(#gradient1)" stroke-width="8" 
-                                        stroke-dasharray="264" stroke-dashoffset="32" stroke-linecap="round"/>
-                                <defs>
-                                    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#8B5CF6"/>
-                                        <stop offset="100%" style="stop-color:#10B981"/>
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                                <div style="font-size: 2.2rem; font-weight: 900; color: #FFFFFF;">88.0%</div>
-                                <div style="font-size: 0.65rem; color: #6B7280; letter-spacing: 0.15em;">OVERALL TRUST</div>
+                        <div style="width: 100px; height: 100px; border-radius: 50%; 
+                                    background: conic-gradient(#8B5CF6 0% 87%, #252540 87% 100%);
+                                    display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 76px; height: 76px; border-radius: 50%; 
+                                        background: #0F0F1F; display: flex; flex-direction: column;
+                                        align-items: center; justify-content: center;">
+                                <span style="color: white; font-size: 1.25rem; font-weight: 700;">87%</span>
+                                <span style="color: #6B7280; font-size: 0.6rem;">TRUST</span>
                             </div>
                         </div>
                     ''')
-                
-                with ui.column().classes('gap-4 flex-1'):
-                    with ui.row().classes('items-start gap-3'):
-                        ui.html('<div style="width: 12px; height: 12px; border-radius: 50%; background: #10B981; margin-top: 6px;"></div>')
-                        with ui.column().classes('gap-0'):
-                            ui.label('Good (88.0%)').classes('text-white font-semibold text-sm')
-                            ui.label('High confidence, reliable results').classes('text-gray-400 text-xs')
-                    
-                    with ui.row().classes('items-start gap-3'):
-                        ui.html('<div style="width: 12px; height: 12px; border-radius: 50%; background: #FBBF24; margin-top: 6px;"></div>')
-                        with ui.column().classes('gap-0'):
-                            ui.label('Needs Review (68.0%)').classes('text-white font-semibold text-sm')
-                            ui.label('Potential issues detected').classes('text-gray-400 text-xs')
-                    
-                    with ui.row().classes('items-start gap-3'):
-                        ui.html('<div style="width: 12px; height: 12px; border-radius: 50%; background: #EC4899; margin-top: 6px;"></div>')
-                        with ui.column().classes('gap-0'):
-                            ui.label('Critical (45.0%)').classes('text-white font-semibold text-sm')
-                            ui.label('Significant risks found').classes('text-gray-400 text-xs')
-            
-            ui.html('<hr style="border-color: #252540; margin: 20px 0;">')
-            ui.label('"Trust in AI is not a feature, it\'s a responsibility."').classes(
-                'text-gray-400 italic text-sm'
-            )
+                with ui.column().classes('gap-2 flex-1'):
+                    for icon, title, sub, color in [('check_circle', 'Hash Verified', 'All records match', 'green'), ('check_circle', 'No Tampering', 'Integrity intact', 'green'), ('warning', 'Minor Drift', '2 features affected', 'yellow')]:
+                        with ui.row().classes('items-start gap-2'):
+                            ui.icon(icon).classes(f'text-{color}-400 text-sm')
+                            with ui.column().classes('gap-0'):
+                                ui.label(title).classes('text-white text-xs font-medium')
+                                ui.label(sub).classes('text-gray-500 text-xs')
         
-        with ui.card().classes('p-6 rounded-2xl').style(
-            'flex: 2; background: rgba(21, 21, 42, 0.8); border: 1px solid #252540;'
-        ):
-            with ui.row().classes('w-full items-center justify-between mb-6'):
+        with ui.card().classes('flex-1 p-5').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+            with ui.row().classes('w-full items-center justify-between mb-4'):
                 with ui.row().classes('items-center gap-2'):
-                    ui.html('<div style="width: 3px; height: 20px; background: #8B5CF6; border-radius: 2px;"></div>')
-                    ui.label('Dataset Insights').classes('text-white font-bold text-lg')
-                ui.link('View All →', '/datasets').classes('text-purple-400 text-sm no-underline')
-            
-            datasets = [
-                ('🖼️', 'Custom Dataset', '320 images', 94, '#8B5CF6'),
-                ('🔒', 'Security Footage', '280 images', 87, '#10B981'),
-                ('🏭', 'Industrial Objects', '309 images', 76, '#EC4899'),
-            ]
-            
-            for icon, name, count, score, color in datasets:
-                with ui.row().classes('items-center gap-4 mb-4'):
-                    ui.html(f'''<div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">{icon}</div>''')
-                    with ui.column().classes('gap-0').style('flex: 1;'):
-                        ui.label(name).classes('text-white text-sm font-semibold')
-                        ui.label(count).classes('text-gray-400 text-xs')
-                    ui.html(f'''
-                        <div style="width: 120px;">
-                            <div style="background: #252540; height: 6px; border-radius: 3px; overflow: hidden;">
-                                <div style="width: {score}%; height: 100%; background: {color}; border-radius: 3px;"></div>
-                            </div>
-                        </div>
-                        <span style="color: #FFFFFF; font-weight: 600; font-size: 0.85rem; margin-left: 12px;">{score}%</span>
-                    ''')
-        
-        with ui.card().classes('p-6 rounded-2xl').style(
-            'flex: 1; background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.05)); border: 1px solid rgba(139, 92, 246, 0.3);'
-        ):
-            ui.html('''
-                <div style="font-size: 2rem; margin-bottom: 12px;">🌍</div>
-                <div style="color: #FFFFFF; font-size: 1.1rem; font-weight: 800; line-height: 1.3; margin-bottom: 16px;">
-                    Responsible AI<br>for a more<br>equitable world.
-                </div>
-                <div style="color: #6B7280; font-size: 0.75rem; letter-spacing: 0.1em;">
-                    ───
-                </div>
-                <div style="color: #9CA3AF; font-size: 0.85rem; margin-top: 12px; line-height: 1.6;">
-                    Built on trust.<br>Driven by people.
-                </div>
-            ''')
+                    ui.icon('storage').classes('text-blue-400 text-xl')
+                    ui.label('Recent Datasets').classes('text-white font-semibold text-base')
+                ui.button('View All →', on_click=lambda: ui.navigate.to('/datasets')).classes('text-purple-400 text-xs').props('flat no-caps dense')
+            for name, status, color in [('ImageNet-1K', 'Verified', 'green'), ('COCO-2017', 'Verified', 'green'), ('OpenImages-v7', 'Pending', 'yellow'), ('LAION-5B', 'Verified', 'green')]:
+                with ui.row().classes('items-center justify-between w-full py-2').style('border-bottom: 1px solid #252540;'):
+                    with ui.row().classes('items-center gap-2'):
+                        ui.icon('folder').classes('text-gray-400 text-sm')
+                        ui.label(name).classes('text-white text-xs')
+                    ui.badge(status).classes(f'bg-{color}-500 text-xs')
 
 
-# ============================================================
-# HOW IT WORKS + RECENT ACTIVITY
-# ============================================================
-def how_it_works_and_activity():
-    with ui.row().classes('w-full px-16 gap-6 mt-8'):
-        
-        with ui.card().classes('p-6 rounded-2xl').style(
-            'flex: 3; background: rgba(21, 21, 42, 0.8); border: 1px solid #252540;'
-        ):
-            with ui.row().classes('items-center gap-2 mb-6'):
-                ui.html('<div style="width: 3px; height: 20px; background: #8B5CF6; border-radius: 2px;"></div>')
-                ui.label('How It Works').classes('text-white font-bold text-lg')
-            
-            steps = [
-                ('📤', '1', 'Upload Dataset', 'ZIP with images + labels'),
-                ('🔍', '2', 'Auto Analysis', 'Blur, duplicate, noise check'),
-                ('🧠', '3', 'Train Model', 'YOLO training on your data'),
-                ('🛡️', '4', 'Robustness Test', '7 transformations'),
-                ('📊', '5', 'Trust Score', 'Accept / Review / Quarantine'),
-            ]
-            
-            with ui.row().classes('w-full items-start justify-between gap-2'):
-                for i, (icon, num, title, desc) in enumerate(steps):
-                    with ui.column().classes('items-center gap-2').style('flex: 1;'):
-                        with ui.row().classes('items-center gap-2'):
-                            ui.html(f'''
-                                <div style="width: 36px; height: 36px; border-radius: 10px; 
-                                            background: rgba(139, 92, 246, 0.15); 
-                                            display: flex; align-items: center; justify-content: center;
-                                            font-size: 1.2rem; border: 1px solid rgba(139, 92, 246, 0.3);">
-                                    {icon}
-                                </div>
-                                <div style="color: #6B7280; font-size: 0.75rem; font-weight: 700;">{num}</div>
-                            ''')
-                        
-                        ui.label(title).classes('text-white font-semibold text-sm text-center')
-                        ui.label(desc).classes('text-gray-500 text-xs text-center leading-snug')
-                    
-                    if i < len(steps) - 1:
-                        ui.label('→').classes('text-gray-600 text-xl mt-4')
-        
-        with ui.card().classes('p-6 rounded-2xl').style(
-            'flex: 2; background: rgba(21, 21, 42, 0.8); border: 1px solid #252540;'
-        ):
-            with ui.row().classes('w-full items-center justify-between mb-6'):
-                with ui.row().classes('items-center gap-2'):
-                    ui.html('<div style="width: 3px; height: 20px; background: #8B5CF6; border-radius: 2px;"></div>')
-                    ui.label('Recent Activity').classes('text-white font-bold text-lg')
-                ui.link('View All →', '/activity').classes('text-purple-400 text-sm no-underline')
-            
-            activities = [
-                ('#10B981', 'Dataset "Custom Dataset" uploaded', '2 min ago'),
-                ('#3B82F6', 'Model training completed (YOLOv8)', '12 min ago'),
-                ('#EC4899', 'Robustness testing finished', '25 min ago'),
-                ('#10B981', 'Trust score calculated: 88.0%', '28 min ago'),
-                ('#FBBF24', 'Report generated', '35 min ago'),
-            ]
-            
-            for color, text, time in activities:
-                with ui.row().classes('items-center justify-between w-full py-2'):
-                    with ui.row().classes('items-center gap-3'):
-                        ui.html(f'<div style="width: 8px; height: 8px; border-radius: 50%; background: {color};"></div>')
-                        ui.label(text).classes('text-gray-300 text-sm')
-                    ui.label(time).classes('text-gray-500 text-xs')
-
-
-# ============================================================
-# FOOTER
-# ============================================================
-def footer():
-    ui.html('<hr style="border-color: #252540; margin: 40px 0 0 0;">')
-    with ui.row().classes('w-full items-center justify-between px-16 py-6'):
-        ui.label('CV-INTEGRITY AI').classes('text-gray-500 text-xs tracking-wider')
-        ui.label('VISION  ·  INTEGRITY  ·  A SAFER TOMORROW').classes(
-            'text-gray-500 text-xs tracking-widest'
-        )
-        with ui.row().classes('items-center gap-1'):
-            ui.label('Built with').classes('text-gray-500 text-xs')
-            ui.html('<span style="color: #EF4444;">❤</span>')
-            ui.label('using NiceGUI').classes('text-gray-500 text-xs')
-
-
-# ============================================================
-# HOME PAGE
-# ============================================================
 @ui.page('/')
 def home():
     setup_page()
@@ -412,334 +202,149 @@ def home():
     hero_section()
     stats_row()
     trust_and_insights()
-    how_it_works_and_activity()
     footer()
 
 
 # ============================================================
-# UPLOAD PAGE
-# ============================================================
-@ui.page('/upload')
-def upload():
-    setup_page()
-    navigation()
-    
-    with ui.column().classes('w-full px-16 py-12 gap-8'):
-        with ui.column().classes('items-center gap-3 w-full'):
-            ui.html('<div style="font-size: 3rem;">📤</div>')
-            ui.html('''
-                <div style="font-size: 2.5rem; font-weight: 900; 
-                            background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%);
-                            -webkit-background-clip: text;
-                            -webkit-text-fill-color: transparent;
-                            background-clip: text;
-                            letter-spacing: -0.03em;">
-                    Upload Your Dataset
-                </div>
-            ''')
-            ui.label(
-                'Upload a ZIP file and run the complete integrity analysis'
-            ).classes('text-gray-400 text-base text-center')
-        
-        with ui.row().classes('w-full gap-6 justify-center'):
-            with ui.card().classes('p-6 rounded-2xl').style(
-                'flex: 1; max-width: 500px; background: rgba(21, 21, 42, 0.8); border: 1px solid #252540;'
-            ):
-                with ui.row().classes('items-center gap-3 mb-4'):
-                    ui.html('''<div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📁</div>''')
-                    ui.label('Folder Structure').classes('text-white font-bold text-base')
-                
-                ui.html('''
-                    <pre style="color: #9CA3AF; font-family: 'JetBrains Mono', monospace; 
-                                font-size: 0.85rem; line-height: 1.8; margin: 0;
-                                background: rgba(10, 10, 20, 0.5); padding: 16px; border-radius: 12px;
-                                border: 1px solid #252540;">
-dataset.zip
-├── images/
-│   ├── image_001.jpg
-│   └── image_002.jpg
-└── labels/
-    ├── image_001.txt
-    └── image_002.txt
-                    </pre>
-                ''')
-            
-            with ui.card().classes('p-6 rounded-2xl').style(
-                'flex: 1; max-width: 500px; background: rgba(21, 21, 42, 0.8); border: 1px solid #252540;'
-            ):
-                with ui.row().classes('items-center gap-3 mb-4'):
-                    ui.html('''<div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🏷️</div>''')
-                    ui.label('Supported Classes (YOLO Format)').classes('text-white font-bold text-base')
-                
-                with ui.column().classes('gap-2'):
-                    classes = [
-                        ('0', 'car', '#8B5CF6'),
-                        ('1', 'bicycle', '#3B82F6'),
-                        ('2', 'bus', '#10B981'),
-                        ('3', 'truck', '#EC4899'),
-                    ]
-                    for num, name, color in classes:
-                        with ui.row().classes('items-center gap-3'):
-                            ui.html(f'''
-                                <div style="width: 24px; height: 24px; border-radius: 6px;
-                                            background: {color}22; color: {color};
-                                            display: flex; align-items: center; justify-content: center;
-                                            font-weight: 700; font-size: 0.75rem;
-                                            border: 1px solid {color}44;">
-                                    {num}
-                                </div>
-                                <div style="color: #E5E7EB; font-size: 0.9rem; font-weight: 500;">
-                                    {name}
-                                </div>
-                            ''')
-        
-        with ui.card().classes('p-8 rounded-2xl w-full').style(
-            'max-width: 1050px; margin: 0 auto; background: rgba(21, 21, 42, 0.8); border: 2px dashed #3A3A5C;'
-        ):
-            with ui.column().classes('items-center gap-4 w-full'):
-                ui.html('<div style="font-size: 3rem;">📤</div>')
-                ui.label('Choose a ZIP file').classes('text-white font-bold text-lg')
-                ui.label('200MB per file • ZIP format only').classes('text-gray-500 text-sm')
-                
-                ui.upload(
-                    on_upload=lambda e: handle_upload(e),
-                    auto_upload=True,
-                    max_file_size=200 * 1024 * 1024
-                ).classes('w-full').props('accept=.zip')
-        
-        with ui.row().classes('w-full justify-center mt-4'):
-            ui.button('🚀 Run Full Analysis').classes(
-                'px-8 py-4 rounded-xl font-semibold text-base'
-            ).style(
-                'background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); color: #FFFFFF;'
-            )
-    
-    footer()
-
-
-# ============================================================
-# DATASETS PAGE (NEW)
+# DATASETS
 # ============================================================
 @ui.page('/datasets')
 def datasets():
     setup_page()
     navigation()
-    
-    with ui.column().classes('w-full px-16 py-12 gap-8'):
-        # Page Header
-        with ui.column().classes('items-center gap-3 w-full'):
-            ui.html('<div style="font-size: 3rem;">📊</div>')
-            ui.html('''
-                <div style="font-size: 2.5rem; font-weight: 900; 
-                            background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%);
-                            -webkit-background-clip: text;
-                            -webkit-text-fill-color: transparent;
-                            background-clip: text;
-                            letter-spacing: -0.03em;">
-                    Datasets
-                </div>
-            ''')
-            ui.label(
-                'Explore all datasets and their quality insights'
-            ).classes('text-gray-400 text-base text-center')
+    with ui.column().classes('w-full section-tight gap-6'):
+        ui.label('Dataset Library').classes('text-white font-bold text-4xl')
+        ui.label('Browse, verify, and manage your AI datasets.').classes('text-gray-400 text-base')
         
-        # Stats Row
-        with ui.row().classes('w-full items-center justify-between gap-4'):
-            stats = [
-                ('📊', '3', 'Total Datasets', '#8B5CF6'),
-                ('🖼️', '909', 'Total Images', '#10B981'),
-                ('⚡', '94%', 'Best Quality', '#FBBF24'),
-                ('🛡️', '88%', 'Avg Trust', '#EC4899'),
-            ]
-            for icon, value, label, color in stats:
-                with ui.card().classes('p-5 rounded-2xl flex-1').style(
-                    f'background: rgba(21, 21, 42, 0.8); border: 1px solid #252540; border-left: 3px solid {color};'
-                ):
-                    with ui.row().classes('items-center gap-3'):
-                        ui.html(f'<div style="font-size: 1.8rem;">{icon}</div>')
-                        with ui.column().classes('gap-0'):
-                            ui.label(value).classes('text-white font-bold text-2xl')
-                            ui.label(label).classes('text-gray-400 text-xs')
+        with ui.row().classes('w-full gap-3 mt-2 items-center'):
+            ui.button('+ Upload New Dataset', on_click=lambda: ui.navigate.to('/upload')).classes('px-5 py-2 rounded-lg text-sm').style('background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white;')
+            ui.input(placeholder='Search datasets...').classes('flex-1').style('background: rgba(21, 21, 42, 0.8); border: 1px solid #252540;')
         
-        # Dataset Cards
-        with ui.column().classes('w-full gap-4'):
-            datasets_data = [
-                {
-                    'name': 'Custom Dataset',
-                    'icon': '🖼️',
-                    'images': 320,
-                    'quality': 94,
-                    'trust': 88,
-                    'status': 'ACCEPT',
-                    'color': '#8B5CF6',
-                    'status_color': '#10B981',
-                },
-                {
-                    'name': 'Security Footage',
-                    'icon': '🔒',
-                    'images': 280,
-                    'quality': 87,
-                    'trust': 78,
-                    'status': 'REVIEW',
-                    'color': '#10B981',
-                    'status_color': '#FBBF24',
-                },
-                {
-                    'name': 'Industrial Objects',
-                    'icon': '🏭',
-                    'images': 309,
-                    'quality': 76,
-                    'trust': 45,
-                    'status': 'QUARANTINE',
-                    'color': '#EC4899',
-                    'status_color': '#EF4444',
-                },
-            ]
-            
-            for ds in datasets_data:
-                with ui.card().classes('p-6 rounded-2xl w-full').style(
-                    'background: rgba(21, 21, 42, 0.8); border: 1px solid #252540;'
-                ):
-                    with ui.row().classes('items-center justify-between w-full gap-4'):
-                        # Left: Icon + Name
-                        with ui.row().classes('items-center gap-4').style('flex: 1;'):
-                            ui.html(f'''
-                                <div style="width: 60px; height: 60px; border-radius: 14px; 
-                                            background: {ds['color']}22; 
-                                            display: flex; align-items: center; justify-content: center;
-                                            font-size: 1.8rem; border: 1px solid {ds['color']}44;">
-                                    {ds['icon']}
-                                </div>
-                            ''')
-                            with ui.column().classes('gap-1'):
-                                ui.label(ds['name']).classes('text-white font-bold text-lg')
-                                ui.label(f"{ds['images']} images").classes('text-gray-400 text-sm')
-                        
-                        # Middle: Quality Bar
-                        with ui.column().classes('gap-1').style('flex: 1;'):
-                            ui.label('Quality Score').classes('text-gray-400 text-xs')
-                            with ui.row().classes('items-center gap-3 w-full'):
-                                ui.html(f'''
-                                    <div style="flex: 1; background: #252540; height: 8px; border-radius: 4px; overflow: hidden;">
-                                        <div style="width: {ds['quality']}%; height: 100%; background: {ds['color']}; border-radius: 4px;"></div>
-                                    </div>
-                                    <span style="color: #FFFFFF; font-weight: 700; font-size: 0.9rem; min-width: 40px;">{ds['quality']}%</span>
-                                ''')
-                        
-                        # Middle 2: Trust Bar
-                        with ui.column().classes('gap-1').style('flex: 1;'):
-                            ui.label('Trust Score').classes('text-gray-400 text-xs')
-                            with ui.row().classes('items-center gap-3 w-full'):
-                                ui.html(f'''
-                                    <div style="flex: 1; background: #252540; height: 8px; border-radius: 4px; overflow: hidden;">
-                                        <div style="width: {ds['trust']}%; height: 100%; background: {ds['status_color']}; border-radius: 4px;"></div>
-                                    </div>
-                                    <span style="color: #FFFFFF; font-weight: 700; font-size: 0.9rem; min-width: 40px;">{ds['trust']}%</span>
-                                ''')
-                        
-                        # Right: Status Badge
-                        with ui.column().classes('items-end gap-2'):
-                            ui.html(f'''
-                                <div style="background: {ds['status_color']}; color: #0A0E1A;
-                                            padding: 6px 16px; border-radius: 50px;
-                                            font-weight: 800; font-size: 0.75rem;
-                                            letter-spacing: 0.1em;">
-                                    {ds['status']}
-                                </div>
-                            ''')
-                            ui.button('View Details').classes(
-                                'text-xs px-3 py-1 rounded-lg'
-                            ).style(
-                                'background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.3);'
-                            )
-    
+        with ui.column().classes('w-full gap-2 mt-2'):
+            for name, meta, status, color, hash_val in [
+                ('ImageNet-1K', '1.2M images · 1000 classes', 'Verified', 'green', '0x7a3f...9b2c'),
+                ('COCO-2017', '330K images · 80 categories', 'Verified', 'green', '0x4d2e...8f1a'),
+                ('OpenImages-v7', '9M images · 600 classes', 'Pending', 'yellow', '0x9c1b...3d5e'),
+                ('LAION-5B', '5B image-text pairs', 'Verified', 'green', '0x2f8a...6c4d'),
+                ('CIFAR-100', '60K images · 100 classes', 'Verified', 'green', '0x1e7b...4a9c'),
+            ]:
+                with ui.card().classes('w-full p-4').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+                    with ui.row().classes('w-full items-center justify-between'):
+                        with ui.row().classes('items-center gap-3'):
+                            ui.icon('storage').classes('text-purple-400 text-2xl')
+                            with ui.column().classes('gap-0'):
+                                ui.label(name).classes('text-white font-bold text-base')
+                                ui.label(meta).classes('text-gray-500 text-xs')
+                        with ui.row().classes('items-center gap-3'):
+                            with ui.column().classes('gap-0 items-end'):
+                                ui.label(f'Hash: {hash_val}').classes('text-gray-400 font-mono text-xs')
+                            ui.badge(status).classes(f'bg-{color}-500 text-white px-2 py-1 text-xs')
     footer()
 
 
 # ============================================================
-# UPLOAD HANDLER
+# BLOCKCHAIN
 # ============================================================
-def handle_upload(e):
-    import zipfile
-    import shutil
-    from pathlib import Path
-    
-    try:
-        upload_dir = Path('/Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/uploaded')
-        upload_dir.mkdir(parents=True, exist_ok=True)
+# ============================================================
+# UPLOAD
+# ============================================================
+@ui.page('/upload')
+def upload():
+    setup_page()
+    navigation()
+    with ui.column().classes('w-full section-tight gap-6'):
+        ui.label('Upload Dataset').classes('text-white font-bold text-4xl')
+        ui.label('Drag & drop your dataset to verify its integrity.').classes('text-gray-400 text-base')
         
-        file_path = upload_dir / e.name
+        upload_result = ui.label('').classes('text-gray-400 text-xs mt-2')
         
-        with open(file_path, 'wb') as f:
-            content = e.content.read()
-            f.write(content)
+        def handle_upload(e):
+            try:
+                if BACKEND_OK:
+                    content = e.content.read()
+                    h = FileHasher.hash_string(str(content[:1000]))
+                    upload_result.text = f'✅ Uploaded: {e.name} · Hash: {h[:32]}...'
+                else:
+                    upload_result.text = f'✅ File received: {e.name} (backend not connected)'
+            except Exception as ex:
+                upload_result.text = f'❌ Error: {ex}'
         
-        ui.notify(f'✅ Uploaded: {e.name}', type='positive')
+        with ui.card().classes('w-full p-8').style('background: rgba(21, 21, 42, 0.4); border: 2px dashed #8B5CF6; border-radius: 16px;'):
+            with ui.column().classes('items-center gap-2'):
+                ui.icon('cloud_upload').classes('text-purple-400').style('font-size: 4rem;')
+                ui.label('Drag & drop files here').classes('text-white font-bold text-xl mt-2')
+                ui.label('or click to browse · Max 10GB · CSV, JSON, Parquet, ZIP').classes('text-gray-500 text-sm mt-1')
+                ui.upload(on_upload=handle_upload, auto_upload=True).classes('mt-4')
         
-        extract_dir = upload_dir / 'extracted'
-        if extract_dir.exists():
-            shutil.rmtree(extract_dir)
-        extract_dir.mkdir(parents=True, exist_ok=True)
-        
-        with zipfile.ZipFile(file_path, 'r') as zf:
-            zf.extractall(extract_dir)
-        
-        images_count = len(list((extract_dir / 'images').glob('*'))) if (extract_dir / 'images').exists() else 0
-        labels_count = len(list((extract_dir / 'labels').glob('*'))) if (extract_dir / 'labels').exists() else 0
-        
-        ui.notify(f'✅ Extracted: {images_count} images, {labels_count} labels', type='positive')
-        
-    except Exception as ex:
-        ui.notify(f'❌ Error: {str(ex)}', type='negative')
+        with ui.card().classes('w-full p-5 mt-2').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+            ui.label('Verification Options').classes('text-white font-bold text-lg mb-3')
+            with ui.column().classes('gap-2'):
+                ui.checkbox('Blockchain verification (SHA-256)').value = True
+                ui.checkbox('Deepfake detection')
+                ui.checkbox('Data drift analysis')
+                ui.checkbox('Generate XAI report')
+    footer()
 
 
 # ============================================================
-# OTHER PAGES
+# SOLUTIONS
 # ============================================================
 @ui.page('/solutions')
 def solutions():
     setup_page()
     navigation()
-    with ui.column().classes('w-full items-center justify-center').style('min-height: 70vh;'):
-        ui.label('💡 Solutions').classes('text-4xl font-bold text-purple-400')
+    with ui.column().classes('w-full section-tight gap-6'):
+        ui.label('Our Solutions').classes('text-white font-bold text-4xl')
+        ui.label('Comprehensive AI dataset integrity solutions for modern enterprises.').classes('text-gray-400 text-base')
+        with ui.row().classes('w-full gap-4 mt-4'):
+            for icon, title, desc in [
+                ('🔐', 'Blockchain Verification', 'Immutable hash storage ensures your datasets can never be tampered with.'),
+                ('🧠', 'Explainable AI', 'Understand why your model makes decisions with SHAP and LIME integration.'),
+                ('🎥', 'Deepfake Detection', 'Advanced video analysis to detect manipulated media in real-time.'),
+                ('📊', 'Drift Detection', 'Monitor model performance and detect data drift before it affects results.'),
+                ('🔍', 'Dataset Forensics', 'Deep inspection of dataset provenance and integrity chains.'),
+                ('🤝', 'Collaboration Tools', 'Team workspaces with role-based access and audit trails.'),
+            ]:
+                with ui.card().classes('p-5').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px; min-width: 280px; flex: 1;'):
+                    ui.label(icon).classes('text-3xl mb-2')
+                    ui.label(title).classes('text-white font-bold text-base mb-2')
+                    ui.label(desc).classes('text-gray-400 text-xs').style('line-height: 1.6;')
+    footer()
 
-@ui.page('/research')
-def research():
-    setup_page()
-    navigation()
-    with ui.column().classes('w-full items-center justify-center').style('min-height: 70vh;'):
-        ui.label('🔬 Research').classes('text-4xl font-bold text-purple-400')
 
-@ui.page('/pricing')
-def pricing():
-    setup_page()
-    navigation()
-    with ui.column().classes('w-full items-center justify-center').style('min-height: 70vh;'):
-        ui.label('💰 Pricing').classes('text-4xl font-bold text-purple-400')
-
+# ============================================================
+# ABOUT
+# ============================================================
 @ui.page('/about')
 def about():
     setup_page()
     navigation()
-    with ui.column().classes('w-full items-center justify-center').style('min-height: 70vh;'):
-        ui.label('ℹ️ About').classes('text-4xl font-bold text-purple-400')
-
-@ui.page('/activity')
-def activity():
-    setup_page()
-    navigation()
-    with ui.column().classes('w-full items-center justify-center').style('min-height: 70vh;'):
-        ui.label('📋 Activity').classes('text-4xl font-bold text-purple-400')
+    with ui.column().classes('w-full section-tight gap-6'):
+        ui.label('About CV-INTEGRITY AI').classes('text-white font-bold text-4xl')
+        ui.label('Building trust in AI through verification and transparency.').classes('text-gray-400 text-base')
+        with ui.card().classes('w-full p-6 mt-2').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+            ui.label('Our Mission').classes('text-white font-bold text-xl mb-3')
+            ui.label('We believe that trust is the foundation of AI adoption. Our platform ensures that every dataset used to train AI models is verified, authentic, and tamper-proof. By combining blockchain technology, explainable AI, and advanced forensics, we help organizations build AI systems that people can trust.').classes('text-gray-300 text-sm').style('line-height: 1.8;')
+        with ui.row().classes('w-full gap-4 mt-2'):
+            for val, label in [('2024', 'Founded'), ('50K+', 'Datasets Verified'), ('1M+', 'Verifications'), ('120+', 'Enterprise Clients')]:
+                with ui.card().classes('flex-1 p-4 text-center').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+                    ui.label(val).classes('text-purple-400 font-bold text-2xl')
+                    ui.label(label).classes('text-gray-400 text-xs mt-1')
+    footer()
 
 
 # ============================================================
 # RUN
 # ============================================================
-ui.run(
-    title='CV-INTEGRITY AI',
-    host='0.0.0.0',
-    port=8520,
-    reload=False,
-    show=False,
-    dark=True
-)
+# Register blockchain page
+create_blockchain_page()
+create_trust_page()
+
+if __name__ in {"__main__", "__mp_main__"}:
+    ui.run(
+        title='CV-INTEGRITY AI',
+        port=8520,
+        reload=False,
+        show=False,
+        favicon='🧠',
+    )
