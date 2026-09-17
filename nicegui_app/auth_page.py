@@ -122,7 +122,7 @@ def create_auth_page():
                     try:
                         result = auth_manager.login(username, password)
                         
-                        if result.get('success'):
+                        if result.get('status') == 'success':
                             # Store user in session
                             app.storage.user['username'] = username
                             app.storage.user['session_token'] = result.get('session_token', '')
@@ -132,7 +132,7 @@ def create_auth_page():
                             ui.timer(0.5, lambda: ui.navigate.to('/'), once=True)
                         else:
                             with error_container:
-                                ui.label(f'❌ {result.get("error", "Login failed")}').classes('text-red-400 text-sm mb-2')
+                                ui.label(f'❌ {result.get("message", "Login failed")}').classes('text-red-400 text-sm mb-2')
                     except Exception as e:
                         with error_container:
                             ui.label(f'❌ Error: {e}').classes('text-red-400 text-sm mb-2')
@@ -166,7 +166,7 @@ def create_auth_page():
                     def register_demo():
                         try:
                             result = auth_manager.register('demo', 'demo123', 'demo@cv-integrity.ai')
-                            if result.get('success'):
+                            if result.get('status') == 'success':
                                 ui.notify('✅ Demo user created! Now click Sign In', type='positive')
                             else:
                                 ui.notify(f'ℹ️ {result.get("error", "User exists")}', type='info')
@@ -269,12 +269,12 @@ def create_auth_page():
                     try:
                         result = auth_manager.register(username, password, email or None)
                         
-                        if result.get('success'):
+                        if result.get('status') == 'success':
                             ui.notify(f'✅ Account created! Please sign in.', type='positive', position='top')
                             ui.timer(0.5, lambda: ui.navigate.to('/login'), once=True)
                         else:
                             with error_container:
-                                ui.label(f'❌ {result.get("error", "Registration failed")}').classes('text-red-400 text-sm mb-2')
+                                ui.label(f'❌ {result.get("message", "Registration failed")}').classes('text-red-400 text-sm mb-2')
                     except Exception as e:
                         with error_container:
                             ui.label(f'❌ Error: {e}').classes('text-red-400 text-sm mb-2')
