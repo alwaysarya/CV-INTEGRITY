@@ -15,6 +15,7 @@ from analytics_page import create_analytics_page  # noqa
 from video_page import create_video_page  # noqa
 from cybersecurity_page import create_cybersecurity_page  # noqa
 from robustness_page import create_robustness_page  # noqa
+from performance_page import create_performance_page  # noqa
 import sys
 from pathlib import Path
 
@@ -94,6 +95,7 @@ def navigation():
                 ('Video', '/video'),
                 ('Cyber', '/cybersecurity'),
                 ('Robust', '/robustness'),
+                ('Performance', '/performance'),
                 ('Drift', '/drift'),
                 ('Analytics', '/analytics'),
                 ('Upload', '/upload'),
@@ -369,6 +371,7 @@ create_analytics_page()
 create_video_page()
 create_cybersecurity_page()
 create_robustness_page()
+create_performance_page()
 
 
 # Serve static files (heatmaps, images, reports)
