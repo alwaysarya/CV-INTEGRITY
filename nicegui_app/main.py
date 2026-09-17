@@ -12,6 +12,7 @@ from auth_page import create_auth_page  # noqa
 from datasets_page import create_datasets_page  # noqa
 from drift_page import create_drift_page  # noqa
 from analytics_page import create_analytics_page  # noqa
+from video_page import create_video_page  # noqa
 import sys
 from pathlib import Path
 
@@ -88,6 +89,7 @@ def navigation():
                 ('Blockchain', '/blockchain'),
                 ('Trust', '/trust'),
                 ('XAI', '/xai'),
+                ('Video', '/video'),
                 ('Drift', '/drift'),
                 ('Analytics', '/analytics'),
                 ('Upload', '/upload'),
@@ -360,6 +362,7 @@ create_auth_page()
 create_datasets_page()
 create_drift_page()
 create_analytics_page()
+create_video_page()
 
 
 # Serve static files (heatmaps, images, reports)
