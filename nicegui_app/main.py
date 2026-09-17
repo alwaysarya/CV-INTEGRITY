@@ -14,6 +14,7 @@ from drift_page import create_drift_page  # noqa
 from analytics_page import create_analytics_page  # noqa
 from video_page import create_video_page  # noqa
 from cybersecurity_page import create_cybersecurity_page  # noqa
+from robustness_page import create_robustness_page  # noqa
 import sys
 from pathlib import Path
 
@@ -92,6 +93,7 @@ def navigation():
                 ('XAI', '/xai'),
                 ('Video', '/video'),
                 ('Cyber', '/cybersecurity'),
+                ('Robust', '/robustness'),
                 ('Drift', '/drift'),
                 ('Analytics', '/analytics'),
                 ('Upload', '/upload'),
@@ -366,6 +368,7 @@ create_drift_page()
 create_analytics_page()
 create_video_page()
 create_cybersecurity_page()
+create_robustness_page()
 
 
 # Serve static files (heatmaps, images, reports)
