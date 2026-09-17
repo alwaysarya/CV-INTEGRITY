@@ -154,10 +154,6 @@ def feature_cards():
             ('psychology', 'XAI Powered', 'Explainable AI', '#3B82F6', '/xai'),
             ('videocam', 'Video Analysis', 'Deepfake detection', '#10B981', '/video'),
             ('trending_up', 'Drift Detection', 'Model monitoring', '#F59E0B', '/drift'),
-            ('analytics', 'Analytics', 'Data insights', '#06B6D4', '/analytics'),
-            ('security', 'Cybersecurity', 'Attack detection', '#EF4444', '/cybersecurity'),
-            ('science', 'Robustness', 'Stress testing', '#A78BFA', '/robustness'),
-            ('speed', 'Performance', 'Model metrics', '#F472B6', '/performance'),
         ]
         for icon, title, subtitle, color, path in cards:
             with ui.card().classes('flex-1 p-4 cursor-pointer').style(
