@@ -22,5 +22,17 @@
     "active": true,
     "avatar": "O",
     "role": "contributor"
+  },
+  "demo": {
+    "username": "demo",
+    "email": "demo@cv-integrity.ai",
+    "password_hash": "af6573f79654bcf25cd92c7d8fa6a5aeb3fdf1144d04d3d0e8f4871a8b7c0b68",
+    "salt": "e6f812ae353fd9d2c06e0d79af4d2077",
+    "provider": "local",
+    "created_at": "2026-09-16T10:29:08.819662",
+    "last_login": "2026-09-16T10:29:17.921562",
+    "active": true,
+    "avatar": "D",
+    "role": "viewer"
   }
 }

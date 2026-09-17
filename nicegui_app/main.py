@@ -8,6 +8,9 @@ from blockchain_page import create_blockchain_page  # noqa
 from trust_page import create_trust_page  # noqa
 from xai_page import create_xai_page  # noqa
 from upload_page import create_upload_page  # noqa
+from auth_page import create_auth_page  # noqa
+from datasets_page import create_datasets_page  # noqa
+from drift_page import create_drift_page  # noqa
 import sys
 from pathlib import Path
 
@@ -84,6 +87,7 @@ def navigation():
                 ('Blockchain', '/blockchain'),
                 ('Trust', '/trust'),
                 ('XAI', '/xai'),
+                ('Drift', '/drift'),
                 ('Upload', '/upload'),
                 ('About', '/about'),
             ]
@@ -146,8 +150,14 @@ def hero_section():
 
 def stats_row():
     with ui.row().classes('w-full items-center justify-between gap-4 section-tight'):
-        for icon, title, subtitle, color in [('shield', 'Blockchain Secured', 'Immutable records', '#8B5CF6'), ('psychology', 'XAI Powered', 'Explainable AI', '#3B82F6'), ('videocam', 'Video Analysis', 'Deepfake detection', '#10B981'), ('trending_up', 'Drift Detection', 'Model monitoring', '#F59E0B')]:
-            with ui.card().classes('flex-1 p-4').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+        feature_cards = [
+            ('shield', 'Blockchain Secured', 'Immutable records', '#8B5CF6', '/blockchain'),
+            ('psychology', 'XAI Powered', 'Explainable AI', '#3B82F6', '/xai'),
+            ('videocam', 'Video Analysis', 'Deepfake detection', '#10B981', '/video'),
+            ('trending_up', 'Drift Detection', 'Model monitoring', '#F59E0B', '/drift'),
+        ]
+        for icon, title, subtitle, color, path in feature_cards:
+            with ui.card().classes('flex-1 p-4 cursor-pointer').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;').on('click', lambda p=path: ui.navigate.to(p)):
                 with ui.row().classes('items-center gap-3'):
                     ui.icon(icon).classes('text-2xl').style(f'color: {color};')
                     with ui.column().classes('gap-0'):
@@ -211,7 +221,7 @@ def home():
 # ============================================================
 # DATASETS
 # ============================================================
-@ui.page('/datasets')
+# [REPLACED] Old datasets route
 def datasets():
     setup_page()
     navigation()
@@ -344,6 +354,9 @@ create_blockchain_page()
 create_trust_page()
 create_xai_page()
 create_upload_page()
+create_auth_page()
+create_datasets_page()
+create_drift_page()
 
 
 # Serve static files (heatmaps, images, reports)
@@ -354,6 +367,7 @@ app.add_static_files('/datasets', str(_project_root / 'datasets'))
 
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(
+        storage_secret='cv-integrity-secret-key-2026',
         title='CV-INTEGRITY AI',
         port=8520,
         reload=False,
