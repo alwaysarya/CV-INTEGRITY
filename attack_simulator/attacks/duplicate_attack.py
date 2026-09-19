@@ -13,5 +13,6 @@ def apply_duplicate(image_path, output_path, count=3):
     return paths
 
 
-def apply(image_path, output_path):
-    return apply_duplicate(image_path, output_path)
+def apply(image_path, output_path, count=3):
+    """Default apply function with optional count."""
+    return apply_duplicate(image_path, output_path, count=count)
