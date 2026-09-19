@@ -19,6 +19,7 @@ from cybersecurity_page import create_cybersecurity_page
 from robustness_page import create_robustness_page
 from performance_page import create_performance_page
 from wallet_page import create_wallet_page
+from reports_page import create_reports_page
 from auth_page import create_auth_page
 
 
@@ -71,6 +72,7 @@ def navigation():
                 ('Blockchain', '/blockchain'),
                 ('Trust', '/trust'),
                 ('Wallet', '/wallet'),
+                ('Reports', '/reports'),
                 ('XAI', '/xai'),
                 ('Upload', '/upload'),
                 ('Datasets', '/datasets'),
@@ -292,6 +294,7 @@ create_cybersecurity_page()
 create_robustness_page()
 create_performance_page()
 create_wallet_page()
+create_reports_page()
 create_auth_page()
 
 
