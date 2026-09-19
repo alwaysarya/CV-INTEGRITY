@@ -209,6 +209,63 @@ def create_reports_page():
                             ui.label(title).classes('text-white font-bold text-sm')
                             ui.label(desc).classes('text-gray-500 text-xs mt-1')
             
+            # Coverage Statement
+            with ui.column().classes('w-full gap-4 mt-6'):
+                with ui.element('div').classes('section-title'):
+                    ui.label('📋').classes('text-xl')
+                    ui.label('Coverage Statement').classes('text-white font-bold text-lg')
+                
+                with ui.card().classes('w-full p-5').style(
+                    'background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px;'
+                ):
+                    ui.label('Supported Attack Classes').classes('text-green-400 font-bold text-sm mb-3')
+                    with ui.column().classes('gap-1 mb-4'):
+                        for attack in [
+                            'Data Poisoning (label flipping, mislabelling)',
+                            'Near-Duplicate Flooding',
+                            'Model Substitution (hash mismatch detection)',
+                            'Model Tampering (SHA-256 verification)',
+                            'Audit Log Tampering (blockchain hash chain)',
+                            'Inference Manipulation (RSA signature)',
+                            'Replay Attacks (timestamp binding)',
+                            'Trigger-based Backdoors (pattern detection)',
+                            'Out-of-Distribution Samples (statistical anomaly)',
+                            'Blur/Noise/Quality Degradation',
+                        ]:
+                            with ui.row().classes('items-center gap-2'):
+                                ui.icon('check_circle').classes('text-green-400 text-xs')
+                                ui.label(f'• {attack}').classes('text-gray-300 text-xs')
+                    
+                    ui.label('Assumptions').classes('text-amber-400 font-bold text-sm mb-3 mt-4').style('border-top: 1px solid rgba(56, 189, 248, 0.15); padding-top: 16px;')
+                    with ui.column().classes('gap-1 mb-4'):
+                        for assumption in [
+                            'Contributor metadata may be available for source-level aggregation',
+                            'SHA-256 hashing provides cryptographic integrity',
+                            'RSA-2048 signatures for authentication',
+                            'Reference baseline captured at enrollment time',
+                            'Trusted computing environment for execution',
+                        ]:
+                            with ui.row().classes('items-center gap-2'):
+                                ui.icon('info').classes('text-amber-400 text-xs')
+                                ui.label(f'• {assumption}').classes('text-gray-300 text-xs')
+                    
+                    ui.label('Limitations & Not Supported').classes('text-red-400 font-bold text-sm mb-3 mt-4').style('border-top: 1px solid rgba(56, 189, 248, 0.15); padding-top: 16px;')
+                    with ui.column().classes('gap-1'):
+                        for limitation in [
+                            'Black-box models: behavioral fingerprinting only (no param inspection)',
+                            'No retraining of contributed models (as per constraints)',
+                            'Deep backdoor trigger reconstruction not supported',
+                            'Adversarial examples generation not included',
+                            'Zero-day attacks not predictable',
+                            'Model architecture reverse engineering not supported',
+                        ]:
+                            with ui.row().classes('items-center gap-2'):
+                                ui.icon('cancel').classes('text-red-400 text-xs')
+                                ui.label(f'• {limitation}').classes('text-gray-300 text-xs')
+                    
+                    ui.label('Confidence Level: HIGH').classes('text-cyan-400 font-bold text-sm mt-4').style('border-top: 1px solid rgba(56, 189, 248, 0.15); padding-top: 16px;')
+                    ui.label('All findings include supporting evidence, SHA-256 hashes, and RSA signatures for verification.').classes('text-gray-400 text-xs mt-1')
+            
             # Actions
             with ui.row().classes('w-full gap-3 justify-center mt-6'):
                 ui.button('🔄 Refresh', on_click=lambda: ui.navigate.to('/reports')).classes(
