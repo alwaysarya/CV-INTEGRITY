@@ -10,6 +10,9 @@ from pathlib import Path
 from datetime import datetime
 
 PROJECT_ROOT = Path(__file__).parent.parent
+import sys
+sys.path.insert(0, str(PROJECT_ROOT))
+from model.fingerprint import ModelFingerprinter
 MODELS_DIR = PROJECT_ROOT / 'model' / 'saved_models'
 HISTORY_DIR = PROJECT_ROOT / 'outputs' / 'model_history'
 
@@ -302,6 +305,82 @@ def create_model_integrity_page():
                                 ui.icon(icon).classes('text-lg').style(f'color: {color};')
                                 ui.label(title).classes('text-white font-bold text-sm')
                             ui.label(desc).classes('text-gray-500 text-xs')
+            
+            # Behavioral Fingerprinting
+            with ui.column().classes('w-full gap-4 mt-6'):
+                with ui.element('div').classes('section-title'):
+                    ui.label('🧬').classes('text-xl')
+                    ui.label('Behavioral Fingerprinting').classes('text-white font-bold text-lg')
+                
+                with ui.card().classes('w-full p-6').style('background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px;'):
+                    ui.label('Reference Battery Comparison — Behavioral signatures from model metrics').classes('text-gray-400 text-sm mb-4')
+                    
+                    # Generate fingerprints
+                    fp = ModelFingerprinter()
+                    all_fps = fp.get_all_fingerprints()
+                    
+                    if not all_fps:
+                        ui.label('No baseline fingerprints available').classes('text-gray-500 text-sm')
+                    else:
+                        with ui.row().classes('w-full gap-4'):
+                            for fp_data in all_fps:
+                                model_name = fp_data['model_name']
+                                fingerprint = fp_data['fingerprint']
+                                
+                                # Color based on model
+                                if 'good' in model_name:
+                                    color = '#10B981'
+                                elif 'bad' in model_name:
+                                    color = '#F59E0B'
+                                else:
+                                    color = '#EF4444'
+                                
+                                with ui.card().classes('flex-1 p-4').style(f'background: rgba(15, 23, 42, 0.4); border: 1px solid {color}60; border-radius: 8px;'):
+                                    ui.label(model_name.upper()).classes('text-white font-bold text-sm mb-2')
+                                    
+                                    with ui.row().classes('items-center gap-2 mb-2'):
+                                        ui.icon('fingerprint').classes('text-lg').style(f'color: {color};')
+                                        ui.label('SHA-256').classes('text-gray-500 text-xs')
+                                    
+                                    ui.label(fingerprint).classes('text-xs mono break-all').style(f'color: {color};')
+                                    
+                                    # Metrics
+                                    components = fp_data.get('components', {})
+                                    ui.label('Components:').classes('text-gray-500 text-xs mt-3 mb-1')
+                                    for comp, val in components.items():
+                                        if comp in ['model_name', 'file_hash']:
+                                            continue
+                                        ui.label(f"  {comp}: {val}").classes('text-gray-400 text-xs mono')
+                        
+                        # Comparison Demo
+                        ui.label('Live Comparison (current vs baseline)').classes('text-gray-400 text-xs tracking-wider mt-6 mb-3')
+                        
+                        with ui.row().classes('w-full gap-4'):
+                            for model in ['good', 'bad', 'worst']:
+                                baseline = fp.load_baseline(model)
+                                if baseline:
+                                    result = fp.compare_with_baseline(model, baseline.get('metrics', {}))
+                                    
+                                    status = result['status']
+                                    status_colors = {
+                                        'IDENTICAL': '#10B981',
+                                        'MATCHING': '#10B981',
+                                        'MINOR_DRIFT': '#F59E0B',
+                                        'SIGNIFICANT_DRIFT': '#EF4444',
+                                        'SUBSTITUTED': '#DC2626',
+                                    }
+                                    s_color = status_colors.get(status, '#6B7280')
+                                    
+                                    with ui.card().classes('flex-1 p-4').style(f'background: rgba(15, 23, 42, 0.4); border: 1px solid {s_color}60; border-radius: 8px;'):
+                                        ui.label(model.upper()).classes('text-white font-bold text-sm mb-2')
+                                        
+                                        with ui.row().classes('items-center gap-2'):
+                                            ui.icon('check_circle' if 'IDENTICAL' in status or 'MATCHING' in status else 'warning').classes('text-lg').style(f'color: {s_color};')
+                                            ui.label(status).classes('text-xs font-bold').style(f'color: {s_color};')
+                                        
+                                        ui.label(f"Confidence: {result['confidence_percent']}%").classes('text-gray-400 text-xs mt-1')
+                                        ui.label(f"Diff: {result['max_diff_percent']}%").classes('text-gray-500 text-xs')
+                                        ui.label(result['message']).classes('text-xs mt-2').style(f'color: {s_color};')
             
             # Actions
             with ui.row().classes('w-full gap-3 justify-center mt-6'):

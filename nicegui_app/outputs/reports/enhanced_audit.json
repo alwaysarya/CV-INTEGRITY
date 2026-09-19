@@ -1,0 +1,21 @@
+{
+  "log_version": "2.0",
+  "generated_at": "2026-09-19T09:46:33.007162",
+  "setup_metadata": {
+    "captured_at": "2026-09-19T09:46:32.979398",
+    "python_version": "3.11.9",
+    "platform": "Darwin",
+    "platform_release": "25.6.0",
+    "machine": "arm64",
+    "nicegui_version": "3.16.0",
+    "setup_hash": "687093eb04df87d4450beb075e759794e95f1c158adf46bbafdadd150e036dff"
+  },
+  "total_entries": 0,
+  "chain_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "entries": [],
+  "verification": {
+    "valid": true,
+    "entries": 0,
+    "message": "Empty chain"
+  }
+}

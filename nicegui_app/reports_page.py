@@ -7,6 +7,9 @@ from nicegui import ui, app
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
+import sys
+sys.path.insert(0, str(PROJECT_ROOT))
+from blockchain.enhanced_audit import EnhancedAuditLog
 PDF_DIR = PROJECT_ROOT / 'outputs' / 'reports' / 'pdf'
 CERT_DIR = PROJECT_ROOT / 'outputs' / 'reports' / 'certificates'
 
@@ -208,6 +211,50 @@ def create_reports_page():
                                 ui.icon(icon).classes('text-lg').style(f'color: {color};')
                             ui.label(title).classes('text-white font-bold text-sm')
                             ui.label(desc).classes('text-gray-500 text-xs mt-1')
+            
+            # Enhanced Audit Log
+            with ui.column().classes('w-full gap-4 mt-6'):
+                with ui.element('div').classes('section-title'):
+                    ui.label('🔗').classes('text-xl')
+                    ui.label('Enhanced Audit Log').classes('text-white font-bold text-lg')
+                
+                with ui.card().classes('w-full p-5').style('background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px;'):
+                    ui.label('Reproducible · Hash-chained · Tamper-evident').classes('text-gray-400 text-sm mb-4')
+                    
+                    # Load or create audit
+                    log = EnhancedAuditLog()
+                    log_data = log.load()
+                    
+                    if not log_data:
+                        log.capture_setup()
+                        log.save()
+                        log_data = log.load()
+                    
+                    setup = log_data.get('setup_metadata', {}) if log_data else {}
+                    verification = log_data.get('verification', {}) if log_data else {}
+                    
+                    # Setup metadata
+                    with ui.row().classes('w-full gap-4 mb-4'):
+                        for label, value, color, icon in [
+                            ('Python', setup.get('python_version', 'N/A'), '#38BDF8', 'code'),
+                            ('Platform', setup.get('platform', 'N/A'), '#8B5CF6', 'computer'),
+                            ('NiceGUI', setup.get('nicegui_version', 'N/A'), '#10B981', 'web'),
+                            ('Chain Hash', (log_data.get('chain_hash', '')[:16] + '...') if log_data else 'N/A', '#F59E0B', 'link'),
+                        ]:
+                            with ui.column().classes('items-center gap-1 flex-1'):
+                                ui.icon(icon).classes('text-xl').style(f'color: {color};')
+                                ui.label(str(value)).classes('text-white font-bold text-sm mono')
+                                ui.label(label).classes('text-gray-500 text-xs')
+                    
+                    # Verification status
+                    is_valid = verification.get('valid', False)
+                    v_color = '#10B981' if is_valid else '#EF4444'
+                    
+                    with ui.row().classes('items-center gap-3 px-4 py-3 rounded-lg').style(f'background: {v_color}15; border: 1px solid {v_color};'):
+                        ui.icon('verified' if is_valid else 'error').classes('text-2xl').style(f'color: {v_color};')
+                        with ui.column().classes('gap-0'):
+                            ui.label('Chain Integrity: ' + ('VALID' if is_valid else 'BROKEN')).classes('font-bold').style(f'color: {v_color};')
+                            ui.label(verification.get('message', 'N/A')).classes('text-gray-400 text-xs')
             
             # Coverage Statement
             with ui.column().classes('w-full gap-4 mt-6'):
