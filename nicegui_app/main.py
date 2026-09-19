@@ -26,6 +26,8 @@ from model_integrity_page import create_model_integrity_page
 from backdoor_page import create_backdoor_page
 from contributors_page import create_contributors_page
 from replay_page import create_replay_page
+from format_support_page import create_format_support_page
+from attack_simulator_page import create_attack_simulator_page
 from auth_page import create_auth_page
 
 
@@ -86,10 +88,12 @@ def navigation():
                 ('XAI', '/xai'),
                 ('Upload', '/upload'),
                 ('Datasets', '/datasets'),
+                ('Formats', '/formats'),
                 ('Quality', '/quality'),
                 ('Drift', '/drift'),
                 ('Analytics', '/analytics'),
                 ('Video', '/video'),
+                ('Attack Sim', '/attack-simulator'),
                 ('Cyber', '/cybersecurity'),
                 ('Replay', '/replay'),
                 ('Robust', '/robustness'),
@@ -313,6 +317,8 @@ create_model_integrity_page()
 create_backdoor_page()
 create_contributors_page()
 create_replay_page()
+create_format_support_page()
+create_attack_simulator_page()
 create_auth_page()
 
 
