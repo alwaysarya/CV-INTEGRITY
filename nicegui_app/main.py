@@ -24,6 +24,8 @@ from quality_page import create_quality_page
 from collaboration_page import create_collaboration_page
 from model_integrity_page import create_model_integrity_page
 from backdoor_page import create_backdoor_page
+from contributors_page import create_contributors_page
+from replay_page import create_replay_page
 from auth_page import create_auth_page
 
 
@@ -79,6 +81,7 @@ def navigation():
                 ('Backdoor', '/backdoor'),
                 ('Wallet', '/wallet'),
                 ('Collaboration', '/collaboration'),
+                ('Contributors', '/contributors'),
                 ('Reports', '/reports'),
                 ('XAI', '/xai'),
                 ('Upload', '/upload'),
@@ -88,6 +91,7 @@ def navigation():
                 ('Analytics', '/analytics'),
                 ('Video', '/video'),
                 ('Cyber', '/cybersecurity'),
+                ('Replay', '/replay'),
                 ('Robust', '/robustness'),
                 ('Performance', '/performance'),
             ]:
@@ -307,6 +311,8 @@ create_quality_page()
 create_collaboration_page()
 create_model_integrity_page()
 create_backdoor_page()
+create_contributors_page()
+create_replay_page()
 create_auth_page()
 
 
