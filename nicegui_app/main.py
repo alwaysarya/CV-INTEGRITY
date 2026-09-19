@@ -328,6 +328,7 @@ create_auth_page()
 _project_root = Path(__file__).parent.parent
 app.add_static_files('/outputs', str(_project_root / 'outputs'))
 app.add_static_files('/datasets', str(_project_root / 'datasets'))
+app.add_static_files('/attack_simulator', str(_project_root / 'attack_simulator'))
 
 
 # ============================================================
