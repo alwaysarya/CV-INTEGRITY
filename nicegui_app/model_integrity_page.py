@@ -13,6 +13,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 import sys
 sys.path.insert(0, str(PROJECT_ROOT))
 from model.fingerprint import ModelFingerprinter
+from model.trigger_search import TriggerSearcher
 MODELS_DIR = PROJECT_ROOT / 'model' / 'saved_models'
 HISTORY_DIR = PROJECT_ROOT / 'outputs' / 'model_history'
 
@@ -381,6 +382,74 @@ def create_model_integrity_page():
                                         ui.label(f"Confidence: {result['confidence_percent']}%").classes('text-gray-400 text-xs mt-1')
                                         ui.label(f"Diff: {result['max_diff_percent']}%").classes('text-gray-500 text-xs')
                                         ui.label(result['message']).classes('text-xs mt-2').style(f'color: {s_color};')
+            
+            # Trigger Search
+            with ui.column().classes('w-full gap-4 mt-6'):
+                with ui.element('div').classes('section-title'):
+                    ui.label('🔍').classes('text-xl')
+                    ui.label('Trigger Search & Reconstruction').classes('text-white font-bold text-lg')
+                
+                with ui.card().classes('w-full p-6').style('background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px;'):
+                    ui.label('Searching for backdoor triggers via input perturbation and activation analysis').classes('text-gray-400 text-sm mb-4')
+                    
+                    # Run trigger search
+                    searcher = TriggerSearcher(model_path='yolov8n.pt')
+                    results = searcher.full_scan()
+                    
+                    # Overall status
+                    status = results.get('status', 'UNKNOWN')
+                    risk = results.get('overall_risk', 0)
+                    
+                    status_colors = {
+                        'LIKELY_CLEAN': '#10B981',
+                        'SUSPICIOUS': '#EF4444',
+                    }
+                    s_color = status_colors.get(status, '#6B7280')
+                    
+                    with ui.row().classes('items-center gap-3 px-4 py-3 rounded-lg mb-4').style(f'background: {s_color}15; border: 1px solid {s_color};'):
+                        ui.icon('check_circle' if status == 'LIKELY_CLEAN' else 'warning').classes('text-2xl').style(f'color: {s_color};')
+                        with ui.column().classes('gap-0'):
+                            ui.label(f'Status: {status}').classes('font-bold').style(f'color: {s_color};')
+                            ui.label(f'Overall Risk: {risk}').classes('text-gray-400 text-xs')
+                    
+                    # Stats
+                    with ui.row().classes('w-full gap-4 mb-4'):
+                        for label, value, color, icon in [
+                            ('Perturbations', str(results.get('perturbation_findings', 0)), '#38BDF8', 'blur_on'),
+                            ('High Severity', str(results.get('high_severity_findings', 0)), '#EF4444', 'warning'),
+                            ('Activation Anomalies', str(results.get('activation_anomalies', 0)), '#F59E0B', 'analytics'),
+                            ('Reconstruction Conf', f"{results.get('reconstruction', {}).get('confidence', 0):.2f}", '#8B5CF6', 'search'),
+                        ]:
+                            with ui.card().classes('flex-1 p-3').style(f'background: rgba(15, 23, 42, 0.4); border: 1px solid {color}40; border-radius: 8px; text-align: center;'):
+                                ui.icon(icon).classes('text-xl mb-1').style(f'color: {color};')
+                                ui.label(value).classes('text-white font-bold text-base')
+                                ui.label(label).classes('text-gray-500 text-xs')
+                    
+                    # Best trigger candidate
+                    reconstruction = results.get('reconstruction', {})
+                    best_trigger = reconstruction.get('best_trigger', {})
+                    
+                    if best_trigger:
+                        ui.label('BEST TRIGGER CANDIDATE').classes('text-gray-500 text-xs tracking-wider mt-4 mb-2')
+                        with ui.card().classes('w-full p-3').style('background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 8px;'):
+                            with ui.row().classes('w-full gap-4'):
+                                for key, value in best_trigger.items():
+                                    with ui.column().classes('items-center flex-1'):
+                                        ui.label(str(value).upper()).classes('text-purple-400 font-bold text-sm')
+                                        ui.label(key).classes('text-gray-500 text-xs')
+                    
+                    # Activation analysis
+                    activation_details = results.get('activation_details', [])
+                    if activation_details:
+                        ui.label('ACTIVATION ANALYSIS').classes('text-gray-500 text-xs tracking-wider mt-4 mb-2')
+                        for act in activation_details[:5]:
+                            act_color = '#EF4444' if act['status'] == 'ANOMALOUS' else '#10B981'
+                            with ui.row().classes('w-full items-center gap-3 py-2').style('border-bottom: 1px solid rgba(239, 68, 68, 0.1);'):
+                                ui.label(act['layer']).classes('text-gray-300 text-xs font-medium').style('width: 80px;')
+                                ui.label(f"mean: {act['mean']}").classes('text-gray-500 text-xs').style('width: 100px;')
+                                ui.label(f"std: {act['std']}").classes('text-gray-500 text-xs').style('width: 100px;')
+                                ui.label(f"anomaly: {act['anomaly_score']}").classes('text-xs font-bold').style(f'color: {act_color};')
+                                ui.html(f'<div style="background: {act_color}30; color: {act_color}; padding: 2px 8px; border-radius: 8px; font-size: 0.65rem; font-weight: 600;">{act["status"]}</div>')
             
             # Actions
             with ui.row().classes('w-full gap-3 justify-center mt-6'):

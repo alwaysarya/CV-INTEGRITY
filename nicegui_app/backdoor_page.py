@@ -9,6 +9,9 @@ from pathlib import Path
 from datetime import datetime
 
 PROJECT_ROOT = Path(__file__).parent.parent
+import sys
+sys.path.insert(0, str(PROJECT_ROOT))
+from dataset_analyzer.ood_detector import OODDetector
 REPORTS_DIR = PROJECT_ROOT / 'outputs' / 'reports'
 
 
@@ -267,6 +270,61 @@ def create_backdoor_page():
                                         ui.html(f'<div style="background: {sample["color"]}30; color: {sample["color"]}; padding: 2px 8px; border-radius: 8px; font-size: 0.65rem; font-weight: 700;">{sample["type"]}</div>')
                                     ui.label(sample['reason']).classes('text-gray-400 text-xs')
                                 ui.html(f'<div style="background: {sample["color"]}30; color: {sample["color"]}; padding: 4px 12px; border-radius: 12px; font-size: 0.7rem; font-weight: 700;">{sample["severity"]}</div>')
+            
+            # OOD Detection
+            with ui.column().classes('w-full gap-4 mt-6'):
+                with ui.element('div').classes('section-title'):
+                    ui.label('🌐').classes('text-xl')
+                    ui.label('Out-of-Distribution (OOD) Detection').classes('text-white font-bold text-lg')
+                
+                with ui.card().classes('w-full p-6').style('background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px;'):
+                    ui.label('Statistical deviation from reference distribution').classes('text-gray-400 text-sm mb-4')
+                    
+                    # Run OOD scan
+                    detector = OODDetector()
+                    scan = detector.scan_directory(str(PROJECT_ROOT / 'datasets' / 'uploaded' / 'extracted' / 'images'), max_files=50)
+                    
+                    if 'error' in scan:
+                        ui.label(f"⚠️ {scan['error']}").classes('text-gray-500 text-sm')
+                    else:
+                        total = scan.get('total_scanned', 0)
+                        ood_count = scan.get('ood_count', 0)
+                        ood_pct = scan.get('ood_percentage', 0)
+                        status = scan.get('status', 'UNKNOWN')
+                        color = scan.get('color', '#6B7280')
+                        
+                        # Status row
+                        with ui.row().classes('items-center gap-3 px-4 py-3 rounded-lg mb-4').style(f'background: {color}15; border: 1px solid {color};'):
+                            ui.icon('check_circle' if status == 'CLEAN' else 'warning').classes('text-2xl').style(f'color: {color};')
+                            with ui.column().classes('gap-0'):
+                                ui.label(f'Status: {status.replace("_", " ")}').classes('font-bold').style(f'color: {color};')
+                                ui.label(f'{ood_count} out of {total} samples are OOD ({ood_pct}%)').classes('text-gray-400 text-xs')
+                        
+                        # Stats
+                        with ui.row().classes('w-full gap-4 mb-4'):
+                            for label, value, c_color, icon in [
+                                ('Total Scanned', str(total), '#38BDF8', 'image'),
+                                ('OOD Samples', str(ood_count), '#EF4444', 'warning'),
+                                ('OOD %', f'{ood_pct}%', '#F59E0B', 'percent'),
+                                ('Reference', 'Baseline', '#10B981', 'analytics'),
+                            ]:
+                                with ui.card().classes('flex-1 p-3').style(f'background: rgba(15, 23, 42, 0.4); border: 1px solid {c_color}40; border-radius: 8px; text-align: center;'):
+                                    ui.icon(icon).classes('text-xl mb-1').style(f'color: {c_color};')
+                                    ui.label(value).classes('text-white font-bold text-base')
+                                    ui.label(label).classes('text-gray-500 text-xs')
+                        
+                        # OOD samples list
+                        samples = scan.get('samples', [])
+                        if samples:
+                            ui.label('SAMPLE ANALYSIS (Top 10)').classes('text-gray-500 text-xs tracking-wider mt-4 mb-2')
+                            for sample in samples[:10]:
+                                s_color = '#EF4444' if sample['is_ood'] else '#10B981'
+                                with ui.row().classes('w-full items-center gap-3 py-2').style('border-bottom: 1px solid rgba(59, 130, 246, 0.1);'):
+                                    ui.icon('warning' if sample['is_ood'] else 'check_circle').classes('text-sm').style(f'color: {s_color};')
+                                    ui.label(sample['image']).classes('text-gray-400 text-xs mono').style('width: 200px;')
+                                    ui.label(f"z-score: {max(sample['brightness_z'], sample['contrast_z']):.2f}").classes('text-gray-500 text-xs')
+                                    ui.label(f"ood_score: {sample['ood_score']}").classes('text-xs font-bold').style(f'color: {s_color};')
+                                    ui.html(f'<div style="background: {s_color}30; color: {s_color}; padding: 2px 8px; border-radius: 8px; font-size: 0.65rem; font-weight: 600;">{sample["severity"]}</div>')
             
             # Detection Methods
             with ui.column().classes('w-full gap-4 mt-6'):
