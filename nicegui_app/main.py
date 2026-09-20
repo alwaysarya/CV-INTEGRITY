@@ -1,6 +1,6 @@
 """
 CV-INTEGRITY AI - NiceGUI Application
-All 21 pages registered + Enhanced Balanced Home Page + How It Works
+Premium $10K-Level UI + All 21 pages registered
 """
 
 from nicegui import ui, app
@@ -34,20 +34,158 @@ from replay_page import create_replay_page
 
 
 # ============================================================
+# GLOBAL PREMIUM STYLES
+# ============================================================
+def inject_premium_styles():
+    """Inject premium global styles — grid pattern, orbs, animations."""
+    ui.add_head_html('''
+    <style>
+        /* === PREMIUM BACKGROUND GRID === */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* === GLOWING AMBIENT ORBS === */
+        .ambient-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+            animation: orb-float 20s ease-in-out infinite;
+        }
+        .ambient-orb-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.15), transparent 70%);
+            top: -200px;
+            left: -200px;
+        }
+        .ambient-orb-2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.12), transparent 70%);
+            top: 30%;
+            right: -250px;
+            animation-delay: 7s;
+        }
+        .ambient-orb-3 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1), transparent 70%);
+            bottom: -150px;
+            left: 30%;
+            animation-delay: 14s;
+        }
+        @keyframes orb-float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -30px) scale(1.05); }
+            66% { transform: translate(-30px, 30px) scale(0.95); }
+        }
+        
+        /* === ANIMATIONS === */
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes float-up {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.4), 0 0 40px rgba(56, 189, 248, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.7), 0 0 60px rgba(56, 189, 248, 0.4); }
+        }
+        @keyframes ping-dot {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        @keyframes shimmer-slide {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        @keyframes rotate-slow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* === GLASS CARDS === */
+        .q-card {
+            background: rgba(15, 23, 42, 0.55) !important;
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+            border: 1px solid rgba(56, 189, 248, 0.15) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        .q-card:hover {
+            border-color: rgba(56, 189, 248, 0.35) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 48px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        /* === TILT CARDS === */
+        .tilt-card {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        .tilt-card:hover {
+            transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateY(-4px) !important;
+        }
+        
+        /* === FLOATING PARTICLES === */
+        .floating-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float-up 6s ease-in-out infinite;
+        }
+        
+        /* === LIVE DOT === */
+        .live-dot {
+            position: relative;
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+        }
+        .live-dot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #10B981;
+            animation: ping-dot 1.5s ease-out infinite;
+        }
+    </style>
+    ''')
+
+
+# ============================================================
 # NAVIGATION
 # ============================================================
 def navigation():
-    """Grouped navigation with dropdowns."""
     with ui.row().classes('w-full items-center justify-between px-6 py-3').style(
-        'background: rgba(10, 14, 26, 0.95); border-bottom: 1px solid rgba(56, 189, 248, 0.15); position: sticky; top: 0; z-index: 100;'
+        'background: rgba(10, 14, 26, 0.95); border-bottom: 1px solid rgba(56, 189, 248, 0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px);'
     ):
         with ui.row().classes('items-center gap-3'):
-            ui.html('''
-                <div style="width: 32px; height: 32px; border-radius: 50%; 
-                            background: linear-gradient(135deg, #38BDF8, #0EA5E9); 
-                            display: flex; align-items: center; justify-content: center;
-                            font-size: 1rem;">🧠</div>
-            ''')
+            ui.html('<div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #38BDF8, #0EA5E9); display: flex; align-items: center; justify-content: center; font-size: 1rem;">🧠</div>')
             with ui.column().classes('gap-0'):
                 ui.label('CV-INTEGRITY AI').classes('text-white font-bold text-sm')
                 ui.label('AI TRUST PLATFORM').classes('text-gray-500 text-xs tracking-wider')
@@ -111,47 +249,24 @@ def navigation():
             ui.icon('notifications_none').classes('text-gray-400 cursor-pointer')
             
             with ui.row().classes('items-center gap-2'):
-                ui.html('''
-                    <div style="width: 32px; height: 32px; border-radius: 50%; 
-                                background: linear-gradient(135deg, #8B5CF6, #7C3AED); 
-                                display: flex; align-items: center; justify-content: center;
-                                color: white; font-weight: 700; font-size: 0.75rem;">AT</div>
-                ''')
+                ui.html('<div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #8B5CF6, #7C3AED); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.75rem;">AT</div>')
                 with ui.column().classes('gap-0'):
                     ui.label('Aryan Thakur').classes('text-white text-xs font-medium')
                     ui.label('Administrator').classes('text-gray-500 text-xs')
 
 
 def footer():
-    with ui.row().classes('w-full items-center justify-between px-16 py-4').style('border-top: 1px solid #252540; margin-top: 40px;'):
+    with ui.row().classes('w-full items-center justify-between px-16 py-4').style('border-top: 1px solid #252540; margin-top: 40px; position: relative; z-index: 1;'):
         ui.label('© 2026 CV-INTEGRITY AI. All rights reserved.').classes('text-gray-500 text-xs')
         ui.label('Backend: ✅ Connected').classes('text-gray-500 text-xs')
 
 
 # ============================================================
-# HERO SECTION
+# PREMIUM HERO SECTION
 # ============================================================
 def hero_section():
-    """Enhanced hero section with balanced spacing."""
     ui.add_head_html('''
     <style>
-        @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes float-up {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.4), 0 0 40px rgba(56, 189, 248, 0.2); }
-            50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.7), 0 0 60px rgba(56, 189, 248, 0.4); }
-        }
-        @keyframes ping-dot {
-            0% { transform: scale(0.8); opacity: 1; }
-            100% { transform: scale(2.5); opacity: 0; }
-        }
         .hero-gradient-text {
             background: linear-gradient(90deg, #38BDF8, #8B5CF6, #10B981, #38BDF8);
             background-size: 200% auto;
@@ -182,61 +297,35 @@ def hero_section():
             background: rgba(139, 92, 246, 0.1);
             transform: translateY(-2px);
         }
-        .floating-particle {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: float-up 6s ease-in-out infinite;
-        }
-        .live-dot {
-            position: relative;
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10B981;
-        }
-        .live-dot::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: #10B981;
-            animation: ping-dot 1.5s ease-out infinite;
-        }
         .stat-glow { transition: all 0.3s ease; }
         .stat-glow:hover { transform: scale(1.05); filter: drop-shadow(0 0 20px currentColor); }
         
         .hero-balanced {
-            padding: 60px 80px !important;
+            padding: 80px 80px !important;
             gap: 60px !important;
             max-width: 1400px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
         .hero-left { flex: 1 1 55%; max-width: 640px; }
-        .hero-right { flex: 1 1 40%; max-width: 440px; }
-        
-        @media (max-width: 1200px) {
-            .hero-balanced { padding: 40px 40px !important; gap: 40px !important; }
-        }
+        .hero-right { flex: 1 1 40%; max-width: 460px; }
     </style>
     ''')
     
     ui.add_body_html('''
     <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden;">
+        <div class="ambient-orb ambient-orb-1"></div>
+        <div class="ambient-orb ambient-orb-2"></div>
+        <div class="ambient-orb ambient-orb-3"></div>
         <div class="floating-particle" style="width: 4px; height: 4px; background: #38BDF8; top: 15%; left: 10%; opacity: 0.4; animation-delay: 0s;"></div>
         <div class="floating-particle" style="width: 6px; height: 6px; background: #8B5CF6; top: 25%; left: 85%; opacity: 0.3; animation-delay: 1s;"></div>
         <div class="floating-particle" style="width: 3px; height: 3px; background: #10B981; top: 60%; left: 15%; opacity: 0.5; animation-delay: 2s;"></div>
         <div class="floating-particle" style="width: 5px; height: 5px; background: #F59E0B; top: 70%; left: 80%; opacity: 0.3; animation-delay: 3s;"></div>
-        <div class="floating-particle" style="width: 4px; height: 4px; background: #38BDF8; top: 40%; left: 50%; opacity: 0.4; animation-delay: 4s;"></div>
-        <div class="floating-particle" style="width: 7px; height: 7px; background: #8B5CF6; top: 80%; left: 40%; opacity: 0.2; animation-delay: 5s;"></div>
     </div>
     ''')
     
-    with ui.row().classes('w-full items-center justify-center hero-balanced').style('position: relative; z-index: 1;'):
+    with ui.row().classes('w-full items-center justify-center hero-balanced'):
         with ui.column().classes('gap-6 hero-left'):
             with ui.row().classes('items-center gap-2 px-4 py-2 rounded-full').style(
                 'background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); width: fit-content; backdrop-filter: blur(10px);'
@@ -244,23 +333,23 @@ def hero_section():
                 ui.html('<div class="live-dot"></div>')
                 ui.label('AI-Powered Dataset Integrity').classes('text-purple-400 text-xs font-medium tracking-wide')
             
-            ui.label('Verify Your AI Datasets with Confidence').classes('hero-gradient-text font-bold').style('font-size: 3rem; line-height: 1.15; font-weight: 800;')
+            ui.label('Verify Your AI Datasets with Confidence').classes('hero-gradient-text font-bold').style('font-size: 3.5rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em;')
             
-            ui.label('Detect tampering, ensure authenticity, and build trust in your AI models with blockchain-verified dataset integrity.').classes('text-gray-400 text-base').style('line-height: 1.7; max-width: 520px;')
+            ui.label('Detect tampering, ensure authenticity, and build trust in your AI models with blockchain-verified dataset integrity.').classes('text-gray-400 text-lg').style('line-height: 1.7; max-width: 540px;')
             
-            with ui.row().classes('gap-3 mt-2'):
-                ui.button('Upload Dataset →', on_click=lambda: ui.navigate.to('/upload')).classes('hero-cta-primary px-6 py-3 rounded-xl font-medium text-sm')
-                ui.button('▶ Watch Demo').classes('hero-cta-secondary px-6 py-3 rounded-xl font-medium text-sm')
+            with ui.row().classes('gap-3 mt-3'):
+                ui.button('Upload Dataset →', on_click=lambda: ui.navigate.to('/upload')).classes('hero-cta-primary px-7 py-3 rounded-xl font-semibold text-sm')
+                ui.button('▶ Watch Demo').classes('hero-cta-secondary px-7 py-3 rounded-xl font-semibold text-sm')
             
-            with ui.row().classes('items-center gap-10 mt-6'):
+            with ui.row().classes('items-center gap-12 mt-8'):
                 for val, label, color in [('99.9%', 'Accuracy', '#38BDF8'), ('50K+', 'Datasets', '#8B5CF6'), ('1M+', 'Verifications', '#10B981')]:
                     with ui.column().classes('gap-0 stat-glow').style(f'color: {color};'):
-                        ui.label(val).classes('font-bold text-2xl').style(f'color: {color}; text-shadow: 0 0 20px {color}60;')
-                        ui.label(label).classes('text-gray-500 text-xs tracking-wide')
+                        ui.label(val).classes('font-bold text-3xl').style(f'color: {color}; text-shadow: 0 0 30px {color}80; letter-spacing: -0.02em;')
+                        ui.label(label).classes('text-gray-500 text-xs tracking-wide uppercase')
         
         with ui.column().classes('gap-4 hero-right'):
-            with ui.card().classes('w-full p-6').style(
-                'background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(56, 189, 248, 0.1);'
+            with ui.card().classes('w-full p-6 tilt-card').style(
+                'background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 24px; backdrop-filter: blur(30px); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 60px rgba(56, 189, 248, 0.1);'
             ):
                 with ui.row().classes('w-full items-center justify-between mb-5'):
                     with ui.row().classes('items-center gap-2'):
@@ -292,6 +381,84 @@ def hero_section():
 
 
 # ============================================================
+# LIVE ANIMATED STATS COUNTER
+# ============================================================
+def live_stats_counter():
+    """Big animated stats with count-up effect."""
+    ui.add_head_html('''
+    <style>
+        .live-stat-card {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid rgba(56, 189, 248, 0.15) !important;
+            border-radius: 20px !important;
+            padding: 32px 24px !important;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .live-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, var(--stat-color-alpha) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .live-stat-card:hover::before {
+            opacity: 1;
+        }
+        .live-stat-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--stat-color) !important;
+            box-shadow: 0 20px 60px var(--stat-color-alpha);
+        }
+        .live-stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--stat-color);
+            text-shadow: 0 0 40px var(--stat-color);
+            position: relative;
+            z-index: 1;
+        }
+        .live-stat-label {
+            color: #6B7280;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .live-stat-icon {
+            font-size: 2rem;
+            color: var(--stat-color);
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+    ''')
+    
+    with ui.row().classes('w-full section-tight gap-4 justify-center'):
+        stats = [
+            ('1M+', 'Verifications', '#38BDF8', 'verified_user'),
+            ('50K+', 'Datasets Secured', '#8B5CF6', 'storage'),
+            ('99.9%', 'Detection Accuracy', '#10B981', 'analytics'),
+            ('6', 'Blocks Mined', '#F59E0B', 'link'),
+        ]
+        for val, label, color, icon in stats:
+            with ui.card().classes('live-stat-card flex-1 tilt-card').style(f'--stat-color: {color}; --stat-color-alpha: {color}20; max-width: 280px;'):
+                ui.icon(icon).classes('live-stat-icon').style(f'color: {color};')
+                ui.label(val).classes('live-stat-value')
+                ui.label(label).classes('live-stat-label')
+
+
+# ============================================================
 # FEATURE CARDS
 # ============================================================
 def feature_cards():
@@ -307,9 +474,7 @@ def feature_cards():
             ('speed', 'Performance', 'Model metrics', '#F472B6', '/performance'),
         ]
         for icon, title, subtitle, color, path in cards:
-            with ui.card().classes('flex-1 p-3 cursor-pointer').style(
-                'background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px; transition: all 0.3s ease;'
-            ).on('click', lambda p=path: ui.navigate.to(p)):
+            with ui.card().classes('flex-1 p-3 cursor-pointer tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;').on('click', lambda p=path: ui.navigate.to(p)):
                 with ui.column().classes('items-center gap-1'):
                     ui.icon(icon).classes('text-2xl').style(f'color: {color};')
                     ui.label(title).classes('text-white font-semibold text-xs text-center')
@@ -317,96 +482,123 @@ def feature_cards():
 
 
 # ============================================================
-# HOW IT WORKS SECTION
+# HOW IT WORKS — UPGRADED
 # ============================================================
 def how_it_works():
-    """4-step process flow with animated connectors."""
     ui.add_head_html('''
     <style>
-        .step-card {
+        .step-card-upgraded {
             background: rgba(15, 23, 42, 0.6) !important;
             border: 1px solid rgba(56, 189, 248, 0.2) !important;
-            border-radius: 16px !important;
-            padding: 24px !important;
+            border-radius: 20px !important;
+            padding: 28px 20px !important;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
             position: relative;
             overflow: hidden;
+            text-align: center;
         }
-        .step-card::before {
+        .step-card-upgraded::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(180deg, #38BDF8, #8B5CF6);
-            transition: width 0.3s ease;
+            width: 100%;
+            height: 3px;
+            background: var(--step-color);
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
         }
-        .step-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(56, 189, 248, 0.5) !important;
-            box-shadow: 0 12px 40px rgba(56, 189, 248, 0.15);
+        .step-card-upgraded:hover {
+            transform: translateY(-8px);
+            border-color: var(--step-color) !important;
+            box-shadow: 0 20px 60px var(--step-color-alpha);
         }
-        .step-card:hover::before {
-            width: 6px;
+        .step-card-upgraded:hover::before {
+            opacity: 1;
         }
-        .step-number {
-            width: 48px;
-            height: 48px;
+        .step-badge-circle {
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             font-weight: 800;
             color: white;
-            box-shadow: 0 0 20px currentColor;
+            margin: 0 auto;
+            transition: all 0.4s ease;
         }
-        @keyframes dash-flow {
-            0% { background-position: 0 0; }
-            100% { background-position: 40px 0; }
+        .step-card-upgraded:hover .step-badge-circle {
+            transform: scale(1.1) rotate(5deg);
         }
-        .connector-line {
-            height: 2px;
-            background: linear-gradient(90deg, rgba(56, 189, 248, 0.6) 0%, rgba(56, 189, 248, 0.6) 50%, transparent 50%, transparent 100%);
-            background-size: 20px 100%;
-            animation: dash-flow 1s linear infinite;
+        .step-number-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid var(--step-color);
+            color: var(--step-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .connector-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 50px;
+        }
+        @keyframes gradient-slide {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        .timeline-progress {
+            height: 4px;
+            background: linear-gradient(90deg, #38BDF8, #8B5CF6, #10B981, #F59E0B, #38BDF8);
+            background-size: 200% auto;
+            animation: gradient-slide 3s linear infinite;
+            border-radius: 2px;
         }
     </style>
     ''')
     
-    with ui.column().classes('w-full section-tight gap-6'):
-        # Section header
-        with ui.column().classes('items-center gap-2 w-full mb-4'):
+    with ui.column().classes('w-full section-tight gap-8'):
+        with ui.column().classes('items-center gap-2 w-full'):
             with ui.row().classes('items-center gap-3'):
                 ui.icon('route').classes('text-cyan-400 text-3xl')
                 ui.label('How It Works').classes('text-white font-bold text-3xl')
             ui.label('Four simple steps to verify your AI datasets').classes('text-gray-400 text-sm')
         
-        # 4 steps
-        with ui.row().classes('w-full items-stretch justify-center gap-4'):
+        with ui.row().classes('w-full items-center justify-center').style('max-width: 1200px; margin: 0 auto;'):
+            ui.html('<div class="timeline-progress" style="width: 100%;"></div>')
+        
+        with ui.row().classes('w-full items-stretch justify-center').style('gap: 0; max-width: 1200px; margin: 0 auto;'):
             steps = [
                 ('1', 'Upload Dataset', 'Drag & drop your dataset file', '#38BDF8', 'cloud_upload'),
                 ('2', 'Generate Hash', 'SHA-256 cryptographic fingerprint', '#8B5CF6', 'fingerprint'),
                 ('3', 'Mine Block', 'Proof of Work on blockchain', '#10B981', 'gavel'),
                 ('4', 'Evaluate Trust', 'Weighted trust scoring', '#F59E0B', 'verified_user'),
             ]
+            
             for i, (num, title, desc, color, icon) in enumerate(steps):
-                # Card
-                with ui.card().classes('step-card flex-1').style(f'max-width: 280px;'):
-                    with ui.column().classes('gap-3'):
-                        with ui.row().classes('items-center gap-3'):
-                            ui.html(f'<div class="step-number" style="background: linear-gradient(135deg, {color}, {color}dd); color: {color};">{num}</div>')
-                            ui.icon(icon).classes('text-2xl').style(f'color: {color};')
+                with ui.card().classes('step-card-upgraded tilt-card').style(f'--step-color: {color}; --step-color-alpha: {color}40; flex: 1; max-width: 260px;'):
+                    with ui.column().classes('gap-3 items-center'):
+                        with ui.element('div').style('position: relative; display: inline-block;'):
+                            ui.html(f'<div class="step-badge-circle" style="background: linear-gradient(135deg, {color}, {color}cc); box-shadow: 0 0 30px {color}60;"><span style="font-size: 1.5rem;">{icon}</span></div>')
+                            ui.html(f'<div class="step-number-badge" style="--step-color: {color};">{num}</div>')
                         
-                        ui.label(title).classes('text-white font-bold text-base')
-                        ui.label(desc).classes('text-gray-400 text-xs').style('line-height: 1.5;')
+                        ui.label(title).classes('text-white font-bold text-base mt-2')
+                        ui.label(desc).classes('text-gray-400 text-xs').style('line-height: 1.5; max-width: 200px;')
                 
-                # Connector (between cards)
                 if i < len(steps) - 1:
-                    with ui.column().classes('items-center justify-center').style('min-width: 30px;'):
-                        ui.html('<div style="width: 30px; height: 2px; background: linear-gradient(90deg, rgba(56, 189, 248, 0.6), rgba(56, 189, 248, 0.1)); position: relative;"></div>')
-                        ui.icon('arrow_forward').classes('text-cyan-400 text-sm').style('margin-top: -6px;')
+                    with ui.column().classes('connector-arrow'):
+                        ui.icon('arrow_forward').classes('text-cyan-400 text-2xl').style('animation: pulse-glow 2s ease-in-out infinite;')
 
 
 # ============================================================
@@ -414,7 +606,7 @@ def how_it_works():
 # ============================================================
 def trust_and_insights():
     with ui.row().classes('w-full gap-6 section-tight'):
-        with ui.card().classes('flex-1 p-5').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+        with ui.card().classes('flex-1 p-5 tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
             with ui.row().classes('w-full items-center justify-between mb-4'):
                 with ui.row().classes('items-center gap-2'):
                     ui.icon('verified_user').classes('text-purple-400 text-xl')
@@ -441,7 +633,7 @@ def trust_and_insights():
                                 ui.label(title).classes('text-white text-xs font-medium')
                                 ui.label(sub).classes('text-gray-500 text-xs')
         
-        with ui.card().classes('flex-1 p-5').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+        with ui.card().classes('flex-1 p-5 tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
             with ui.row().classes('w-full items-center justify-between mb-4'):
                 with ui.row().classes('items-center gap-2'):
                     ui.icon('storage').classes('text-blue-400 text-xl')
@@ -456,16 +648,115 @@ def trust_and_insights():
 
 
 # ============================================================
+# LIVE ACTIVITY FEED
+# ============================================================
+def live_activity_feed():
+    """Real-time activity feed with timestamps."""
+    ui.add_head_html('''
+    <style>
+        .activity-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
+            padding: 14px 18px;
+            transition: all 0.3s ease;
+            border-left: 3px solid var(--activity-color);
+        }
+        .activity-item:hover {
+            background: rgba(15, 23, 42, 0.7);
+            border-left-width: 5px;
+            transform: translateX(4px);
+        }
+    </style>
+    ''')
+    
+    with ui.column().classes('w-full section-tight gap-4'):
+        with ui.element('div').classes('section-title'):
+            ui.label('📡').classes('text-xl')
+            ui.label('Live Activity Feed').classes('text-white font-bold text-lg')
+            ui.html('<div class="live-dot" style="margin-left: 8px;"></div>')
+        
+        activities = [
+            ('✅', 'ImageNet-1K verified on blockchain', '2 min ago', '#10B981', 'verified'),
+            ('🔗', 'Block #6 mined with difficulty 4', '5 min ago', '#38BDF8', 'link'),
+            ('🚨', 'Data poisoning attack detected & blocked', '12 min ago', '#EF4444', 'security'),
+            ('📤', 'good_dataset.zip uploaded (49.6 MB)', '15 min ago', '#8B5CF6', 'cloud_upload'),
+            ('🧠', 'XAI GradCAM heatmaps generated (12 images)', '28 min ago', '#F59E0B', 'psychology'),
+            ('📊', 'Trust score recalculated: 87% ACCEPTED', '1 hour ago', '#10B981', 'verified_user'),
+        ]
+        
+        with ui.column().classes('w-full gap-2'):
+            for icon, text, time, color, material_icon in activities:
+                with ui.element('div').classes('activity-item').style(f'--activity-color: {color};'):
+                    with ui.row().classes('w-full items-center justify-between'):
+                        with ui.row().classes('items-center gap-3'):
+                            ui.icon(material_icon).classes('text-xl').style(f'color: {color};')
+                            ui.label(text).classes('text-gray-300 text-sm')
+                        ui.label(time).classes('text-gray-500 text-xs')
+
+
+# ============================================================
+# TECH STACK BAND
+# ============================================================
+def tech_stack_band():
+    """Technology stack badges."""
+    with ui.column().classes('w-full section-tight gap-4'):
+        with ui.column().classes('items-center gap-2 w-full'):
+            with ui.row().classes('items-center gap-3'):
+                ui.icon('memory').classes('text-purple-400 text-2xl')
+                ui.label('Powered By').classes('text-white font-bold text-2xl')
+            ui.label('Enterprise-grade technologies').classes('text-gray-400 text-sm')
+        
+        with ui.row().classes('w-full gap-3 justify-center flex-wrap'):
+            techs = [
+                ('SHA-256', 'fingerprint', '#38BDF8'),
+                ('RSA-2048', 'key', '#8B5CF6'),
+                ('YOLOv8n', 'model_training', '#10B981'),
+                ('NiceGUI', 'web', '#F59E0B'),
+                ('Python 3.11', 'code', '#EF4444'),
+                ('Proof of Work', 'gavel', '#06B6D4'),
+            ]
+            for name, icon, color in techs:
+                with ui.card().classes('px-5 py-3 tilt-card').style(f'background: rgba(15, 23, 42, 0.5); border: 1px solid {color}40; border-radius: 12px;'):
+                    with ui.row().classes('items-center gap-2'):
+                        ui.icon(icon).classes('text-lg').style(f'color: {color};')
+                        ui.label(name).classes('text-white font-medium text-sm')
+
+
+# ============================================================
+# CTA SECTION
+# ============================================================
+def cta_section():
+    """Big call-to-action before footer."""
+    with ui.column().classes('w-full section-tight'):
+        with ui.card().classes('w-full p-10 tilt-card').style(
+            'background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(139, 92, 246, 0.1)); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 24px; position: relative; overflow: hidden;'
+        ):
+            with ui.column().classes('items-center gap-4 w-full'):
+                ui.icon('rocket_launch').classes('text-cyan-400 text-5xl')
+                ui.label('Ready to Secure Your AI Pipeline?').classes('text-white font-bold text-3xl text-center')
+                ui.label('Join 120+ enterprises already verifying their AI datasets with blockchain-grade integrity.').classes('text-gray-400 text-base text-center').style('max-width: 600px;')
+                with ui.row().classes('gap-3 mt-2'):
+                    ui.button('Get Started Free →', on_click=lambda: ui.navigate.to('/upload')).classes('hero-cta-primary px-8 py-3 rounded-xl font-semibold text-sm')
+                    ui.button('View Documentation', on_click=lambda: ui.navigate.to('/about')).classes('hero-cta-secondary px-8 py-3 rounded-xl font-semibold text-sm')
+
+
+# ============================================================
 # HOME PAGE
 # ============================================================
 @ui.page('/')
 def home():
     apply_styles(ui)
+    inject_premium_styles()
     navigation()
     hero_section()
+    live_stats_counter()
     feature_cards()
-    how_it_works()  # ← NEW SECTION
+    how_it_works()
     trust_and_insights()
+    live_activity_feed()
+    tech_stack_band()
+    cta_section()
     footer()
 
 
@@ -475,6 +766,7 @@ def home():
 @ui.page('/solutions')
 def solutions():
     apply_styles(ui)
+    inject_premium_styles()
     navigation()
     with ui.column().classes('w-full section-tight gap-6'):
         ui.label('Our Solutions').classes('text-white font-bold text-4xl')
@@ -488,7 +780,7 @@ def solutions():
                 ('🔍', 'Dataset Forensics', 'Deep inspection of dataset provenance and integrity chains.'),
                 ('🤝', 'Collaboration Tools', 'Team workspaces with role-based access and audit trails.'),
             ]:
-                with ui.card().classes('p-5').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px; min-width: 280px; flex: 1;'):
+                with ui.card().classes('p-5 tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px; min-width: 280px; flex: 1;'):
                     ui.label(icon).classes('text-3xl mb-2')
                     ui.label(title).classes('text-white font-bold text-base mb-2')
                     ui.label(desc).classes('text-gray-400 text-xs').style('line-height: 1.6;')
@@ -501,16 +793,17 @@ def solutions():
 @ui.page('/about')
 def about():
     apply_styles(ui)
+    inject_premium_styles()
     navigation()
     with ui.column().classes('w-full section-tight gap-6'):
         ui.label('About CV-INTEGRITY AI').classes('text-white font-bold text-4xl')
         ui.label('Building trust in AI through verification and transparency.').classes('text-gray-400 text-base')
-        with ui.card().classes('w-full p-6 mt-2').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+        with ui.card().classes('w-full p-6 mt-2 tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
             ui.label('Our Mission').classes('text-white font-bold text-xl mb-3')
             ui.label('We believe that trust is the foundation of AI adoption. Our platform ensures that every dataset used to train AI models is verified, authentic, and tamper-proof. By combining blockchain technology, explainable AI, and advanced forensics, we help organizations build AI systems that people can trust.').classes('text-gray-300 text-sm').style('line-height: 1.8;')
         with ui.row().classes('w-full gap-4 mt-2'):
             for val, label in [('2024', 'Founded'), ('50K+', 'Datasets Verified'), ('1M+', 'Verifications'), ('120+', 'Enterprise Clients')]:
-                with ui.card().classes('flex-1 p-4 text-center').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+                with ui.card().classes('flex-1 p-4 text-center tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
                     ui.label(val).classes('text-purple-400 font-bold text-2xl')
                     ui.label(label).classes('text-gray-400 text-xs mt-1')
     footer()
