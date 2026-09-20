@@ -3,8 +3,8 @@ NiceGUI Inference Replay Prevention Page
 Nonce + Timestamp + Sequence controls for inference records
 """
 
-from nicegui import ui
-from styles import apply_styles
+from nicegui import ui, app
+from styles import apply_styles, page_title
 import json
 import hashlib
 from pathlib import Path
@@ -25,7 +25,6 @@ def load_blockchain():
 
 
 def generate_nonce():
-    """Generate nonce from timestamp + random."""
     import random
     ts = int(datetime.utcnow().timestamp() * 1000)
     rnd = random.randint(0, 999999)
@@ -33,7 +32,6 @@ def generate_nonce():
 
 
 def compute_inference_hash(input_hash, model_hash, output_hash, nonce, timestamp, sequence):
-    """Compute cryptographic hash binding all inference fields."""
     data = {
         'input_hash': input_hash,
         'model_hash': model_hash,
@@ -50,51 +48,6 @@ def create_replay_page():
     @ui.page('/replay')
     def replay():
         apply_styles(ui)
-        ui.add_head_html('''
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-            @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-            
-            body, .q-page { 
-                font-family: 'Inter', sans-serif !important;
-                background: #0A0E1A !important; 
-            }
-            .q-page-container { padding: 0 !important; }
-            .nicegui-content { padding: 0 !important; }
-            .mono { font-family: 'JetBrains Mono', monospace !important; word-break: break-all; }
-            
-            .section-title {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 12px 0;
-                border-left: 3px solid #8B5CF6;
-                padding-left: 16px;
-                margin-bottom: 20px;
-            }
-            
-            .record-card {
-                background: rgba(15, 23, 42, 0.6) !important;
-                border: 1px solid rgba(139, 92, 246, 0.2) !important;
-                border-radius: 12px !important;
-                padding: 16px !important;
-                margin-bottom: 12px;
-            }
-            
-            .info-box {
-                background: rgba(139, 92, 246, 0.1);
-                border: 1px solid rgba(139, 92, 246, 0.3);
-                border-radius: 8px;
-                padding: 16px;
-            }
-            
-            .hash-text {
-                font-family: 'JetBrains Mono', monospace;
-                word-break: break-all;
-                font-size: 11px;
-            }
-        </style>
-        ''')
         
         # Navigation
         with ui.row().classes('w-full items-center justify-between px-6 py-3').style(
@@ -121,12 +74,7 @@ def create_replay_page():
         
         with ui.column().classes('w-full px-8 py-8 gap-6'):
             
-            # Header
-            with ui.column().classes('items-center gap-2 w-full'):
-                with ui.row().classes('items-center gap-3'):
-                    ui.icon('shield').classes('text-purple-400 text-4xl')
-                    ui.label('Inference Replay Prevention').classes('text-purple-400 font-bold text-4xl')
-                ui.label('Nonce · Timestamp · Sequence binding for tamper-evident inference records').classes('text-gray-400 text-sm')
+            page_title(ui, '🔒', 'Inference Replay Prevention', 'Nonce · Timestamp · Sequence binding for tamper-evident inference records', '#8B5CF6')
             
             # Stats
             chain = chain_data.get('chain', []) if chain_data else []
@@ -140,9 +88,7 @@ def create_replay_page():
                     ('Sequence Tracked', str(total_records), '#10B981', 'format_list_numbered'),
                     ('Replay Blocked', '5/5', '#F59E0B', 'block'),
                 ]:
-                    with ui.card().classes('p-5').style(
-                        f'background: rgba(15, 23, 42, 0.6); border: 2px solid {color}; border-radius: 12px; min-width: 180px; text-align: center;'
-                    ):
+                    with ui.card().classes('p-5').style(f'border: 2px solid {color}; border-radius: 12px; min-width: 180px; text-align: center;'):
                         ui.icon(icon).classes('text-3xl mb-2').style(f'color: {color};')
                         ui.label(value).classes('text-white font-bold text-2xl')
                         ui.label(label).classes('text-gray-500 text-xs tracking-wider mt-1')
@@ -153,7 +99,7 @@ def create_replay_page():
                     ui.label('⚡').classes('text-xl')
                     ui.label('Live Binding Demo').classes('text-white font-bold text-lg')
                 
-                with ui.card().classes('w-full p-6 info-box'):
+                with ui.card().classes('w-full p-6').style('border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px;'):
                     ui.label('Fields bound into inference hash:').classes('text-white font-bold text-sm mb-3')
                     
                     with ui.row().classes('w-full gap-4'):
@@ -170,10 +116,7 @@ def create_replay_page():
                                 ui.label(value).classes('text-xs mono').style(f'color: {color};')
                     
                     ui.label('→ SHA-256 Binding:').classes('text-white font-bold text-sm mt-4 mb-2')
-                    binding_hash = compute_inference_hash(
-                        'a1c37c7f', '5b8e3f2c', 'f2e1d0b9',
-                        generate_nonce(), datetime.utcnow().isoformat(), 42
-                    )
+                    binding_hash = compute_inference_hash('a1c37c7f', '5b8e3f2c', 'f2e1d0b9', generate_nonce(), datetime.utcnow().isoformat(), 42)
                     ui.label(binding_hash).classes('text-cyan-300 text-xs mono')
             
             # Protected Records List
@@ -193,7 +136,7 @@ def create_replay_page():
                         block_hash = block.get('hash', '')
                         ts = block.get('datetime', block.get('timestamp', ''))[:19]
                         
-                        with ui.card().classes('record-card w-full'):
+                        with ui.card().classes('w-full p-4 mb-2').style('border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 12px;'):
                             with ui.row().classes('w-full items-center justify-between mb-3'):
                                 with ui.row().classes('items-center gap-3'):
                                     ui.html(f'<div style="background: #8B5CF6; color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;">SEQ #{idx}</div>')
@@ -224,9 +167,7 @@ def create_replay_page():
                 
                 with ui.row().classes('w-full gap-4'):
                     for title, desc, detection, color, icon in scenarios:
-                        with ui.card().classes('flex-1 p-4').style(
-                            f'background: rgba(15, 23, 42, 0.6); border: 1px solid {color}40; border-radius: 12px;'
-                        ):
+                        with ui.card().classes('flex-1 p-4').style(f'border: 1px solid {color}40; border-radius: 12px;'):
                             with ui.row().classes('items-center gap-2 mb-2'):
                                 ui.icon(icon).classes('text-lg').style(f'color: {color};')
                                 ui.icon('block').classes('text-sm text-red-400')
@@ -247,9 +188,7 @@ def create_replay_page():
                         ('3', 'Sequence Tracking', 'Monotonic sequence', '#10B981'),
                         ('4', 'Hash Verification', 'Recompute + compare', '#38BDF8'),
                     ]:
-                        with ui.card().classes('flex-1 p-4').style(
-                            f'background: rgba(15, 23, 42, 0.6); border: 1px solid {color}40; border-radius: 12px;'
-                        ):
+                        with ui.card().classes('flex-1 p-4').style(f'border: 1px solid {color}40; border-radius: 12px;'):
                             with ui.row().classes('items-center gap-2 mb-2'):
                                 ui.html(f'<div style="width: 28px; height: 28px; border-radius: 50%; background: {color}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem;">{num}</div>')
                             ui.label(title).classes('text-white font-bold text-sm')
@@ -257,17 +196,12 @@ def create_replay_page():
             
             # Actions
             with ui.row().classes('w-full gap-3 justify-center mt-6'):
-                ui.button('🔄 Refresh', on_click=lambda: ui.navigate.to('/replay')).classes(
-                    'px-6 py-2 rounded-lg text-sm'
-                ).style('background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white;')
+                ui.button('🔄 Refresh', on_click=lambda: ui.navigate.to('/replay')).classes('px-6 py-2 rounded-lg text-sm').style('background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white;')
                 
-                ui.button('🔒 Cybersecurity', on_click=lambda: ui.navigate.to('/cybersecurity')).classes(
-                    'px-6 py-2 rounded-lg text-sm'
-                ).style('background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid #EF4444;')
+                ui.button('🔒 Cybersecurity', on_click=lambda: ui.navigate.to('/cybersecurity')).classes('px-6 py-2 rounded-lg text-sm').style('background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid #EF4444;')
                 
-                ui.button('⛓️ Blockchain', on_click=lambda: ui.navigate.to('/blockchain')).classes(
-                    'px-6 py-2 rounded-lg text-sm'
-                ).style('background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid #38BDF8;')
+                ui.button('⛓️ Blockchain', on_click=lambda: ui.navigate.to('/blockchain')).classes('px-6 py-2 rounded-lg text-sm').style('background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid #38BDF8;')
 
 
+# Register
 create_replay_page()

@@ -3,8 +3,8 @@ NiceGUI Format Support Page
 ONNX + COCO + PyTorch format compatibility
 """
 
-from nicegui import ui
-from styles import apply_styles
+from nicegui import ui, app
+from styles import apply_styles, page_title
 import sys
 from pathlib import Path
 
@@ -17,16 +17,6 @@ def create_format_support_page():
     @ui.page('/formats')
     def formats():
         apply_styles(ui)
-        ui.add_head_html('''
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-            body, .q-page { font-family: 'Inter', sans-serif !important; background: #0A0E1A !important; }
-            .q-page-container { padding: 0 !important; }
-            .nicegui-content { padding: 0 !important; }
-            .section-title { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-left: 3px solid #38BDF8; padding-left: 16px; margin-bottom: 20px; }
-            .format-card { background: rgba(15, 23, 42, 0.6) !important; border-radius: 12px !important; padding: 20px !important; border: 2px solid; }
-        </style>
-        ''')
         
         # Navigation
         with ui.row().classes('w-full items-center justify-between px-6 py-3').style(
@@ -50,12 +40,7 @@ def create_format_support_page():
         
         with ui.column().classes('w-full px-8 py-8 gap-6'):
             
-            # Header
-            with ui.column().classes('items-center gap-2 w-full'):
-                with ui.row().classes('items-center gap-3'):
-                    ui.icon('extension').classes('text-cyan-400 text-4xl')
-                    ui.label('Format Support').classes('text-cyan-400 font-bold text-4xl')
-                ui.label('COCO · YOLO · ONNX · PyTorch · TorchScript — Air-gapped · No cloud').classes('text-gray-400 text-sm')
+            page_title(ui, '📦', 'Format Support', 'COCO · YOLO · ONNX · PyTorch · TorchScript — Air-gapped · No cloud', '#38BDF8')
             
             # Model Formats
             with ui.column().classes('w-full gap-4 mt-2'):
@@ -71,7 +56,7 @@ def create_format_support_page():
                         ('TensorFlow', '.pb / .h5', 'Not in scope', False, '#EF4444', 'block'),
                     ]
                     for name, ext, notes, supported, color, icon in model_formats:
-                        with ui.card().classes('format-card flex-1').style(f'border-color: {color}60; max-width: 280px;'):
+                        with ui.card().classes('flex-1 p-5').style(f'border: 2px solid {color}60; border-radius: 12px; max-width: 280px;'):
                             with ui.row().classes('items-center gap-2 mb-2'):
                                 ui.icon(icon).classes('text-2xl').style(f'color: {color};')
                                 ui.label(name).classes('text-white font-bold text-base')
@@ -95,7 +80,7 @@ def create_format_support_page():
                         ('Custom', 'Adapter required', 'Not supported', False, '#EF4444', 'block'),
                     ]
                     for name, ext, notes, supported, color, icon in dataset_formats:
-                        with ui.card().classes('format-card flex-1').style(f'border-color: {color}60; max-width: 280px;'):
+                        with ui.card().classes('flex-1 p-5').style(f'border: 2px solid {color}60; border-radius: 12px; max-width: 280px;'):
                             with ui.row().classes('items-center gap-2 mb-2'):
                                 ui.icon(icon).classes('text-2xl').style(f'color: {color};')
                                 ui.label(name).classes('text-white font-bold text-base')
@@ -111,7 +96,7 @@ def create_format_support_page():
                     ui.label('⚡').classes('text-xl')
                     ui.label('Live Format Detection').classes('text-white font-bold text-lg')
                 
-                with ui.card().classes('w-full p-6').style('background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px;'):
+                with ui.card().classes('w-full p-6').style('border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px;'):
                     ui.label('Detected formats in project:').classes('text-white font-bold text-sm mb-4')
                     
                     with ui.row().classes('w-full gap-4'):
@@ -138,4 +123,5 @@ def create_format_support_page():
                 ui.button('📄 Reports', on_click=lambda: ui.navigate.to('/reports')).classes('px-6 py-2 rounded-lg text-sm').style('background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid #10B981;')
 
 
+# Register
 create_format_support_page()

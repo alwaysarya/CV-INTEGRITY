@@ -4,13 +4,11 @@ Real blockchain data from outputs/reports/blockchain.json
 """
 
 from nicegui import ui, app
-from styles import apply_styles
+from styles import apply_styles, page_title
 import json
-import sys
 from pathlib import Path
 from datetime import datetime
 
-# Project root
 PROJECT_ROOT = Path(__file__).parent.parent
 BLOCKCHAIN_FILE = PROJECT_ROOT / 'outputs' / 'reports' / 'blockchain.json'
 
@@ -46,7 +44,6 @@ def validate_chain(data):
         if current['previous_hash'] != prev['hash']:
             return False, f"Block {i} broken link"
         
-        # Recalculate hash
         block_str = json.dumps({
             'index': current['index'],
             'timestamp': current['timestamp'],
@@ -62,108 +59,50 @@ def validate_chain(data):
     return True, "Chain is valid"
 
 
-# ============================================================
-# PAGE STYLES
-# ============================================================
-
-def setup_blockchain_styles():
-    ui.add_head_html('''
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-        .mono { font-family: 'JetBrains Mono', monospace !important; }
-        .block-card {
-            background: rgba(15, 23, 42, 0.6) !important;
-            border: 1px solid rgba(56, 189, 248, 0.15) !important;
-            border-radius: 12px !important;
-            padding: 0 !important;
-            margin-bottom: 16px !important;
-            overflow: hidden !important;
-        }
-        .block-header {
-            background: rgba(30, 41, 59, 0.7) !important;
-            padding: 12px 16px !important;
-            border-bottom: 1px solid rgba(56, 189, 248, 0.15) !important;
-        }
-        .block-body {
-            padding: 16px !important;
-        }
-        .stat-card {
-            background: rgba(15, 23, 42, 0.6) !important;
-            border-radius: 12px !important;
-            padding: 20px !important;
-            text-align: center !important;
-            border: 2px solid !important;
-        }
-        .data-box {
-            background: rgba(0,0,0,0.4) !important;
-            padding: 12px !important;
-            border-radius: 6px !important;
-            color: #94A3B8 !important;
-            font-family: 'JetBrains Mono', monospace !important;
-            font-size: 11px !important;
-            white-space: pre-wrap !important;
-            overflow-x: auto !important;
-        }
-    </style>
-    ''')
-
-
-# ============================================================
-# BLOCKCHAIN PAGE
-# ============================================================
-
 def create_blockchain_page():
-    """Create the blockchain visualization page."""
     
     @ui.page('/blockchain')
     def blockchain():
-        setup_blockchain_styles()
         apply_styles(ui)
         
-        # Body background
-        ui.add_head_html('''
-        <style>
-            body, .q-page { background: #0A0E1A !important; }
-            .q-page-container { padding: 0 !important; }
-        </style>
-        ''')
-        
-        # Navigation (simple)
+        # Navigation
         with ui.row().classes('w-full items-center justify-between px-6 py-3').style(
-            'background: rgba(10, 14, 26, 0.95); border-bottom: 1px solid rgba(56, 189, 248, 0.15);'
+            'background: rgba(10, 14, 26, 0.95); border-bottom: 1px solid rgba(56, 189, 248, 0.15); position: sticky; top: 0; z-index: 100;'
         ):
             with ui.row().classes('items-center gap-3'):
                 ui.html('<div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #38BDF8, #0EA5E9); display: flex; align-items: center; justify-content: center; font-size: 1rem;">🧠</div>')
                 ui.label('CV-INTEGRITY AI').classes('text-white font-bold text-sm')
             
             with ui.row().classes('items-center gap-1'):
-                for label, path in [('Home', '/'), ('Blockchain', '/blockchain'), ('Upload', '/upload')]:
+                for label, path in [
+                    ('Home', '/'),
+                    ('Blockchain', '/blockchain'),
+                    ('Trust', '/trust'),
+                    ('XAI', '/xai'),
+                    ('Upload', '/upload'),
+                ]:
+                    active = path == '/blockchain'
                     ui.button(label, on_click=lambda p=path: ui.navigate.to(p)).props('flat no-caps').classes(
-                        'text-gray-400 text-sm'
+                        'text-white' if active else 'text-gray-400'
                     )
-        
-        # Main content
-        with ui.column().classes('w-full px-8 py-8 gap-6'):
-            # Header
-            with ui.column().classes('items-center gap-2 w-full'):
-                with ui.row().classes('items-center gap-3'):
-                    ui.icon('link').classes('text-cyan-400 text-4xl')
-                    ui.label('Blockchain Integrity').classes('text-cyan-400 font-bold text-3xl')
-                ui.label('Immutable audit trail with SHA-256 hashing').classes('text-gray-400 text-sm')
             
-            # Load data
-            data = load_blockchain()
+            with ui.row().classes('items-center gap-3'):
+                ui.icon('notifications_none').classes('text-gray-400')
+                ui.html('<div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #38BDF8, #0EA5E9); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.75rem;">AT</div>')
+        
+        # Load data
+        data = load_blockchain()
+        
+        with ui.column().classes('w-full px-8 py-8 gap-6'):
+            
+            page_title(ui, '🔗', 'Blockchain Integrity', 'Immutable audit trail with SHA-256 hashing', '#8B5CF6')
             
             if not data:
-                # Empty state
-                with ui.card().classes('w-full p-8 mt-4').style(
-                    'background: rgba(15, 23, 42, 0.6); border: 2px dashed #F59E0B; border-radius: 12px;'
-                ):
+                with ui.card().classes('w-full p-12').style('border: 2px dashed #F59E0B; border-radius: 12px;'):
                     with ui.column().classes('items-center gap-3'):
                         ui.icon('info').classes('text-amber-400 text-5xl')
                         ui.label('No Blockchain Data').classes('text-white font-bold text-xl')
                         ui.label(f'Expected: {BLOCKCHAIN_FILE}').classes('text-gray-500 text-xs mono')
-                        ui.label('Run phase9_integration.py to create blockchain').classes('text-gray-400 text-sm')
                 return
             
             # Stats
@@ -172,51 +111,40 @@ def create_blockchain_page():
             difficulty = data.get('difficulty', 0)
             
             with ui.row().classes('w-full gap-4 justify-center'):
-                # Total blocks
-                with ui.card().classes('stat-card').style('border-color: #10B981; min-width: 200px;'):
+                with ui.card().classes('p-5').style('border: 2px solid #10B981; border-radius: 12px; min-width: 200px; text-align: center;'):
                     ui.icon('inventory_2').classes('text-4xl text-amber-400 mb-2')
                     ui.label(str(len(chain))).classes('text-white font-bold text-4xl')
                     ui.label('TOTAL BLOCKS').classes('text-gray-500 text-xs tracking-wider mt-1')
                 
-                # Status
-                with ui.card().classes('stat-card').style(f'border-color: {"#10B981" if is_valid else "#EF4444"}; min-width: 200px;'):
+                with ui.card().classes('p-5').style(f'border: 2px solid {"#10B981" if is_valid else "#EF4444"}; border-radius: 12px; min-width: 200px; text-align: center;'):
                     ui.icon('verified' if is_valid else 'error').classes(f'text-4xl {"text-green-400" if is_valid else "text-red-400"} mb-2')
                     ui.label('VALID' if is_valid else 'INVALID').classes(f'font-bold text-3xl {"text-green-400" if is_valid else "text-red-400"}')
                     ui.label('CHAIN STATUS').classes('text-gray-500 text-xs tracking-wider mt-1')
                 
-                # Difficulty
-                with ui.card().classes('stat-card').style('border-color: #8B5CF6; min-width: 200px;'):
+                with ui.card().classes('p-5').style('border: 2px solid #8B5CF6; border-radius: 12px; min-width: 200px; text-align: center;'):
                     ui.icon('settings').classes('text-4xl text-purple-400 mb-2')
                     ui.label(str(difficulty)).classes('text-white font-bold text-4xl')
                     ui.label('DIFFICULTY').classes('text-gray-500 text-xs tracking-wider mt-1')
                 
-                # Hash algo
-                with ui.card().classes('stat-card').style('border-color: #F59E0B; min-width: 200px;'):
+                with ui.card().classes('p-5').style('border: 2px solid #F59E0B; border-radius: 12px; min-width: 200px; text-align: center;'):
                     ui.icon('lock').classes('text-4xl text-amber-400 mb-2')
                     ui.label('SHA-256').classes('text-amber-400 font-bold text-xl')
                     ui.label('HASH ALGO').classes('text-gray-500 text-xs tracking-wider mt-1')
             
             # Chain section
-            with ui.card().classes('w-full p-6').style(
-                'background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px;'
-            ):
+            with ui.card().classes('w-full p-6').style('border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px;'):
                 with ui.row().classes('items-center gap-3 mb-4'):
                     ui.icon('link').classes('text-cyan-400 text-2xl')
                     ui.label('Blockchain Chain').classes('text-cyan-400 font-bold text-xl')
                 
-                # Render each block
                 for block in chain:
                     render_block(block)
             
             # Actions
             with ui.row().classes('w-full gap-3 justify-center mt-4'):
-                ui.button('🔄 Refresh', on_click=lambda: ui.navigate.to('/blockchain')).classes(
-                    'px-6 py-2 rounded-lg text-sm'
-                ).style('background: linear-gradient(135deg, #38BDF8, #0EA5E9); color: white;')
+                ui.button('🔄 Refresh', on_click=lambda: ui.navigate.to('/blockchain')).classes('px-6 py-2 rounded-lg text-sm').style('background: linear-gradient(135deg, #38BDF8, #0EA5E9); color: white;')
                 
-                ui.button('✅ Verify Chain', on_click=lambda: ui.notify(msg, type='positive' if is_valid else 'negative')).classes(
-                    'px-6 py-2 rounded-lg text-sm'
-                ).style('background: rgba(16, 185, 129, 0.2); color: #10B981; border: 1px solid #10B981;')
+                ui.button('✅ Verify Chain', on_click=lambda: ui.notify(msg, type='positive' if is_valid else 'negative')).classes('px-6 py-2 rounded-lg text-sm').style('background: rgba(16, 185, 129, 0.2); color: #10B981; border: 1px solid #10B981;')
 
 
 def render_block(block):
@@ -229,16 +157,15 @@ def render_block(block):
     data = block.get('data', {})
     action = data.get('action', 'UNKNOWN') if isinstance(data, dict) else 'UNKNOWN'
     
-    with ui.card().classes('block-card w-full'):
+    with ui.card().classes('w-full p-0 mb-3').style('border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px; overflow: hidden;'):
         # Header
-        with ui.row().classes('block-header items-center gap-2 w-full'):
+        with ui.row().classes('w-full items-center gap-2 px-4 py-3').style('background: rgba(30, 41, 59, 0.7); border-bottom: 1px solid rgba(56, 189, 248, 0.15);'):
             ui.icon('inventory_2').classes('text-cyan-400 text-sm')
             ui.label(f'Block #{idx} — {action}').classes('text-cyan-300 text-sm font-medium mono')
             ui.label(f'— {str(ts)[:19]}').classes('text-gray-500 text-xs mono')
         
         # Body
-        with ui.row().classes('block-body w-full gap-6'):
-            # Left
+        with ui.row().classes('w-full gap-6 p-4'):
             with ui.column().classes('gap-3').style('flex: 1;'):
                 with ui.column().classes('gap-0'):
                     ui.label('INDEX').classes('text-gray-500 text-xs tracking-wider')
@@ -252,7 +179,6 @@ def render_block(block):
                     ui.label('🔢  NONCE').classes('text-gray-500 text-xs tracking-wider')
                     ui.label(f'{nonce:,}').classes('text-white text-sm mono')
             
-            # Right
             with ui.column().classes('gap-3').style('flex: 1;'):
                 with ui.column().classes('gap-0'):
                     ui.label('🔒  BLOCK HASH').classes('text-gray-500 text-xs tracking-wider')
@@ -264,17 +190,14 @@ def render_block(block):
         
         # Data
         if data:
-            with ui.column().classes('block-body gap-2 w-full').style('padding-top: 0 !important;'):
+            with ui.column().classes('w-full gap-2 px-4 pb-4'):
                 with ui.row().classes('items-center gap-2'):
                     ui.icon('description').classes('text-gray-500 text-sm')
                     ui.label('DATA').classes('text-gray-500 text-xs tracking-wider')
                 
                 data_str = json.dumps(data, indent=2, default=str)
-                ui.label(data_str).classes('data-box w-full')
+                ui.label(data_str).classes('w-full p-3 rounded-lg text-xs mono').style('background: rgba(0,0,0,0.4); color: #94A3B8; white-space: pre-wrap; overflow-x: auto;')
 
 
-# ============================================================
-# AUTO-REGISTER
-# ============================================================
-
+# Register
 create_blockchain_page()

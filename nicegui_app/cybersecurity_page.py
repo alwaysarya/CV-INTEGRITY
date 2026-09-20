@@ -3,8 +3,8 @@ NiceGUI Cybersecurity Page
 Real attack data from outputs/reports/cyber_attacks.json
 """
 
-from nicegui import ui
-from styles import apply_styles
+from nicegui import ui, app
+from styles import apply_styles, page_title
 import json
 from pathlib import Path
 from datetime import datetime
@@ -39,38 +39,6 @@ def create_cybersecurity_page():
     @ui.page('/cybersecurity')
     def cybersecurity():
         apply_styles(ui)
-        ui.add_head_html('''
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-            @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-            
-            body, .q-page { 
-                font-family: 'Inter', sans-serif !important;
-                background: #0A0E1A !important; 
-            }
-            .q-page-container { padding: 0 !important; }
-            .nicegui-content { padding: 0 !important; }
-            .mono { font-family: 'JetBrains Mono', monospace !important; word-break: break-all; }
-            
-            .section-title {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 12px 0;
-                border-left: 3px solid #EF4444;
-                padding-left: 16px;
-                margin-bottom: 20px;
-            }
-            
-            .attack-card {
-                background: rgba(15, 23, 42, 0.6) !important;
-                border-radius: 12px !important;
-                padding: 20px !important;
-                border-left: 4px solid;
-                margin-bottom: 12px;
-            }
-        </style>
-        ''')
         
         # Navigation
         with ui.row().classes('w-full items-center justify-between px-6 py-3').style(
@@ -82,34 +50,26 @@ def create_cybersecurity_page():
             
             with ui.row().classes('items-center gap-1'):
                 for label, path in [
-                    ('Home', '/'), 
-                    ('Datasets', '/datasets'), 
+                    ('Home', '/'),
                     ('Blockchain', '/blockchain'),
                     ('Trust', '/trust'),
-                    ('XAI', '/xai'),
-                    ('Video', '/video'),
                     ('Cyber', '/cybersecurity'),
+                    ('Backdoor', '/backdoor'),
                 ]:
                     active = path == '/cybersecurity'
                     ui.button(label, on_click=lambda p=path: ui.navigate.to(p)).props('flat no-caps').classes(
                         'text-white' if active else 'text-gray-400'
                     )
         
+        # Load data
         data = load_attacks()
         
         with ui.column().classes('w-full px-8 py-8 gap-6'):
             
-            # Header
-            with ui.column().classes('items-center gap-2 w-full'):
-                with ui.row().classes('items-center gap-3'):
-                    ui.icon('security').classes('text-red-400 text-4xl')
-                    ui.label('Cybersecurity Monitor').classes('text-red-400 font-bold text-4xl')
-                ui.label('Attack detection · Threat analysis · Security response').classes('text-gray-400 text-sm')
+            page_title(ui, '🛡️', 'Cybersecurity Monitor', 'Attack detection · Threat analysis · Security response', '#EF4444')
             
             if not data:
-                with ui.card().classes('w-full p-12').style(
-                    'background: rgba(15, 23, 42, 0.4); border: 2px dashed #EF4444; border-radius: 12px;'
-                ):
+                with ui.card().classes('w-full p-12').style('border: 2px dashed #EF4444; border-radius: 12px;'):
                     with ui.column().classes('items-center gap-3'):
                         ui.icon('security').classes('text-gray-500 text-5xl')
                         ui.label('No attack data found').classes('text-gray-400 text-lg')
@@ -132,9 +92,7 @@ def create_cybersecurity_page():
                     ('Detection Rate', f'{rate:.0f}%', '#10B981', 'verified'),
                     ('Critical', str(critical), '#DC2626', 'error'),
                 ]:
-                    with ui.card().classes('p-5').style(
-                        f'background: rgba(15, 23, 42, 0.6); border: 2px solid {color}; border-radius: 12px; min-width: 180px; text-align: center;'
-                    ):
+                    with ui.card().classes('p-5').style(f'border: 2px solid {color}; border-radius: 12px; min-width: 180px; text-align: center;'):
                         ui.icon(icon).classes('text-3xl mb-2').style(f'color: {color};')
                         ui.label(value).classes('text-white font-bold text-3xl')
                         ui.label(label).classes('text-gray-500 text-xs tracking-wider mt-1')
@@ -152,9 +110,7 @@ def create_cybersecurity_page():
                         ('MEDIUM', medium, '#3B82F6'),
                         ('LOW', 0, '#10B981'),
                     ]:
-                        with ui.card().classes('flex-1 p-5').style(
-                            f'background: rgba(15, 23, 42, 0.6); border: 2px solid {color}; border-radius: 12px; text-align: center;'
-                        ):
+                        with ui.card().classes('flex-1 p-5').style(f'border: 2px solid {color}; border-radius: 12px; text-align: center;'):
                             ui.label(label).classes('text-xs font-bold tracking-wider mb-2').style(f'color: {color};')
                             ui.label(str(count)).classes('text-white font-bold text-4xl')
                             ui.label('attacks').classes('text-gray-500 text-xs')
@@ -170,8 +126,7 @@ def create_cybersecurity_page():
                     colors = {'CRITICAL': '#DC2626', 'HIGH': '#F59E0B', 'MEDIUM': '#3B82F6'}
                     color = colors.get(severity, '#6B7280')
                     
-                    with ui.card().classes('attack-card w-full').style(f'border-left-color: {color};'):
-                        # Header
+                    with ui.card().classes('w-full p-5').style(f'border-left: 4px solid {color}; border-radius: 12px;'):
                         with ui.row().classes('w-full items-center justify-between mb-3'):
                             with ui.row().classes('items-center gap-3'):
                                 ui.html(f'<div style="background: {color}; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;">{attack.get("id", "N/A")}</div>')
@@ -185,9 +140,7 @@ def create_cybersecurity_page():
                                     ui.icon('check_circle').classes('text-green-400 text-lg')
                                     ui.label('DETECTED').classes('text-green-400 text-xs font-bold')
                         
-                        # Detection details
                         with ui.row().classes('w-full gap-6 mt-3 pt-3').style('border-top: 1px solid rgba(239, 68, 68, 0.15);'):
-                            # Detection method
                             with ui.column().classes('gap-0 flex-1'):
                                 ui.label('Detection Method').classes('text-gray-500 text-xs tracking-wider mb-1')
                                 methods = attack.get('detection_methods', [attack.get('detection_method', 'N/A')])
@@ -196,7 +149,6 @@ def create_cybersecurity_page():
                                 for m in methods:
                                     ui.label(f'• {m}').classes('text-gray-300 text-xs')
                             
-                            # Hashes (if present)
                             if attack.get('original_hash'):
                                 with ui.column().classes('gap-0 flex-1'):
                                     ui.label('Original Hash').classes('text-gray-500 text-xs tracking-wider mb-1')
@@ -207,7 +159,6 @@ def create_cybersecurity_page():
                                     ui.label('Tampered Hash').classes('text-red-400 text-xs tracking-wider mb-1')
                                     ui.label(attack.get('tampered_hash', '')[:48] + '...').classes('text-red-300 text-xs mono')
                             
-                            # Special cases
                             if attack.get('original_decision'):
                                 with ui.column().classes('gap-0 flex-1'):
                                     ui.label('Decision Change').classes('text-gray-500 text-xs tracking-wider mb-1')
@@ -219,7 +170,6 @@ def create_cybersecurity_page():
                                     ui.label(f'Old: {attack.get("old_timestamp", "")[:10]}').classes('text-gray-400 text-xs')
                                     ui.label(f'New: {attack.get("new_timestamp", "")[:10]}').classes('text-red-300 text-xs')
                         
-                        # Timestamp
                         with ui.row().classes('w-full justify-end mt-2'):
                             ts = attack.get('timestamp', '')
                             if ts:
@@ -238,9 +188,7 @@ def create_cybersecurity_page():
                         ('3', 'Blockchain', 'Immutable audit trail', '#10B981', 'link'),
                         ('4', 'Timestamp Binding', 'Prevents replay attacks', '#F59E0B', 'schedule'),
                     ]:
-                        with ui.card().classes('flex-1 p-4').style(
-                            f'background: rgba(15, 23, 42, 0.6); border: 1px solid {color}40; border-radius: 12px;'
-                        ):
+                        with ui.card().classes('flex-1 p-4').style(f'border: 1px solid {color}40; border-radius: 12px;'):
                             with ui.row().classes('items-center gap-2 mb-2'):
                                 ui.html(f'<div style="width: 28px; height: 28px; border-radius: 50%; background: {color}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem;">{num}</div>')
                                 ui.icon(icon).classes('text-lg').style(f'color: {color};')
@@ -249,17 +197,11 @@ def create_cybersecurity_page():
             
             # Actions
             with ui.row().classes('w-full gap-3 justify-center mt-6'):
-                ui.button('🔄 Refresh', on_click=lambda: ui.navigate.to('/cybersecurity')).classes(
-                    'px-6 py-2 rounded-lg text-sm'
-                ).style('background: linear-gradient(135deg, #EF4444, #DC2626); color: white;')
+                ui.button('🔄 Refresh', on_click=lambda: ui.navigate.to('/cybersecurity')).classes('px-6 py-2 rounded-lg text-sm').style('background: linear-gradient(135deg, #EF4444, #DC2626); color: white;')
                 
-                ui.button('⛓️ Blockchain', on_click=lambda: ui.navigate.to('/blockchain')).classes(
-                    'px-6 py-2 rounded-lg text-sm'
-                ).style('background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid #8B5CF6;')
+                ui.button('⛓️ Blockchain', on_click=lambda: ui.navigate.to('/blockchain')).classes('px-6 py-2 rounded-lg text-sm').style('background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid #8B5CF6;')
                 
-                ui.button('📊 Analytics', on_click=lambda: ui.navigate.to('/analytics')).classes(
-                    'px-6 py-2 rounded-lg text-sm'
-                ).style('background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid #38BDF8;')
+                ui.button('📊 Analytics', on_click=lambda: ui.navigate.to('/analytics')).classes('px-6 py-2 rounded-lg text-sm').style('background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid #38BDF8;')
 
 
 # Register
