@@ -1,6 +1,6 @@
 """
 CV-INTEGRITY AI - NiceGUI Application
-All 21 pages registered + Enhanced Balanced Home Page
+All 21 pages registered + Enhanced Balanced Home Page + How It Works
 """
 
 from nicegui import ui, app
@@ -41,7 +41,6 @@ def navigation():
     with ui.row().classes('w-full items-center justify-between px-6 py-3').style(
         'background: rgba(10, 14, 26, 0.95); border-bottom: 1px solid rgba(56, 189, 248, 0.15); position: sticky; top: 0; z-index: 100;'
     ):
-        # Left: Logo
         with ui.row().classes('items-center gap-3'):
             ui.html('''
                 <div style="width: 32px; height: 32px; border-radius: 50%; 
@@ -53,7 +52,6 @@ def navigation():
                 ui.label('CV-INTEGRITY AI').classes('text-white font-bold text-sm')
                 ui.label('AI TRUST PLATFORM').classes('text-gray-500 text-xs tracking-wider')
         
-        # Center: Grouped nav
         with ui.row().classes('items-center gap-2'):
             ui.button('Home', on_click=lambda: ui.navigate.to('/')).props('flat no-caps dense').classes('text-gray-300 text-xs')
             
@@ -95,7 +93,6 @@ def navigation():
             
             ui.button('About', on_click=lambda: ui.navigate.to('/about')).props('flat no-caps dense').classes('text-gray-300 text-xs')
         
-        # Right: Search + User
         with ui.row().classes('items-center gap-3'):
             with ui.row().classes('items-center gap-2 px-3 py-1 rounded-lg').style('background: rgba(21, 21, 42, 0.8); border: 1px solid #252540; width: 220px;'):
                 ui.icon('search').classes('text-gray-500 text-sm')
@@ -132,7 +129,7 @@ def footer():
 
 
 # ============================================================
-# ENHANCED HERO SECTION — BALANCED LAYOUT
+# HERO SECTION
 # ============================================================
 def hero_section():
     """Enhanced hero section with balanced spacing."""
@@ -224,8 +221,6 @@ def hero_section():
         
         @media (max-width: 1200px) {
             .hero-balanced { padding: 40px 40px !important; gap: 40px !important; }
-            .hero-left { max-width: 100%; }
-            .hero-right { max-width: 100%; }
         }
     </style>
     ''')
@@ -242,7 +237,6 @@ def hero_section():
     ''')
     
     with ui.row().classes('w-full items-center justify-center hero-balanced').style('position: relative; z-index: 1;'):
-        # LEFT: Main content
         with ui.column().classes('gap-6 hero-left'):
             with ui.row().classes('items-center gap-2 px-4 py-2 rounded-full').style(
                 'background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); width: fit-content; backdrop-filter: blur(10px);'
@@ -264,7 +258,6 @@ def hero_section():
                         ui.label(val).classes('font-bold text-2xl').style(f'color: {color}; text-shadow: 0 0 20px {color}60;')
                         ui.label(label).classes('text-gray-500 text-xs tracking-wide')
         
-        # RIGHT: Verification card
         with ui.column().classes('gap-4 hero-right'):
             with ui.card().classes('w-full p-6').style(
                 'background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(56, 189, 248, 0.1);'
@@ -324,6 +317,99 @@ def feature_cards():
 
 
 # ============================================================
+# HOW IT WORKS SECTION
+# ============================================================
+def how_it_works():
+    """4-step process flow with animated connectors."""
+    ui.add_head_html('''
+    <style>
+        .step-card {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid rgba(56, 189, 248, 0.2) !important;
+            border-radius: 16px !important;
+            padding: 24px !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #38BDF8, #8B5CF6);
+            transition: width 0.3s ease;
+        }
+        .step-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(56, 189, 248, 0.5) !important;
+            box-shadow: 0 12px 40px rgba(56, 189, 248, 0.15);
+        }
+        .step-card:hover::before {
+            width: 6px;
+        }
+        .step-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 0 20px currentColor;
+        }
+        @keyframes dash-flow {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 0; }
+        }
+        .connector-line {
+            height: 2px;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.6) 0%, rgba(56, 189, 248, 0.6) 50%, transparent 50%, transparent 100%);
+            background-size: 20px 100%;
+            animation: dash-flow 1s linear infinite;
+        }
+    </style>
+    ''')
+    
+    with ui.column().classes('w-full section-tight gap-6'):
+        # Section header
+        with ui.column().classes('items-center gap-2 w-full mb-4'):
+            with ui.row().classes('items-center gap-3'):
+                ui.icon('route').classes('text-cyan-400 text-3xl')
+                ui.label('How It Works').classes('text-white font-bold text-3xl')
+            ui.label('Four simple steps to verify your AI datasets').classes('text-gray-400 text-sm')
+        
+        # 4 steps
+        with ui.row().classes('w-full items-stretch justify-center gap-4'):
+            steps = [
+                ('1', 'Upload Dataset', 'Drag & drop your dataset file', '#38BDF8', 'cloud_upload'),
+                ('2', 'Generate Hash', 'SHA-256 cryptographic fingerprint', '#8B5CF6', 'fingerprint'),
+                ('3', 'Mine Block', 'Proof of Work on blockchain', '#10B981', 'gavel'),
+                ('4', 'Evaluate Trust', 'Weighted trust scoring', '#F59E0B', 'verified_user'),
+            ]
+            for i, (num, title, desc, color, icon) in enumerate(steps):
+                # Card
+                with ui.card().classes('step-card flex-1').style(f'max-width: 280px;'):
+                    with ui.column().classes('gap-3'):
+                        with ui.row().classes('items-center gap-3'):
+                            ui.html(f'<div class="step-number" style="background: linear-gradient(135deg, {color}, {color}dd); color: {color};">{num}</div>')
+                            ui.icon(icon).classes('text-2xl').style(f'color: {color};')
+                        
+                        ui.label(title).classes('text-white font-bold text-base')
+                        ui.label(desc).classes('text-gray-400 text-xs').style('line-height: 1.5;')
+                
+                # Connector (between cards)
+                if i < len(steps) - 1:
+                    with ui.column().classes('items-center justify-center').style('min-width: 30px;'):
+                        ui.html('<div style="width: 30px; height: 2px; background: linear-gradient(90deg, rgba(56, 189, 248, 0.6), rgba(56, 189, 248, 0.1)); position: relative;"></div>')
+                        ui.icon('arrow_forward').classes('text-cyan-400 text-sm').style('margin-top: -6px;')
+
+
+# ============================================================
 # TRUST & INSIGHTS
 # ============================================================
 def trust_and_insights():
@@ -378,6 +464,7 @@ def home():
     navigation()
     hero_section()
     feature_cards()
+    how_it_works()  # ← NEW SECTION
     trust_and_insights()
     footer()
 
