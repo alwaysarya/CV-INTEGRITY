@@ -1,12 +1,12 @@
 """
 CV-INTEGRITY AI - NiceGUI Application
-Premium $10K-Level UI + All 21 pages registered
+Apple Liquid Glass Premium UI + All 21 pages registered
 """
 
 from nicegui import ui, app
 from pathlib import Path
 from search import search as global_search
-from styles import apply_styles
+from styles import apply_styles, apply_apple_glass
 
 # Import all page creators
 from blockchain_page import create_blockchain_page
@@ -34,158 +34,14 @@ from replay_page import create_replay_page
 
 
 # ============================================================
-# GLOBAL PREMIUM STYLES
-# ============================================================
-def inject_premium_styles():
-    """Inject premium global styles — grid pattern, orbs, animations."""
-    ui.add_head_html('''
-    <style>
-        /* === PREMIUM BACKGROUND GRID === */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        /* === GLOWING AMBIENT ORBS === */
-        .ambient-orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(100px);
-            pointer-events: none;
-            z-index: 0;
-            animation: orb-float 20s ease-in-out infinite;
-        }
-        .ambient-orb-1 {
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.15), transparent 70%);
-            top: -200px;
-            left: -200px;
-        }
-        .ambient-orb-2 {
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.12), transparent 70%);
-            top: 30%;
-            right: -250px;
-            animation-delay: 7s;
-        }
-        .ambient-orb-3 {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.1), transparent 70%);
-            bottom: -150px;
-            left: 30%;
-            animation-delay: 14s;
-        }
-        @keyframes orb-float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(50px, -30px) scale(1.05); }
-            66% { transform: translate(-30px, 30px) scale(0.95); }
-        }
-        
-        /* === ANIMATIONS === */
-        @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes float-up {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.4), 0 0 40px rgba(56, 189, 248, 0.2); }
-            50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.7), 0 0 60px rgba(56, 189, 248, 0.4); }
-        }
-        @keyframes ping-dot {
-            0% { transform: scale(0.8); opacity: 1; }
-            100% { transform: scale(2.5); opacity: 0; }
-        }
-        @keyframes shimmer-slide {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        @keyframes rotate-slow {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* === GLASS CARDS === */
-        .q-card {
-            background: rgba(15, 23, 42, 0.55) !important;
-            backdrop-filter: blur(20px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-            border: 1px solid rgba(56, 189, 248, 0.15) !important;
-            border-radius: 16px !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-        .q-card:hover {
-            border-color: rgba(56, 189, 248, 0.35) !important;
-            transform: translateY(-2px);
-            box-shadow: 0 12px 48px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        /* === TILT CARDS === */
-        .tilt-card {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-        .tilt-card:hover {
-            transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateY(-4px) !important;
-        }
-        
-        /* === FLOATING PARTICLES === */
-        .floating-particle {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: float-up 6s ease-in-out infinite;
-        }
-        
-        /* === LIVE DOT === */
-        .live-dot {
-            position: relative;
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10B981;
-        }
-        .live-dot::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: #10B981;
-            animation: ping-dot 1.5s ease-out infinite;
-        }
-    </style>
-    ''')
-
-
-# ============================================================
 # NAVIGATION
 # ============================================================
 def navigation():
     with ui.row().classes('w-full items-center justify-between px-6 py-3').style(
-        'background: rgba(10, 14, 26, 0.95); border-bottom: 1px solid rgba(56, 189, 248, 0.15); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px);'
+        'background: rgba(10, 14, 26, 0.7); border-bottom: 1px solid rgba(255, 255, 255, 0.08); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);'
     ):
         with ui.row().classes('items-center gap-3'):
-            ui.html('<div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #38BDF8, #0EA5E9); display: flex; align-items: center; justify-content: center; font-size: 1rem;">🧠</div>')
+            ui.html('<div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #38BDF8, #0EA5E9); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);">🧠</div>')
             with ui.column().classes('gap-0'):
                 ui.label('CV-INTEGRITY AI').classes('text-white font-bold text-sm')
                 ui.label('AI TRUST PLATFORM').classes('text-gray-500 text-xs tracking-wider')
@@ -232,7 +88,7 @@ def navigation():
             ui.button('About', on_click=lambda: ui.navigate.to('/about')).props('flat no-caps dense').classes('text-gray-300 text-xs')
         
         with ui.row().classes('items-center gap-3'):
-            with ui.row().classes('items-center gap-2 px-3 py-1 rounded-lg').style('background: rgba(21, 21, 42, 0.8); border: 1px solid #252540; width: 220px;'):
+            with ui.row().classes('items-center gap-2 px-3 py-1 rounded-lg').style('background: rgba(21, 21, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); width: 220px; backdrop-filter: blur(20px);'):
                 ui.icon('search').classes('text-gray-500 text-sm')
                 search_input = ui.input(placeholder='Search...').classes('flex-1').style('background: transparent; border: none; color: white; font-size: 12px;').props('borderless dense')
                 
@@ -249,24 +105,33 @@ def navigation():
             ui.icon('notifications_none').classes('text-gray-400 cursor-pointer')
             
             with ui.row().classes('items-center gap-2'):
-                ui.html('<div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #8B5CF6, #7C3AED); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.75rem;">AT</div>')
+                ui.html('<div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #8B5CF6, #7C3AED); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.75rem; box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);">AT</div>')
                 with ui.column().classes('gap-0'):
                     ui.label('Aryan Thakur').classes('text-white text-xs font-medium')
                     ui.label('Administrator').classes('text-gray-500 text-xs')
 
 
 def footer():
-    with ui.row().classes('w-full items-center justify-between px-16 py-4').style('border-top: 1px solid #252540; margin-top: 40px; position: relative; z-index: 1;'):
+    with ui.row().classes('w-full items-center justify-between px-16 py-4').style('border-top: 1px solid rgba(255,255,255,0.08); margin-top: 40px; position: relative; z-index: 1;'):
         ui.label('© 2026 CV-INTEGRITY AI. All rights reserved.').classes('text-gray-500 text-xs')
         ui.label('Backend: ✅ Connected').classes('text-gray-500 text-xs')
 
 
 # ============================================================
-# PREMIUM HERO SECTION
+# HERO SECTION
 # ============================================================
 def hero_section():
     ui.add_head_html('''
     <style>
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes ping-dot {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
         .hero-gradient-text {
             background: linear-gradient(90deg, #38BDF8, #8B5CF6, #10B981, #38BDF8);
             background-size: 200% auto;
@@ -278,27 +143,26 @@ def hero_section():
         .hero-cta-primary {
             background: linear-gradient(135deg, #38BDF8, #0EA5E9);
             color: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: pulse-glow 3s ease-in-out infinite;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .hero-cta-primary:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(56, 189, 248, 0.4);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(56, 189, 248, 0.5), 0 0 80px rgba(56, 189, 248, 0.3);
         }
         .hero-cta-secondary {
             background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(139, 92, 246, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: white;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            transition: all 0.4s ease;
         }
         .hero-cta-secondary:hover {
-            border-color: rgba(139, 92, 246, 0.8);
-            background: rgba(139, 92, 246, 0.1);
-            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
         }
         .stat-glow { transition: all 0.3s ease; }
-        .stat-glow:hover { transform: scale(1.05); filter: drop-shadow(0 0 20px currentColor); }
+        .stat-glow:hover { transform: scale(1.05); filter: drop-shadow(0 0 25px currentColor); }
         
         .hero-balanced {
             padding: 80px 80px !important;
@@ -310,25 +174,33 @@ def hero_section():
         }
         .hero-left { flex: 1 1 55%; max-width: 640px; }
         .hero-right { flex: 1 1 40%; max-width: 460px; }
+        
+        .live-dot {
+            position: relative;
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+        }
+        .live-dot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #10B981;
+            animation: ping-dot 1.5s ease-out infinite;
+        }
     </style>
-    ''')
-    
-    ui.add_body_html('''
-    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden;">
-        <div class="ambient-orb ambient-orb-1"></div>
-        <div class="ambient-orb ambient-orb-2"></div>
-        <div class="ambient-orb ambient-orb-3"></div>
-        <div class="floating-particle" style="width: 4px; height: 4px; background: #38BDF8; top: 15%; left: 10%; opacity: 0.4; animation-delay: 0s;"></div>
-        <div class="floating-particle" style="width: 6px; height: 6px; background: #8B5CF6; top: 25%; left: 85%; opacity: 0.3; animation-delay: 1s;"></div>
-        <div class="floating-particle" style="width: 3px; height: 3px; background: #10B981; top: 60%; left: 15%; opacity: 0.5; animation-delay: 2s;"></div>
-        <div class="floating-particle" style="width: 5px; height: 5px; background: #F59E0B; top: 70%; left: 80%; opacity: 0.3; animation-delay: 3s;"></div>
-    </div>
     ''')
     
     with ui.row().classes('w-full items-center justify-center hero-balanced'):
         with ui.column().classes('gap-6 hero-left'):
             with ui.row().classes('items-center gap-2 px-4 py-2 rounded-full').style(
-                'background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); width: fit-content; backdrop-filter: blur(10px);'
+                'background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); width: fit-content; backdrop-filter: blur(20px);'
             ):
                 ui.html('<div class="live-dot"></div>')
                 ui.label('AI-Powered Dataset Integrity').classes('text-purple-400 text-xs font-medium tracking-wide')
@@ -338,8 +210,8 @@ def hero_section():
             ui.label('Detect tampering, ensure authenticity, and build trust in your AI models with blockchain-verified dataset integrity.').classes('text-gray-400 text-lg').style('line-height: 1.7; max-width: 540px;')
             
             with ui.row().classes('gap-3 mt-3'):
-                ui.button('Upload Dataset →', on_click=lambda: ui.navigate.to('/upload')).classes('hero-cta-primary px-7 py-3 rounded-xl font-semibold text-sm')
-                ui.button('▶ Watch Demo').classes('hero-cta-secondary px-7 py-3 rounded-xl font-semibold text-sm')
+                ui.button('Upload Dataset →', on_click=lambda: ui.navigate.to('/upload')).classes('hero-cta-primary magnetic-btn px-7 py-3 rounded-xl font-semibold text-sm')
+                ui.button('▶ Watch Demo').classes('hero-cta-secondary magnetic-btn px-7 py-3 rounded-xl font-semibold text-sm')
             
             with ui.row().classes('items-center gap-12 mt-8'):
                 for val, label, color in [('99.9%', 'Accuracy', '#38BDF8'), ('50K+', 'Datasets', '#8B5CF6'), ('1M+', 'Verifications', '#10B981')]:
@@ -348,9 +220,7 @@ def hero_section():
                         ui.label(label).classes('text-gray-500 text-xs tracking-wide uppercase')
         
         with ui.column().classes('gap-4 hero-right'):
-            with ui.card().classes('w-full p-6 tilt-card').style(
-                'background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 24px; backdrop-filter: blur(30px); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 60px rgba(56, 189, 248, 0.1);'
-            ):
+            with ui.card().classes('liquid-glass specular w-full p-6').style('border-radius: 24px;'):
                 with ui.row().classes('w-full items-center justify-between mb-5'):
                     with ui.row().classes('items-center gap-2'):
                         ui.icon('verified').classes('text-green-400 text-2xl')
@@ -361,19 +231,19 @@ def hero_section():
                         ui.html('<div class="live-dot"></div>')
                         ui.label('LIVE').classes('text-green-400 text-xs font-bold tracking-wider')
                 
-                with ui.column().classes('w-full gap-2 mb-4 p-4 rounded-xl').style('background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(139, 92, 246, 0.2);'):
+                with ui.column().classes('w-full gap-2 mb-4 p-4 rounded-xl').style('background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(139, 92, 246, 0.2); backdrop-filter: blur(20px);'):
                     with ui.row().classes('items-center gap-2'):
                         ui.icon('fingerprint').classes('text-purple-400 text-lg')
                         ui.label('SHA-256 Hash').classes('text-gray-400 text-xs tracking-wider')
                     ui.label('0x7a3f...9b2c').classes('text-purple-300 text-sm mono font-medium')
                 
-                with ui.column().classes('w-full gap-2 mb-4 p-4 rounded-xl').style('background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(56, 189, 248, 0.2);'):
+                with ui.column().classes('w-full gap-2 mb-4 p-4 rounded-xl').style('background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(20px);'):
                     with ui.row().classes('items-center gap-2'):
                         ui.icon('schedule').classes('text-cyan-400 text-lg')
                         ui.label('Last Verified').classes('text-gray-400 text-xs tracking-wider')
                     ui.label('2 minutes ago').classes('text-cyan-300 text-sm font-medium')
                 
-                with ui.column().classes('w-full gap-2 pt-4').style('border-top: 1px solid rgba(56, 189, 248, 0.15);'):
+                with ui.column().classes('w-full gap-2 pt-4').style('border-top: 1px solid rgba(255,255,255,0.08);'):
                     with ui.row().classes('w-full justify-between items-center'):
                         ui.label('Trust Score').classes('text-gray-400 text-xs tracking-wider')
                         ui.label('87%').classes('text-green-400 font-bold text-lg')
@@ -381,17 +251,12 @@ def hero_section():
 
 
 # ============================================================
-# LIVE ANIMATED STATS COUNTER
+# LIVE STATS COUNTER
 # ============================================================
 def live_stats_counter():
-    """Big animated stats with count-up effect."""
     ui.add_head_html('''
     <style>
         .live-stat-card {
-            background: rgba(15, 23, 42, 0.6) !important;
-            border: 1px solid rgba(56, 189, 248, 0.15) !important;
-            border-radius: 20px !important;
-            padding: 32px 24px !important;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -407,14 +272,10 @@ def live_stats_counter():
             background: radial-gradient(circle at 50% 0%, var(--stat-color-alpha) 0%, transparent 60%);
             opacity: 0;
             transition: opacity 0.4s ease;
+            pointer-events: none;
         }
         .live-stat-card:hover::before {
             opacity: 1;
-        }
-        .live-stat-card:hover {
-            transform: translateY(-6px);
-            border-color: var(--stat-color) !important;
-            box-shadow: 0 20px 60px var(--stat-color-alpha);
         }
         .live-stat-value {
             font-size: 3rem;
@@ -452,7 +313,7 @@ def live_stats_counter():
             ('6', 'Blocks Mined', '#F59E0B', 'link'),
         ]
         for val, label, color, icon in stats:
-            with ui.card().classes('live-stat-card flex-1 tilt-card').style(f'--stat-color: {color}; --stat-color-alpha: {color}20; max-width: 280px;'):
+            with ui.card().classes('liquid-glass live-stat-card specular p-6').style(f'--stat-color: {color}; --stat-color-alpha: {color}20; flex: 1; max-width: 280px; border-radius: 24px;'):
                 ui.icon(icon).classes('live-stat-icon').style(f'color: {color};')
                 ui.label(val).classes('live-stat-value')
                 ui.label(label).classes('live-stat-label')
@@ -474,28 +335,63 @@ def feature_cards():
             ('speed', 'Performance', 'Model metrics', '#F472B6', '/performance'),
         ]
         for icon, title, subtitle, color, path in cards:
-            with ui.card().classes('flex-1 p-3 cursor-pointer tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;').on('click', lambda p=path: ui.navigate.to(p)):
-                with ui.column().classes('items-center gap-1'):
-                    ui.icon(icon).classes('text-2xl').style(f'color: {color};')
+            with ui.card().classes('liquid-glass specular flex-1 p-4 cursor-pointer').style('border-radius: 20px;').on('click', lambda p=path: ui.navigate.to(p)):
+                with ui.column().classes('items-center gap-2'):
+                    ui.icon(icon).classes('text-2xl').style(f'color: {color}; text-shadow: 0 0 20px {color}80;')
                     ui.label(title).classes('text-white font-semibold text-xs text-center')
                     ui.label(subtitle).classes('text-gray-500 text-xs text-center')
 
 
 # ============================================================
-# HOW IT WORKS — UPGRADED
+# BLOCKCHAIN VISUALIZER
+# ============================================================
+def blockchain_visualizer():
+    """Zara hatke: Live animated blockchain visualization."""
+    with ui.column().classes('w-full section-tight gap-4'):
+        with ui.column().classes('items-center gap-2 w-full'):
+            with ui.row().classes('items-center gap-3'):
+                ui.icon('link').classes('text-cyan-400 text-3xl')
+                ui.label('Live Blockchain').classes('text-white font-bold text-3xl')
+            ui.label('Real-time immutable ledger visualization').classes('text-gray-400 text-sm')
+        
+        with ui.card().classes('liquid-glass specular w-full p-8').style('border-radius: 24px;'):
+            with ui.row().classes('w-full items-center justify-center gap-4'):
+                # 5 blocks with connectors
+                blocks = [
+                    ('#0', 'GENESIS', '#10B981', '0'),
+                    ('#1', 'DATASET', '#38BDF8', '1'),
+                    ('#2', 'MODEL', '#8B5CF6', '2'),
+                    ('#3', 'TRUST', '#F59E0B', '3'),
+                    ('#4', 'INFERENCE', '#EF4444', '4'),
+                ]
+                for i, (num, label, color, delay) in enumerate(blocks):
+                    with ui.column().classes('items-center gap-2'):
+                        ui.html(f'''
+                            <div class="blockchain-block" style="animation-delay: {int(delay)*0.4}s; border-color: {color}60; min-width: 100px;">
+                                <div style="text-align: center;">
+                                    <div style="color: {color}; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em;">{num}</div>
+                                    <div style="color: #94A3B8; font-size: 0.65rem; letter-spacing: 2px; margin-top: 4px;">{label}</div>
+                                </div>
+                            </div>
+                        ''')
+                    
+                    if i < len(blocks) - 1:
+                        ui.icon('arrow_forward').classes('text-cyan-400 text-xl')
+
+
+# ============================================================
+# HOW IT WORKS
 # ============================================================
 def how_it_works():
     ui.add_head_html('''
     <style>
         .step-card-upgraded {
-            background: rgba(15, 23, 42, 0.6) !important;
-            border: 1px solid rgba(56, 189, 248, 0.2) !important;
-            border-radius: 20px !important;
             padding: 28px 20px !important;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
             position: relative;
             overflow: hidden;
             text-align: center;
+            border-radius: 24px;
         }
         .step-card-upgraded::before {
             content: '';
@@ -507,14 +403,6 @@ def how_it_works():
             background: var(--step-color);
             opacity: 0.6;
             transition: opacity 0.3s ease;
-        }
-        .step-card-upgraded:hover {
-            transform: translateY(-8px);
-            border-color: var(--step-color) !important;
-            box-shadow: 0 20px 60px var(--step-color-alpha);
-        }
-        .step-card-upgraded:hover::before {
-            opacity: 1;
         }
         .step-badge-circle {
             width: 64px;
@@ -547,12 +435,6 @@ def how_it_works():
             justify-content: center;
             font-size: 0.7rem;
             font-weight: 700;
-        }
-        .connector-arrow {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 50px;
         }
         @keyframes gradient-slide {
             0% { background-position: 0% 50%; }
@@ -587,7 +469,7 @@ def how_it_works():
             ]
             
             for i, (num, title, desc, color, icon) in enumerate(steps):
-                with ui.card().classes('step-card-upgraded tilt-card').style(f'--step-color: {color}; --step-color-alpha: {color}40; flex: 1; max-width: 260px;'):
+                with ui.card().classes('liquid-glass specular step-card-upgraded').style(f'--step-color: {color}; flex: 1; max-width: 260px; border-radius: 24px;'):
                     with ui.column().classes('gap-3 items-center'):
                         with ui.element('div').style('position: relative; display: inline-block;'):
                             ui.html(f'<div class="step-badge-circle" style="background: linear-gradient(135deg, {color}, {color}cc); box-shadow: 0 0 30px {color}60;"><span style="font-size: 1.5rem;">{icon}</span></div>')
@@ -597,8 +479,8 @@ def how_it_works():
                         ui.label(desc).classes('text-gray-400 text-xs').style('line-height: 1.5; max-width: 200px;')
                 
                 if i < len(steps) - 1:
-                    with ui.column().classes('connector-arrow'):
-                        ui.icon('arrow_forward').classes('text-cyan-400 text-2xl').style('animation: pulse-glow 2s ease-in-out infinite;')
+                    with ui.column().classes('items-center justify-center').style('min-width: 50px;'):
+                        ui.icon('arrow_forward').classes('text-cyan-400 text-2xl')
 
 
 # ============================================================
@@ -606,7 +488,7 @@ def how_it_works():
 # ============================================================
 def trust_and_insights():
     with ui.row().classes('w-full gap-6 section-tight'):
-        with ui.card().classes('flex-1 p-5 tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+        with ui.card().classes('liquid-glass specular flex-1 p-5').style('border-radius: 24px;'):
             with ui.row().classes('w-full items-center justify-between mb-4'):
                 with ui.row().classes('items-center gap-2'):
                     ui.icon('verified_user').classes('text-purple-400 text-xl')
@@ -616,7 +498,8 @@ def trust_and_insights():
                     ui.html('''
                         <div style="width: 100px; height: 100px; border-radius: 50%; 
                                     background: conic-gradient(#8B5CF6 0% 87%, #252540 87% 100%);
-                                    display: flex; align-items: center; justify-content: center;">
+                                    display: flex; align-items: center; justify-content: center;
+                                    box-shadow: 0 0 40px rgba(139, 92, 246, 0.3);">
                             <div style="width: 76px; height: 76px; border-radius: 50%; 
                                         background: #0F0F1F; display: flex; flex-direction: column;
                                         align-items: center; justify-content: center;">
@@ -633,14 +516,14 @@ def trust_and_insights():
                                 ui.label(title).classes('text-white text-xs font-medium')
                                 ui.label(sub).classes('text-gray-500 text-xs')
         
-        with ui.card().classes('flex-1 p-5 tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+        with ui.card().classes('liquid-glass specular flex-1 p-5').style('border-radius: 24px;'):
             with ui.row().classes('w-full items-center justify-between mb-4'):
                 with ui.row().classes('items-center gap-2'):
                     ui.icon('storage').classes('text-blue-400 text-xl')
                     ui.label('Recent Datasets').classes('text-white font-semibold text-base')
                 ui.button('View All →', on_click=lambda: ui.navigate.to('/datasets')).props('flat dense no-caps').classes('text-purple-400 text-xs')
             for name, status, color in [('ImageNet-1K', 'Verified', 'green'), ('COCO-2017', 'Verified', 'green'), ('OpenImages-v7', 'Pending', 'yellow'), ('LAION-5B', 'Verified', 'green')]:
-                with ui.row().classes('items-center justify-between w-full py-2').style('border-bottom: 1px solid #252540;'):
+                with ui.row().classes('items-center justify-between w-full py-2').style('border-bottom: 1px solid rgba(255,255,255,0.06);'):
                     with ui.row().classes('items-center gap-2'):
                         ui.icon('folder').classes('text-gray-400 text-sm')
                         ui.label(name).classes('text-white text-xs')
@@ -651,21 +534,22 @@ def trust_and_insights():
 # LIVE ACTIVITY FEED
 # ============================================================
 def live_activity_feed():
-    """Real-time activity feed with timestamps."""
     ui.add_head_html('''
     <style>
         .activity-item {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(56, 189, 248, 0.1);
-            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
             padding: 14px 18px;
             transition: all 0.3s ease;
             border-left: 3px solid var(--activity-color);
+            backdrop-filter: blur(20px);
         }
         .activity-item:hover {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(15, 23, 42, 0.6);
             border-left-width: 5px;
             transform: translateX(4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         }
     </style>
     ''')
@@ -699,7 +583,6 @@ def live_activity_feed():
 # TECH STACK BAND
 # ============================================================
 def tech_stack_band():
-    """Technology stack badges."""
     with ui.column().classes('w-full section-tight gap-4'):
         with ui.column().classes('items-center gap-2 w-full'):
             with ui.row().classes('items-center gap-3'):
@@ -717,9 +600,9 @@ def tech_stack_band():
                 ('Proof of Work', 'gavel', '#06B6D4'),
             ]
             for name, icon, color in techs:
-                with ui.card().classes('px-5 py-3 tilt-card').style(f'background: rgba(15, 23, 42, 0.5); border: 1px solid {color}40; border-radius: 12px;'):
+                with ui.card().classes('liquid-glass specular px-5 py-3').style(f'border-radius: 16px;'):
                     with ui.row().classes('items-center gap-2'):
-                        ui.icon(icon).classes('text-lg').style(f'color: {color};')
+                        ui.icon(icon).classes('text-lg').style(f'color: {color}; text-shadow: 0 0 15px {color}80;')
                         ui.label(name).classes('text-white font-medium text-sm')
 
 
@@ -727,18 +610,15 @@ def tech_stack_band():
 # CTA SECTION
 # ============================================================
 def cta_section():
-    """Big call-to-action before footer."""
     with ui.column().classes('w-full section-tight'):
-        with ui.card().classes('w-full p-10 tilt-card').style(
-            'background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(139, 92, 246, 0.1)); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 24px; position: relative; overflow: hidden;'
-        ):
+        with ui.card().classes('liquid-glass specular w-full p-12').style('border-radius: 32px; background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(139, 92, 246, 0.08)) !important;'):
             with ui.column().classes('items-center gap-4 w-full'):
-                ui.icon('rocket_launch').classes('text-cyan-400 text-5xl')
+                ui.icon('rocket_launch').classes('text-cyan-400 text-5xl').style('text-shadow: 0 0 40px rgba(56, 189, 248, 0.6);')
                 ui.label('Ready to Secure Your AI Pipeline?').classes('text-white font-bold text-3xl text-center')
                 ui.label('Join 120+ enterprises already verifying their AI datasets with blockchain-grade integrity.').classes('text-gray-400 text-base text-center').style('max-width: 600px;')
                 with ui.row().classes('gap-3 mt-2'):
-                    ui.button('Get Started Free →', on_click=lambda: ui.navigate.to('/upload')).classes('hero-cta-primary px-8 py-3 rounded-xl font-semibold text-sm')
-                    ui.button('View Documentation', on_click=lambda: ui.navigate.to('/about')).classes('hero-cta-secondary px-8 py-3 rounded-xl font-semibold text-sm')
+                    ui.button('Get Started Free →', on_click=lambda: ui.navigate.to('/upload')).classes('hero-cta-primary magnetic-btn px-8 py-3 rounded-xl font-semibold text-sm')
+                    ui.button('View Documentation', on_click=lambda: ui.navigate.to('/about')).classes('hero-cta-secondary magnetic-btn px-8 py-3 rounded-xl font-semibold text-sm')
 
 
 # ============================================================
@@ -747,11 +627,12 @@ def cta_section():
 @ui.page('/')
 def home():
     apply_styles(ui)
-    inject_premium_styles()
+    apply_apple_glass(ui)
     navigation()
     hero_section()
     live_stats_counter()
     feature_cards()
+    blockchain_visualizer()
     how_it_works()
     trust_and_insights()
     live_activity_feed()
@@ -766,7 +647,7 @@ def home():
 @ui.page('/solutions')
 def solutions():
     apply_styles(ui)
-    inject_premium_styles()
+    apply_apple_glass(ui)
     navigation()
     with ui.column().classes('w-full section-tight gap-6'):
         ui.label('Our Solutions').classes('text-white font-bold text-4xl')
@@ -780,7 +661,7 @@ def solutions():
                 ('🔍', 'Dataset Forensics', 'Deep inspection of dataset provenance and integrity chains.'),
                 ('🤝', 'Collaboration Tools', 'Team workspaces with role-based access and audit trails.'),
             ]:
-                with ui.card().classes('p-5 tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px; min-width: 280px; flex: 1;'):
+                with ui.card().classes('liquid-glass specular p-5').style('border-radius: 24px; min-width: 280px; flex: 1;'):
                     ui.label(icon).classes('text-3xl mb-2')
                     ui.label(title).classes('text-white font-bold text-base mb-2')
                     ui.label(desc).classes('text-gray-400 text-xs').style('line-height: 1.6;')
@@ -793,17 +674,17 @@ def solutions():
 @ui.page('/about')
 def about():
     apply_styles(ui)
-    inject_premium_styles()
+    apply_apple_glass(ui)
     navigation()
     with ui.column().classes('w-full section-tight gap-6'):
         ui.label('About CV-INTEGRITY AI').classes('text-white font-bold text-4xl')
         ui.label('Building trust in AI through verification and transparency.').classes('text-gray-400 text-base')
-        with ui.card().classes('w-full p-6 mt-2 tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+        with ui.card().classes('liquid-glass specular w-full p-6 mt-2').style('border-radius: 24px;'):
             ui.label('Our Mission').classes('text-white font-bold text-xl mb-3')
             ui.label('We believe that trust is the foundation of AI adoption. Our platform ensures that every dataset used to train AI models is verified, authentic, and tamper-proof. By combining blockchain technology, explainable AI, and advanced forensics, we help organizations build AI systems that people can trust.').classes('text-gray-300 text-sm').style('line-height: 1.8;')
         with ui.row().classes('w-full gap-4 mt-2'):
             for val, label in [('2024', 'Founded'), ('50K+', 'Datasets Verified'), ('1M+', 'Verifications'), ('120+', 'Enterprise Clients')]:
-                with ui.card().classes('flex-1 p-4 text-center tilt-card').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
+                with ui.card().classes('liquid-glass specular flex-1 p-4 text-center').style('border-radius: 24px;'):
                     ui.label(val).classes('text-purple-400 font-bold text-2xl')
                     ui.label(label).classes('text-gray-400 text-xs mt-1')
     footer()

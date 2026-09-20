@@ -438,3 +438,306 @@ def badge(ui, text, color='#38BDF8', size='sm'):
 def glass_divider(ui):
     """Add a gradient divider."""
     ui.html('<div class="gradient-divider"></div>')
+
+
+# ============================================================
+# APPLE LIQUID GLASS SYSTEM
+# ============================================================
+APPLE_GLASS_CSS = '''
+<style>
+    /* === APPLE LIQUID GLASS CARDS === */
+    .liquid-glass {
+        background: rgba(15, 23, 42, 0.5) !important;
+        backdrop-filter: blur(40px) saturate(200%) brightness(1.1) !important;
+        -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 24px !important;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            inset 0 1px 1px rgba(255, 255, 255, 0.15),
+            inset 0 -1px 1px rgba(0, 0, 0, 0.2),
+            0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .liquid-glass::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%);
+        pointer-events: none;
+        border-radius: 24px 24px 0 0;
+    }
+    
+    .liquid-glass::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+        transition: left 0.8s ease;
+        pointer-events: none;
+    }
+    
+    .liquid-glass:hover::after {
+        left: 100%;
+    }
+    
+    .liquid-glass:hover {
+        transform: translateY(-6px) scale(1.01);
+        border-color: rgba(255, 255, 255, 0.25) !important;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 80px rgba(56, 189, 248, 0.15),
+            inset 0 1px 1px rgba(255, 255, 255, 0.25),
+            inset 0 -1px 1px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* === SPECULAR HIGHLIGHT === */
+    .specular::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: 5%;
+        right: 5%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        border-radius: 2px;
+        pointer-events: none;
+    }
+    
+    /* === MAGNETIC BUTTONS === */
+    .magnetic-btn {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .magnetic-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s ease, height 0.6s ease;
+        pointer-events: none;
+    }
+    
+    .magnetic-btn:hover::before {
+        width: 400px;
+        height: 400px;
+    }
+    
+    .magnetic-btn:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 
+            0 15px 40px rgba(56, 189, 248, 0.4),
+            0 0 60px rgba(56, 189, 248, 0.2) !important;
+    }
+    
+    /* === CURSOR GLOW === */
+    .cursor-glow {
+        position: fixed;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 1;
+        transition: opacity 0.3s ease;
+        transform: translate(-50%, -50%);
+        filter: blur(40px);
+    }
+    
+    /* === GRADIENT BORDER ANIMATION === */
+    @keyframes border-flow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .gradient-border {
+        position: relative;
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(139, 92, 246, 0.3));
+        padding: 2px;
+        border-radius: 24px;
+        background-size: 200% 200%;
+        animation: border-flow 4s ease infinite;
+    }
+    
+    /* === ANIMATED MESH GRADIENT === */
+    @keyframes mesh-move-1 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(100px, -50px) scale(1.1); }
+        66% { transform: translate(-50px, 50px) scale(0.95); }
+    }
+    @keyframes mesh-move-2 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(-80px, 80px) scale(1.15); }
+    }
+    @keyframes mesh-move-3 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(60px, -100px) scale(0.9); }
+    }
+    @keyframes mesh-move-4 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(-100px, 60px) scale(1.05); }
+        66% { transform: translate(80px, -40px) scale(1.1); }
+    }
+    
+    .mesh-orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(120px);
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.5;
+    }
+    .mesh-orb-1 {
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.4), transparent 70%);
+        top: -200px;
+        left: -200px;
+        animation: mesh-move-1 25s ease-in-out infinite;
+    }
+    .mesh-orb-2 {
+        width: 700px;
+        height: 700px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.35), transparent 70%);
+        top: 20%;
+        right: -300px;
+        animation: mesh-move-2 30s ease-in-out infinite;
+    }
+    .mesh-orb-3 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.3), transparent 70%);
+        bottom: -150px;
+        left: 25%;
+        animation: mesh-move-3 28s ease-in-out infinite;
+    }
+    .mesh-orb-4 {
+        width: 450px;
+        height: 450px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.25), transparent 70%);
+        top: 50%;
+        left: 10%;
+        animation: mesh-move-4 32s ease-in-out infinite;
+    }
+    
+    /* === FLOATING BLOCKCHAIN VISUALIZER === */
+    @keyframes block-float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(2deg); }
+    }
+    @keyframes block-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.1); }
+        50% { box-shadow: 0 0 40px rgba(56, 189, 248, 0.8), inset 0 0 30px rgba(56, 189, 248, 0.2); }
+    }
+    @keyframes chain-connect {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: 20; }
+    }
+    
+    .blockchain-block {
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(139, 92, 246, 0.15));
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        border-radius: 12px;
+        padding: 12px;
+        animation: block-float 4s ease-in-out infinite, block-glow 3s ease-in-out infinite;
+        backdrop-filter: blur(20px);
+        position: relative;
+    }
+    
+    /* === PREMIUM SCROLLBAR === */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: rgba(10, 14, 26, 0.5); }
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #38BDF8, #8B5CF6);
+        border-radius: 5px;
+        border: 2px solid rgba(10, 14, 26, 0.5);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #0EA5E9, #7C3AED);
+    }
+    
+    /* === SMOOTH TRANSITIONS === */
+    * { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    /* === APPLE-STYLE FONT SMOOTHING === */
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+</style>
+'''
+
+
+def apply_apple_glass(ui):
+    """Apply Apple Liquid Glass styles + cursor glow + mesh orbs."""
+    ui.add_head_html(APPLE_GLASS_CSS)
+    ui.add_body_html('''
+    <!-- Mesh gradient orbs -->
+    <div class="mesh-orb mesh-orb-1"></div>
+    <div class="mesh-orb mesh-orb-2"></div>
+    <div class="mesh-orb mesh-orb-3"></div>
+    <div class="mesh-orb mesh-orb-4"></div>
+    
+    <!-- Cursor glow -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+    
+    <script>
+        // Cursor glow follow
+        const cursorGlow = document.getElementById('cursorGlow');
+        let mouseX = 0, mouseY = 0;
+        let glowX = 0, glowY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        function animateGlow() {
+            glowX += (mouseX - glowX) * 0.1;
+            glowY += (mouseY - glowY) * 0.1;
+            if (cursorGlow) {
+                cursorGlow.style.left = glowX + 'px';
+                cursorGlow.style.top = glowY + 'px';
+            }
+            requestAnimationFrame(animateGlow);
+        }
+        animateGlow();
+        
+        // Magnetic buttons
+        document.addEventListener('mousemove', (e) => {
+            document.querySelectorAll('.magnetic-btn').forEach(btn => {
+                const rect = btn.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const distX = e.clientX - centerX;
+                const distY = e.clientY - centerY;
+                const dist = Math.sqrt(distX * distX + distY * distY);
+                
+                if (dist < 150) {
+                    const strength = (150 - dist) / 150 * 8;
+                    btn.style.transform = `translate(${distX * 0.08}px, ${distY * 0.08}px) translateY(-3px) scale(1.03)`;
+                } else {
+                    btn.style.transform = '';
+                }
+            });
+        });
+    </script>
+    ''')
