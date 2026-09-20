@@ -1,5 +1,6 @@
 """NiceGUI Upload Page - Real Working"""
 from nicegui import ui
+from styles import apply_styles
 import hashlib, json, time
 from pathlib import Path
 from datetime import datetime
@@ -58,7 +59,7 @@ def create_block(index, data, previous_hash, difficulty=4):
 def create_upload_page():
     @ui.page('/upload')
     def upload():
-        ui.dark_mode().enable()
+        apply_styles(ui)
         ui.add_head_html('''
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');

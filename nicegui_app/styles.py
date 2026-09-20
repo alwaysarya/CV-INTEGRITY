@@ -386,3 +386,55 @@ def stat_card(ui, icon, value, label, color='#38BDF8'):
         ui.icon(icon).classes('text-3xl mb-2').style(f'color: {color}; text-shadow: 0 0 20px {color}80;')
         ui.label(str(value)).classes('text-white font-bold text-2xl')
         ui.label(label).classes('text-gray-500 text-xs tracking-wider mt-1')
+
+# ============================================================
+# PAGE TITLE HELPERS
+# ============================================================
+def page_title(ui, icon, title, subtitle='', color='#38BDF8', icon_size='text-4xl'):
+    """Create a consistent page title header."""
+    with ui.column().classes('items-center gap-3 w-full mb-6'):
+        with ui.row().classes('items-center gap-3'):
+            ui.label(icon).classes(icon_size)
+            ui.label(title).classes('font-bold text-4xl').style(f'color: {color}; text-shadow: 0 0 30px {color}40;')
+        if subtitle:
+            ui.label(subtitle).classes('text-gray-400 text-sm text-center')
+
+
+def page_title_left(ui, icon, title, subtitle='', color='#38BDF8', icon_size='text-3xl'):
+    """Create a left-aligned page title."""
+    with ui.column().classes('gap-1 mb-6'):
+        with ui.row().classes('items-center gap-3'):
+            ui.label(icon).classes(icon_size)
+            ui.label(title).classes('font-bold text-3xl').style(f'color: {color};')
+        if subtitle:
+            ui.label(subtitle).classes('text-gray-400 text-sm ml-12')
+
+
+def card_title(ui, icon, title, color='#38BDF8'):
+    """Create a consistent card title."""
+    with ui.row().classes('items-center gap-2 mb-3'):
+        ui.icon(icon).classes('text-xl').style(f'color: {color};')
+        ui.label(title).classes('text-white font-bold text-base')
+
+
+def badge(ui, text, color='#38BDF8', size='sm'):
+    """Create a consistent badge."""
+    sizes = {'sm': '0.65rem', 'md': '0.75rem', 'lg': '0.85rem'}
+    return ui.html(f'''
+        <div style="
+            background: {color}20; 
+            color: {color}; 
+            border: 1px solid {color}40;
+            padding: 4px 12px; 
+            border-radius: 10px; 
+            font-size: {sizes.get(size, '0.7rem')}; 
+            font-weight: 600;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+        ">{text}</div>
+    ''')
+
+
+def glass_divider(ui):
+    """Add a gradient divider."""
+    ui.html('<div class="gradient-divider"></div>')

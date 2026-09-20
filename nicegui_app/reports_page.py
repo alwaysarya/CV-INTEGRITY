@@ -4,6 +4,7 @@ Real PDFs from outputs/reports/
 """
 
 from nicegui import ui, app
+from styles import apply_styles
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -52,7 +53,7 @@ def create_reports_page():
     
     @ui.page('/reports')
     def reports():
-        ui.dark_mode().enable()
+        apply_styles(ui)
         ui.add_head_html('''
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');

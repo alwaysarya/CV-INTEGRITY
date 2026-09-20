@@ -2,6 +2,7 @@
 NiceGUI Analytics Dashboard
 """
 from nicegui import ui
+from styles import apply_styles
 import json
 from pathlib import Path
 
@@ -32,7 +33,7 @@ def create_donut_svg(value, max_val=100, color='#10B981', size=120):
 def create_analytics_page():
     @ui.page('/analytics')
     def analytics():
-        ui.dark_mode().enable()
+        apply_styles(ui)
         ui.add_head_html('''<style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');body,.q-page{font-family:Inter,sans-serif!important;background:#0A0E1A!important;}.q-page-container{padding:0!important;}.nicegui-content{padding:0!important;}.section-title{display:flex;align-items:center;gap:10px;padding:12px 0;border-left:3px solid #8B5CF6;padding-left:16px;margin-bottom:20px;}.metric-card{background:rgba(15,23,42,0.4)!important;border:1px solid rgba(56,189,248,0.15)!important;border-radius:12px!important;padding:16px!important;}.progress-bar{background:rgba(255,255,255,0.08);height:6px;border-radius:3px;overflow:hidden;margin:4px 0;}.progress-fill{height:100%;border-radius:3px;}</style>''')
         
         with ui.row().classes('w-full items-center justify-between px-6 py-3').style('background:rgba(10,14,26,0.95);border-bottom:1px solid rgba(139,92,246,0.15);position:sticky;top:0;z-index:100;'):

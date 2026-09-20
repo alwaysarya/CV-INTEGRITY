@@ -4,6 +4,7 @@ Real data from outputs/reports/users.json + outputs/collaboration/
 """
 
 from nicegui import ui
+from styles import apply_styles
 import json
 from pathlib import Path
 from datetime import datetime
@@ -129,7 +130,7 @@ def create_contributors_page():
     
     @ui.page('/contributors')
     def contributors():
-        ui.dark_mode().enable()
+        apply_styles(ui)
         ui.add_head_html('''
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');

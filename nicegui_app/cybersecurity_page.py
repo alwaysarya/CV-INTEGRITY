@@ -4,6 +4,7 @@ Real attack data from outputs/reports/cyber_attacks.json
 """
 
 from nicegui import ui
+from styles import apply_styles
 import json
 from pathlib import Path
 from datetime import datetime
@@ -37,7 +38,7 @@ def create_cybersecurity_page():
     
     @ui.page('/cybersecurity')
     def cybersecurity():
-        ui.dark_mode().enable()
+        apply_styles(ui)
         ui.add_head_html('''
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');

@@ -4,6 +4,7 @@ Real blockchain data from outputs/reports/blockchain.json
 """
 
 from nicegui import ui, app
+from styles import apply_styles
 import json
 import sys
 from pathlib import Path
@@ -117,7 +118,7 @@ def create_blockchain_page():
     @ui.page('/blockchain')
     def blockchain():
         setup_blockchain_styles()
-        ui.dark_mode().enable()
+        apply_styles(ui)
         
         # Body background
         ui.add_head_html('''

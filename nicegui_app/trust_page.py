@@ -4,6 +4,7 @@ Matches Streamlit design with 3 gauges, decision cards, and breakdown bars.
 """
 
 from nicegui import ui, app
+from styles import apply_styles
 import json
 from pathlib import Path
 from datetime import datetime
@@ -198,7 +199,7 @@ def create_trust_page():
         </style>
         ''')
         
-        ui.dark_mode().enable()
+        apply_styles(ui)
         
         # Navigation
         with ui.row().classes('w-full items-center justify-between px-6 py-3').style(

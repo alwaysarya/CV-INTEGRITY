@@ -1,5 +1,6 @@
 """NiceGUI Attack Simulator Page - Interactive"""
 from nicegui import ui
+from styles import apply_styles
 import sys
 import json
 from pathlib import Path
@@ -23,7 +24,7 @@ def create_attack_simulator_page():
     
     @ui.page('/attack-simulator')
     def attack_simulator():
-        ui.dark_mode().enable()
+        apply_styles(ui)
         ui.add_head_html('''
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');

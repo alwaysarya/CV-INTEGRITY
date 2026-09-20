@@ -4,6 +4,7 @@ Real GradCAM heatmaps from outputs/xai_heatmaps/
 """
 
 from nicegui import ui
+from styles import apply_styles
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -44,7 +45,7 @@ def create_xai_page():
         </style>
         ''')
         
-        ui.dark_mode().enable()
+        apply_styles(ui)
         
         # Navigation
         with ui.row().classes('w-full items-center justify-between px-6 py-3').style(
