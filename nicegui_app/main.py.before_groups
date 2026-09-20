@@ -4,8 +4,6 @@ All 12 pages registered
 """
 
 from nicegui import ui, app
-from search import search as global_search
-from styles import apply_styles
 from pathlib import Path
 
 # Import all page creators
@@ -37,73 +35,29 @@ from auth_page import create_auth_page
 # SHARED SETUP
 # ============================================================
 def setup_page():
-    """Shared setup with consistent styles."""
-    apply_styles(ui)
-    ui.add_head_html("""
+    ui.dark_mode().enable()
+    ui.add_head_html('''
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        
+        body, .q-page { 
+            font-family: 'Inter', -apple-system, sans-serif !important;
+            background: #0A0E1A !important; 
+        }
+        .q-page-container { padding: 0 !important; }
+        .nicegui-content { padding: 0 !important; }
+        .mono { font-family: 'JetBrains Mono', monospace !important; }
+        .q-icon { display: inline-flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important; }
+        .q-card { background: transparent !important; box-shadow: none !important; }
         .section-tight { padding: 32px 64px !important; }
         .section-hero { padding: 60px 64px !important; }
     </style>
-    """)
-
-
-def open_search_dialog():
-    """Open global search dialog."""
-    with ui.dialog() as dialog, ui.card().classes('w-full max-w-2xl p-0').style(
-        'background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px;'
-    ):
-        with ui.column().classes('w-full gap-0'):
-            # Search input
-            with ui.row().classes('w-full items-center gap-3 px-4 py-3').style('border-bottom: 1px solid rgba(56, 189, 248, 0.15);'):
-                ui.icon('search').classes('text-cyan-400 text-xl')
-                search_input = ui.input(placeholder='Search pages, features, models...').classes('flex-1').style(
-                    'background: transparent; border: none; color: white;'
-                ).props('autofocus')
-            
-            # Results container
-            results_container = ui.column().classes('w-full p-2').style('max-height: 400px; overflow-y: auto;')
-            
-            def update_results():
-                results_container.clear()
-                query = search_input.value or ''
-                
-                if len(query) < 1:
-                    with results_container:
-                        ui.label('Type to search across 25+ pages...').classes('text-gray-500 text-sm p-4')
-                    return
-                
-                results = global_search(query, limit=8)
-                
-                if not results:
-                    with results_container:
-                        ui.label(f'No results for "{query}"').classes('text-gray-500 text-sm p-4')
-                    return
-                
-                with results_container:
-                    for r in results:
-                        with ui.row().classes('w-full items-center gap-3 px-4 py-3 rounded-lg cursor-pointer').style(
-                            'transition: background 0.2s;'
-                        ).on('click', lambda p=r['path']: (dialog.close(), ui.navigate.to(p))).on('mouseenter', lambda e: e.sender.style('background: rgba(56, 189, 248, 0.1);')).on('mouseleave', lambda e: e.sender.style('background: transparent;')):
-                            ui.icon('arrow_forward').classes('text-cyan-400 text-sm')
-                            with ui.column().classes('gap-0 flex-1'):
-                                ui.label(r['title']).classes('text-white text-sm font-medium')
-                                ui.label(r['category']).classes('text-gray-500 text-xs')
-            
-            search_input.on('update:model-value', lambda: update_results())
-            search_input.on('keydown.enter', lambda: (dialog.close(), ui.navigate.to(global_search(search_input.value, limit=1)[0]['path'])) if search_input.value and global_search(search_input.value, limit=1) else None)
-            update_results()
-            
-            # Footer hint
-            with ui.row().classes('w-full items-center justify-between px-4 py-2').style('border-top: 1px solid rgba(56, 189, 248, 0.15);'):
-                ui.label('Press ESC to close').classes('text-gray-500 text-xs')
-                ui.label('Enter to open first result').classes('text-gray-500 text-xs')
-    
-    dialog.open()
-
+    ''')
 
 
 def navigation():
-    """Grouped navigation with dropdowns."""
+    """Shared navigation bar with search + user info."""
     with ui.row().classes('w-full items-center justify-between px-6 py-3').style(
         'background: rgba(10, 14, 26, 0.95); border-bottom: 1px solid rgba(56, 189, 248, 0.15); position: sticky; top: 0; z-index: 100;'
     ):
@@ -119,72 +73,47 @@ def navigation():
                 ui.label('CV-INTEGRITY AI').classes('text-white font-bold text-sm')
                 ui.label('AI TRUST PLATFORM').classes('text-gray-500 text-xs tracking-wider')
         
-        # Center: Grouped navigation
-        with ui.row().classes('items-center gap-2'):
-            ui.button('Home', on_click=lambda: ui.navigate.to('/')).props('flat no-caps dense').classes('text-gray-300 text-xs')
-            
-            with ui.button('Data', icon='folder').props('flat no-caps dense').classes('text-cyan-400 text-xs'):
-                with ui.menu().props('auto-close'):
-                    ui.menu_item('Upload', on_click=lambda: ui.navigate.to('/upload'))
-                    ui.menu_item('Datasets', on_click=lambda: ui.navigate.to('/datasets'))
-                    ui.menu_item('Quality', on_click=lambda: ui.navigate.to('/quality'))
-                    ui.menu_item('Formats', on_click=lambda: ui.navigate.to('/formats'))
-            
-            with ui.button('Models', icon='model_training').props('flat no-caps dense').classes('text-blue-400 text-xs'):
-                with ui.menu().props('auto-close'):
-                    ui.menu_item('Model Integrity', on_click=lambda: ui.navigate.to('/model-integrity'))
-                    ui.menu_item('Performance', on_click=lambda: ui.navigate.to('/performance'))
-                    ui.menu_item('Robustness', on_click=lambda: ui.navigate.to('/robustness'))
-                    ui.menu_item('Drift', on_click=lambda: ui.navigate.to('/drift'))
-            
-            with ui.button('Security', icon='security').props('flat no-caps dense').classes('text-red-400 text-xs'):
-                with ui.menu().props('auto-close'):
-                    ui.menu_item('Blockchain', on_click=lambda: ui.navigate.to('/blockchain'))
-                    ui.menu_item('Cybersecurity', on_click=lambda: ui.navigate.to('/cybersecurity'))
-                    ui.menu_item('Backdoor', on_click=lambda: ui.navigate.to('/backdoor'))
-                    ui.menu_item('Replay', on_click=lambda: ui.navigate.to('/replay'))
-                    ui.menu_item('Wallet', on_click=lambda: ui.navigate.to('/wallet'))
-                    ui.menu_item('Attack Simulator', on_click=lambda: ui.navigate.to('/attack-simulator'))
-            
-            with ui.button('Analytics', icon='analytics').props('flat no-caps dense').classes('text-purple-400 text-xs'):
-                with ui.menu().props('auto-close'):
-                    ui.menu_item('Analytics', on_click=lambda: ui.navigate.to('/analytics'))
-                    ui.menu_item('Reports', on_click=lambda: ui.navigate.to('/reports'))
-                    ui.menu_item('XAI', on_click=lambda: ui.navigate.to('/xai'))
-                    ui.menu_item('Video', on_click=lambda: ui.navigate.to('/video'))
-            
-            with ui.button('Team', icon='groups').props('flat no-caps dense').classes('text-amber-400 text-xs'):
-                with ui.menu().props('auto-close'):
-                    ui.menu_item('Collaboration', on_click=lambda: ui.navigate.to('/collaboration'))
-                    ui.menu_item('Contributors', on_click=lambda: ui.navigate.to('/contributors'))
-                    ui.menu_item('Trust', on_click=lambda: ui.navigate.to('/trust'))
-            
-            ui.button('About', on_click=lambda: ui.navigate.to('/about')).props('flat no-caps dense').classes('text-gray-300 text-xs')
+        # Center: Nav links
+        with ui.row().classes('items-center gap-1'):
+            for label, path in [
+                ('Home', '/'),
+                ('Blockchain', '/blockchain'),
+                ('Trust', '/trust'),
+                ('Model Integrity', '/model-integrity'),
+                ('Backdoor', '/backdoor'),
+                ('Wallet', '/wallet'),
+                ('Collaboration', '/collaboration'),
+                ('Contributors', '/contributors'),
+                ('Reports', '/reports'),
+                ('XAI', '/xai'),
+                ('Upload', '/upload'),
+                ('Datasets', '/datasets'),
+                ('Formats', '/formats'),
+                ('Quality', '/quality'),
+                ('Drift', '/drift'),
+                ('Analytics', '/analytics'),
+                ('Video', '/video'),
+                ('Attack Sim', '/attack-simulator'),
+                ('Cyber', '/cybersecurity'),
+                ('Replay', '/replay'),
+                ('Robust', '/robustness'),
+                ('Performance', '/performance'),
+            ]:
+                ui.button(label, on_click=lambda p=path: ui.navigate.to(p)).props('flat no-caps dense').classes('text-gray-400 text-xs')
         
-        # Right: Search + User
+        # Right: Search + Notification + User
         with ui.row().classes('items-center gap-3'):
-            # Simple Search Input
+            # Search bar
             with ui.row().classes('items-center gap-2 px-3 py-1 rounded-lg').style(
-                'background: rgba(21, 21, 42, 0.8); border: 1px solid #252540; width: 220px;'
+                'background: rgba(21, 21, 42, 0.8); border: 1px solid #252540; width: 200px;'
             ):
                 ui.icon('search').classes('text-gray-500 text-sm')
-                
-                def do_search():
-                    q = search_input.value or ''
-                    if q:
-                        results = global_search(q, limit=1)
-                        if results:
-                            ui.navigate.to(results[0]['path'])
-                            search_input.value = ''
-                
-                search_input = ui.input(placeholder='Search...').classes('flex-1').style(
-                    'color: white; font-size: 12px;'
-                ).props('borderless dense')
-                
-                search_input.on('keydown.enter', lambda: do_search())
+                ui.label('Search...').classes('text-gray-500 text-xs')
             
+            # Notification
             ui.icon('notifications_none').classes('text-gray-400 cursor-pointer')
             
+            # User avatar + info
             with ui.row().classes('items-center gap-2'):
                 ui.html('''
                     <div style="width: 32px; height: 32px; border-radius: 50%; 
