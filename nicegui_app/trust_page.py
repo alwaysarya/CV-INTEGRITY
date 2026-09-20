@@ -222,4 +222,5 @@ def create_trust_page():
                 ui.button('⛓️ Blockchain', on_click=lambda: ui.navigate.to('/blockchain')).classes('px-6 py-2 rounded-lg text-sm font-medium').style('background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid #8B5CF6;')
 
 
+
 create_trust_page()

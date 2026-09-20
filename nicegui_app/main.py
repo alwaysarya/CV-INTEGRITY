@@ -1,12 +1,12 @@
 """
 CV-INTEGRITY AI - NiceGUI Application
-All 12 pages registered
+All 21 pages registered + Enhanced Balanced Home Page
 """
 
 from nicegui import ui, app
+from pathlib import Path
 from search import search as global_search
 from styles import apply_styles
-from pathlib import Path
 
 # Import all page creators
 from blockchain_page import create_blockchain_page
@@ -20,88 +20,22 @@ from video_page import create_video_page
 from cybersecurity_page import create_cybersecurity_page
 from robustness_page import create_robustness_page
 from performance_page import create_performance_page
+from auth_page import create_auth_page
 from wallet_page import create_wallet_page
 from reports_page import create_reports_page
-from quality_page import create_quality_page
 from collaboration_page import create_collaboration_page
+from contributors_page import create_contributors_page
+from attack_simulator_page import create_attack_simulator_page
+from format_support_page import create_format_support_page
+from quality_page import create_quality_page
 from model_integrity_page import create_model_integrity_page
 from backdoor_page import create_backdoor_page
-from contributors_page import create_contributors_page
 from replay_page import create_replay_page
-from format_support_page import create_format_support_page
-from attack_simulator_page import create_attack_simulator_page
-from auth_page import create_auth_page
 
 
 # ============================================================
-# SHARED SETUP
+# NAVIGATION
 # ============================================================
-def setup_page():
-    """Shared setup with consistent styles."""
-    apply_styles(ui)
-    ui.add_head_html("""
-    <style>
-        .section-tight { padding: 32px 64px !important; }
-        .section-hero { padding: 60px 64px !important; }
-    </style>
-    """)
-
-
-def open_search_dialog():
-    """Open global search dialog."""
-    with ui.dialog() as dialog, ui.card().classes('w-full max-w-2xl p-0').style(
-        'background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px;'
-    ):
-        with ui.column().classes('w-full gap-0'):
-            # Search input
-            with ui.row().classes('w-full items-center gap-3 px-4 py-3').style('border-bottom: 1px solid rgba(56, 189, 248, 0.15);'):
-                ui.icon('search').classes('text-cyan-400 text-xl')
-                search_input = ui.input(placeholder='Search pages, features, models...').classes('flex-1').style(
-                    'background: transparent; border: none; color: white;'
-                ).props('autofocus')
-            
-            # Results container
-            results_container = ui.column().classes('w-full p-2').style('max-height: 400px; overflow-y: auto;')
-            
-            def update_results():
-                results_container.clear()
-                query = search_input.value or ''
-                
-                if len(query) < 1:
-                    with results_container:
-                        ui.label('Type to search across 25+ pages...').classes('text-gray-500 text-sm p-4')
-                    return
-                
-                results = global_search(query, limit=8)
-                
-                if not results:
-                    with results_container:
-                        ui.label(f'No results for "{query}"').classes('text-gray-500 text-sm p-4')
-                    return
-                
-                with results_container:
-                    for r in results:
-                        with ui.row().classes('w-full items-center gap-3 px-4 py-3 rounded-lg cursor-pointer').style(
-                            'transition: background 0.2s;'
-                        ).on('click', lambda p=r['path']: (dialog.close(), ui.navigate.to(p))).on('mouseenter', lambda e: e.sender.style('background: rgba(56, 189, 248, 0.1);')).on('mouseleave', lambda e: e.sender.style('background: transparent;')):
-                            ui.icon('arrow_forward').classes('text-cyan-400 text-sm')
-                            with ui.column().classes('gap-0 flex-1'):
-                                ui.label(r['title']).classes('text-white text-sm font-medium')
-                                ui.label(r['category']).classes('text-gray-500 text-xs')
-            
-            search_input.on('update:model-value', lambda: update_results())
-            search_input.on('keydown.enter', lambda: (dialog.close(), ui.navigate.to(global_search(search_input.value, limit=1)[0]['path'])) if search_input.value and global_search(search_input.value, limit=1) else None)
-            update_results()
-            
-            # Footer hint
-            with ui.row().classes('w-full items-center justify-between px-4 py-2').style('border-top: 1px solid rgba(56, 189, 248, 0.15);'):
-                ui.label('Press ESC to close').classes('text-gray-500 text-xs')
-                ui.label('Enter to open first result').classes('text-gray-500 text-xs')
-    
-    dialog.open()
-
-
-
 def navigation():
     """Grouped navigation with dropdowns."""
     with ui.row().classes('w-full items-center justify-between px-6 py-3').style(
@@ -119,7 +53,7 @@ def navigation():
                 ui.label('CV-INTEGRITY AI').classes('text-white font-bold text-sm')
                 ui.label('AI TRUST PLATFORM').classes('text-gray-500 text-xs tracking-wider')
         
-        # Center: Grouped navigation
+        # Center: Grouped nav
         with ui.row().classes('items-center gap-2'):
             ui.button('Home', on_click=lambda: ui.navigate.to('/')).props('flat no-caps dense').classes('text-gray-300 text-xs')
             
@@ -163,11 +97,9 @@ def navigation():
         
         # Right: Search + User
         with ui.row().classes('items-center gap-3'):
-            # Simple Search Input
-            with ui.row().classes('items-center gap-2 px-3 py-1 rounded-lg').style(
-                'background: rgba(21, 21, 42, 0.8); border: 1px solid #252540; width: 220px;'
-            ):
+            with ui.row().classes('items-center gap-2 px-3 py-1 rounded-lg').style('background: rgba(21, 21, 42, 0.8); border: 1px solid #252540; width: 220px;'):
                 ui.icon('search').classes('text-gray-500 text-sm')
+                search_input = ui.input(placeholder='Search...').classes('flex-1').style('background: transparent; border: none; color: white; font-size: 12px;').props('borderless dense')
                 
                 def do_search():
                     q = search_input.value or ''
@@ -176,10 +108,6 @@ def navigation():
                         if results:
                             ui.navigate.to(results[0]['path'])
                             search_input.value = ''
-                
-                search_input = ui.input(placeholder='Search...').classes('flex-1').style(
-                    'color: white; font-size: 12px;'
-                ).props('borderless dense')
                 
                 search_input.on('keydown.enter', lambda: do_search())
             
@@ -197,73 +125,209 @@ def navigation():
                     ui.label('Administrator').classes('text-gray-500 text-xs')
 
 
-
 def footer():
-    with ui.row().classes('w-full items-center justify-between px-16 py-4').style(
-        'border-top: 1px solid #252540; margin-top: 40px;'
-    ):
+    with ui.row().classes('w-full items-center justify-between px-16 py-4').style('border-top: 1px solid #252540; margin-top: 40px;'):
         ui.label('© 2026 CV-INTEGRITY AI. All rights reserved.').classes('text-gray-500 text-xs')
         ui.label('Backend: ✅ Connected').classes('text-gray-500 text-xs')
 
 
 # ============================================================
-# HOME PAGE SECTIONS
+# ENHANCED HERO SECTION — BALANCED LAYOUT
 # ============================================================
 def hero_section():
-    with ui.row().classes('w-full items-center justify-between gap-8 section-hero'):
-        with ui.column().classes('gap-5').style('max-width: 560px;'):
-            with ui.row().classes('items-center gap-2 px-3 py-1 rounded-full').style(
-                'background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); width: fit-content;'
-            ):
-                ui.label('⚡').classes('text-cyan-400 text-sm')
-                ui.label('AI-Powered Dataset Integrity').classes('text-cyan-400 text-xs font-medium')
-            ui.label('Verify Your AI Datasets with Confidence').classes('text-white font-bold').style('font-size: 2.75rem; line-height: 1.15;')
-            ui.label('Detect tampering, ensure authenticity, and build trust in your AI models with blockchain-verified dataset integrity.').classes('text-gray-400 text-base').style('line-height: 1.6;')
-            with ui.row().classes('gap-3 mt-2'):
-                ui.button('Upload Dataset →', on_click=lambda: ui.navigate.to('/upload')).classes('px-5 py-2 rounded-lg font-medium text-sm').style('background: linear-gradient(135deg, #38BDF8, #0EA5E9); color: white;')
-                ui.button('▶ View Blockchain', on_click=lambda: ui.navigate.to('/blockchain')).classes('px-5 py-2 rounded-lg font-medium text-sm').style('background: transparent; border: 1px solid #252540; color: white;')
-            with ui.row().classes('items-center gap-6 mt-3'):
-                for val, label in [('99.9%', 'Accuracy'), ('50K+', 'Datasets'), ('1M+', 'Verifications')]:
-                    with ui.column().classes('gap-0'):
-                        ui.label(val).classes('text-white font-bold text-xl')
-                        ui.label(label).classes('text-gray-500 text-xs')
+    """Enhanced hero section with balanced spacing."""
+    ui.add_head_html('''
+    <style>
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes float-up {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.4), 0 0 40px rgba(56, 189, 248, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.7), 0 0 60px rgba(56, 189, 248, 0.4); }
+        }
+        @keyframes ping-dot {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        .hero-gradient-text {
+            background: linear-gradient(90deg, #38BDF8, #8B5CF6, #10B981, #38BDF8);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 4s ease infinite;
+        }
+        .hero-cta-primary {
+            background: linear-gradient(135deg, #38BDF8, #0EA5E9);
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+        .hero-cta-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(56, 189, 248, 0.4);
+        }
+        .hero-cta-secondary {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: white;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .hero-cta-secondary:hover {
+            border-color: rgba(139, 92, 246, 0.8);
+            background: rgba(139, 92, 246, 0.1);
+            transform: translateY(-2px);
+        }
+        .floating-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float-up 6s ease-in-out infinite;
+        }
+        .live-dot {
+            position: relative;
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+        }
+        .live-dot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #10B981;
+            animation: ping-dot 1.5s ease-out infinite;
+        }
+        .stat-glow { transition: all 0.3s ease; }
+        .stat-glow:hover { transform: scale(1.05); filter: drop-shadow(0 0 20px currentColor); }
         
-        with ui.card().classes('p-6').style('background: rgba(15, 23, 42, 0.6); border: 1px solid #252540; border-radius: 16px; min-width: 320px; max-width: 380px;'):
-            for icon, title, sub, color in [('verified', 'Dataset Verified', 'Blockchain confirmed', 'green'), ('fingerprint', 'Hash: 0x7a3f...9b2c', 'SHA-256', 'purple'), ('schedule', 'Last verified', '2 minutes ago', 'blue')]:
-                with ui.row().classes('items-center gap-3 mb-4'):
-                    ui.icon(icon).classes(f'text-{color}-400 text-2xl')
-                    with ui.column().classes('gap-0'):
-                        ui.label(title).classes('text-white font-semibold text-sm')
-                        ui.label(sub).classes('text-gray-500 text-xs')
+        .hero-balanced {
+            padding: 60px 80px !important;
+            gap: 60px !important;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .hero-left { flex: 1 1 55%; max-width: 640px; }
+        .hero-right { flex: 1 1 40%; max-width: 440px; }
+        
+        @media (max-width: 1200px) {
+            .hero-balanced { padding: 40px 40px !important; gap: 40px !important; }
+            .hero-left { max-width: 100%; }
+            .hero-right { max-width: 100%; }
+        }
+    </style>
+    ''')
+    
+    ui.add_body_html('''
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden;">
+        <div class="floating-particle" style="width: 4px; height: 4px; background: #38BDF8; top: 15%; left: 10%; opacity: 0.4; animation-delay: 0s;"></div>
+        <div class="floating-particle" style="width: 6px; height: 6px; background: #8B5CF6; top: 25%; left: 85%; opacity: 0.3; animation-delay: 1s;"></div>
+        <div class="floating-particle" style="width: 3px; height: 3px; background: #10B981; top: 60%; left: 15%; opacity: 0.5; animation-delay: 2s;"></div>
+        <div class="floating-particle" style="width: 5px; height: 5px; background: #F59E0B; top: 70%; left: 80%; opacity: 0.3; animation-delay: 3s;"></div>
+        <div class="floating-particle" style="width: 4px; height: 4px; background: #38BDF8; top: 40%; left: 50%; opacity: 0.4; animation-delay: 4s;"></div>
+        <div class="floating-particle" style="width: 7px; height: 7px; background: #8B5CF6; top: 80%; left: 40%; opacity: 0.2; animation-delay: 5s;"></div>
+    </div>
+    ''')
+    
+    with ui.row().classes('w-full items-center justify-center hero-balanced').style('position: relative; z-index: 1;'):
+        # LEFT: Main content
+        with ui.column().classes('gap-6 hero-left'):
+            with ui.row().classes('items-center gap-2 px-4 py-2 rounded-full').style(
+                'background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); width: fit-content; backdrop-filter: blur(10px);'
+            ):
+                ui.html('<div class="live-dot"></div>')
+                ui.label('AI-Powered Dataset Integrity').classes('text-purple-400 text-xs font-medium tracking-wide')
+            
+            ui.label('Verify Your AI Datasets with Confidence').classes('hero-gradient-text font-bold').style('font-size: 3rem; line-height: 1.15; font-weight: 800;')
+            
+            ui.label('Detect tampering, ensure authenticity, and build trust in your AI models with blockchain-verified dataset integrity.').classes('text-gray-400 text-base').style('line-height: 1.7; max-width: 520px;')
+            
+            with ui.row().classes('gap-3 mt-2'):
+                ui.button('Upload Dataset →', on_click=lambda: ui.navigate.to('/upload')).classes('hero-cta-primary px-6 py-3 rounded-xl font-medium text-sm')
+                ui.button('▶ Watch Demo').classes('hero-cta-secondary px-6 py-3 rounded-xl font-medium text-sm')
+            
+            with ui.row().classes('items-center gap-10 mt-6'):
+                for val, label, color in [('99.9%', 'Accuracy', '#38BDF8'), ('50K+', 'Datasets', '#8B5CF6'), ('1M+', 'Verifications', '#10B981')]:
+                    with ui.column().classes('gap-0 stat-glow').style(f'color: {color};'):
+                        ui.label(val).classes('font-bold text-2xl').style(f'color: {color}; text-shadow: 0 0 20px {color}60;')
+                        ui.label(label).classes('text-gray-500 text-xs tracking-wide')
+        
+        # RIGHT: Verification card
+        with ui.column().classes('gap-4 hero-right'):
+            with ui.card().classes('w-full p-6').style(
+                'background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(56, 189, 248, 0.1);'
+            ):
+                with ui.row().classes('w-full items-center justify-between mb-5'):
+                    with ui.row().classes('items-center gap-2'):
+                        ui.icon('verified').classes('text-green-400 text-2xl')
+                        with ui.column().classes('gap-0'):
+                            ui.label('Dataset Verified').classes('text-white font-bold text-sm')
+                            ui.label('Blockchain confirmed').classes('text-gray-500 text-xs')
+                    with ui.row().classes('items-center gap-1 px-3 py-1 rounded-full').style('background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3);'):
+                        ui.html('<div class="live-dot"></div>')
+                        ui.label('LIVE').classes('text-green-400 text-xs font-bold tracking-wider')
+                
+                with ui.column().classes('w-full gap-2 mb-4 p-4 rounded-xl').style('background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(139, 92, 246, 0.2);'):
+                    with ui.row().classes('items-center gap-2'):
+                        ui.icon('fingerprint').classes('text-purple-400 text-lg')
+                        ui.label('SHA-256 Hash').classes('text-gray-400 text-xs tracking-wider')
+                    ui.label('0x7a3f...9b2c').classes('text-purple-300 text-sm mono font-medium')
+                
+                with ui.column().classes('w-full gap-2 mb-4 p-4 rounded-xl').style('background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(56, 189, 248, 0.2);'):
+                    with ui.row().classes('items-center gap-2'):
+                        ui.icon('schedule').classes('text-cyan-400 text-lg')
+                        ui.label('Last Verified').classes('text-gray-400 text-xs tracking-wider')
+                    ui.label('2 minutes ago').classes('text-cyan-300 text-sm font-medium')
+                
+                with ui.column().classes('w-full gap-2 pt-4').style('border-top: 1px solid rgba(56, 189, 248, 0.15);'):
+                    with ui.row().classes('w-full justify-between items-center'):
+                        ui.label('Trust Score').classes('text-gray-400 text-xs tracking-wider')
+                        ui.label('87%').classes('text-green-400 font-bold text-lg')
+                    ui.html('<div style="background: rgba(255,255,255,0.08); height: 6px; border-radius: 3px; overflow: hidden;"><div style="width: 87%; height: 100%; background: linear-gradient(90deg, #10B981, #38BDF8); border-radius: 3px;"></div></div>')
 
 
+# ============================================================
+# FEATURE CARDS
+# ============================================================
 def feature_cards():
-    """4 feature cards - CLICKABLE."""
-    with ui.row().classes('w-full items-center justify-between gap-4 section-tight'):
+    with ui.row().classes('w-full items-center justify-between gap-3 section-tight'):
         cards = [
-            ('shield', 'Blockchain Secured', 'Immutable records', '#8B5CF6', '/blockchain'),
-            ('psychology', 'XAI Powered', 'Explainable AI', '#3B82F6', '/xai'),
-            ('videocam', 'Video Analysis', 'Deepfake detection', '#10B981', '/video'),
-            ('trending_up', 'Drift Detection', 'Model monitoring', '#F59E0B', '/drift'),
+            ('shield', 'Blockchain', 'Immutable records', '#8B5CF6', '/blockchain'),
+            ('psychology', 'XAI', 'Explainable AI', '#3B82F6', '/xai'),
+            ('videocam', 'Video', 'Object detection', '#10B981', '/video'),
+            ('trending_up', 'Drift', 'Model monitoring', '#F59E0B', '/drift'),
             ('analytics', 'Analytics', 'Data insights', '#06B6D4', '/analytics'),
             ('security', 'Cybersecurity', 'Attack detection', '#EF4444', '/cybersecurity'),
             ('science', 'Robustness', 'Stress testing', '#A78BFA', '/robustness'),
             ('speed', 'Performance', 'Model metrics', '#F472B6', '/performance'),
         ]
         for icon, title, subtitle, color, path in cards:
-            with ui.card().classes('flex-1 p-4 cursor-pointer').style(
+            with ui.card().classes('flex-1 p-3 cursor-pointer').style(
                 'background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px; transition: all 0.3s ease;'
             ).on('click', lambda p=path: ui.navigate.to(p)):
-                with ui.row().classes('items-center gap-3'):
+                with ui.column().classes('items-center gap-1'):
                     ui.icon(icon).classes('text-2xl').style(f'color: {color};')
-                    with ui.column().classes('gap-0'):
-                        ui.label(title).classes('text-white font-semibold text-sm')
-                        ui.label(subtitle).classes('text-gray-500 text-xs')
+                    ui.label(title).classes('text-white font-semibold text-xs text-center')
+                    ui.label(subtitle).classes('text-gray-500 text-xs text-center')
 
 
+# ============================================================
+# TRUST & INSIGHTS
+# ============================================================
 def trust_and_insights():
     with ui.row().classes('w-full gap-6 section-tight'):
-        # Trust Score
         with ui.card().classes('flex-1 p-5').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
             with ui.row().classes('w-full items-center justify-between mb-4'):
                 with ui.row().classes('items-center gap-2'):
@@ -291,7 +355,6 @@ def trust_and_insights():
                                 ui.label(title).classes('text-white text-xs font-medium')
                                 ui.label(sub).classes('text-gray-500 text-xs')
         
-        # Recent Datasets
         with ui.card().classes('flex-1 p-5').style('background: rgba(21, 21, 42, 0.4); border: 1px solid #252540; border-radius: 12px;'):
             with ui.row().classes('w-full items-center justify-between mb-4'):
                 with ui.row().classes('items-center gap-2'):
@@ -311,7 +374,7 @@ def trust_and_insights():
 # ============================================================
 @ui.page('/')
 def home():
-    setup_page()
+    apply_styles(ui)
     navigation()
     hero_section()
     feature_cards()
@@ -324,7 +387,7 @@ def home():
 # ============================================================
 @ui.page('/solutions')
 def solutions():
-    setup_page()
+    apply_styles(ui)
     navigation()
     with ui.column().classes('w-full section-tight gap-6'):
         ui.label('Our Solutions').classes('text-white font-bold text-4xl')
@@ -350,7 +413,7 @@ def solutions():
 # ============================================================
 @ui.page('/about')
 def about():
-    setup_page()
+    apply_styles(ui)
     navigation()
     with ui.column().classes('w-full section-tight gap-6'):
         ui.label('About CV-INTEGRITY AI').classes('text-white font-bold text-4xl')
@@ -380,17 +443,17 @@ create_video_page()
 create_cybersecurity_page()
 create_robustness_page()
 create_performance_page()
+create_auth_page()
 create_wallet_page()
 create_reports_page()
-create_quality_page()
 create_collaboration_page()
+create_contributors_page()
+create_attack_simulator_page()
+create_format_support_page()
+create_quality_page()
 create_model_integrity_page()
 create_backdoor_page()
-create_contributors_page()
 create_replay_page()
-create_format_support_page()
-create_attack_simulator_page()
-create_auth_page()
 
 
 # ============================================================
