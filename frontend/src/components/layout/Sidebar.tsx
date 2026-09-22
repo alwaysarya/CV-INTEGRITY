@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Database, Brain, Shield, BarChart3,
   Video, Users, Settings, Link as LinkIcon, Wallet,
   FileText, AlertTriangle, Activity, Lock, Cpu,
-  TrendingUp, Zap, Eye, Menu, Fingerprint
+  TrendingUp, Zap, Eye, Menu, Fingerprint, Bug
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -23,6 +23,10 @@ const navItems = [
   { label: 'Robustness', path: '/robustness', icon: Zap },
   { label: 'Performance', path: '/performance', icon: Cpu },
   { label: 'Wallets', path: '/wallets', icon: Wallet },
+  { label: 'Model Integrity', path: '/model-integrity', icon: Fingerprint },
+  { label: 'Backdoor Detection', path: '/backdoor', icon: Bug },
+  { label: 'Dataset Analysis', path: '/dataset-analysis', icon: Database },
+  { label: 'Assurance Report', path: '/assurance', icon: FileText },
   { label: 'Reports', path: '/reports', icon: FileText },
   { label: 'Team', path: '/team', icon: Users },
   { label: 'Settings', path: '/settings', icon: Settings },

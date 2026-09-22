@@ -20,6 +20,10 @@ import { Team } from '@/pages/Team'
 import { Settings } from '@/pages/Settings'
 import { TamperDetection } from '@/pages/TamperDetection'
 import { NotFound } from '@/pages/NotFound'
+import { BackdoorDetection } from '@/pages/BackdoorDetection'
+import { DatasetAnalysis } from '@/pages/DatasetAnalysis'
+import { AssuranceReport } from '@/pages/AssuranceReport'
+import { ModelIntegrity } from '@/pages/ModelIntegrity'
 
 function App() {
   return (
@@ -45,6 +49,10 @@ function App() {
           <Route path="team" element={<Team />} />
           <Route path="settings" element={<Settings />} />
           <Route path="tamper" element={<TamperDetection />} />
+          <Route path="model-integrity" element={<ModelIntegrity />} />
+          <Route path="backdoor" element={<BackdoorDetection />} />
+          <Route path="dataset-analysis" element={<DatasetAnalysis />} />
+          <Route path="assurance" element={<AssuranceReport />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

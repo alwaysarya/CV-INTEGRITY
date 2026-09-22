@@ -5,10 +5,11 @@ const API_BASE_URL = 'http://localhost:8000'
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 10000,
+  timeout: 30000,
 })
 
 export const apiClient = {
+  // Original
   getRoot: () => api.get('/'),
   getHealth: () => api.get('/health'),
   getDatasets: () => api.get('/api/datasets'),
@@ -26,6 +27,19 @@ export const apiClient = {
   getContracts: () => api.get('/api/contracts'),
   verifyIntegrity: (data: any) => api.post('/api/verify', data),
   getStats: () => api.get('/api/stats'),
+
+  // New Premium Endpoints
+  getModelFingerprints: () => api.get('/api/model/fingerprints'),
+  getModelFingerprint: (modelPath: string) =>
+    api.post('/api/model/fingerprint', { model_path: modelPath }),
+  xaiExplain: (data: any) => api.post('/api/xai/explain', data),
+  backdoorDetect: (data: any) => api.post('/api/backdoor/detect', data),
+  sourceRiskAnalyze: (contributors: any[]) =>
+    api.post('/api/source-risk/analyze', { contributors }),
+  loadDataset: (datasetPath: string) =>
+    api.post('/api/dataset/load', { dataset_path: datasetPath }),
+  getAvailableDatasets: () => api.get('/api/dataset/available'),
+  getAssuranceReport: () => api.get('/api/assurance/report'),
 }
 
 export default apiClient

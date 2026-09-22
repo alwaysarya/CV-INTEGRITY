@@ -37,6 +37,14 @@ if FASTAPI_AVAILABLE:
         allow_headers=["*"],
     )
     
+    # Register premium routes
+    try:
+        from api.routes.premium import router as premium_router
+        app.include_router(premium_router)
+        print("✅ Premium routes registered: 8 new endpoints")
+    except Exception as e:
+        print(f"⚠️ Failed to register premium routes: {e}")
+    
     REPORTS = Path(__file__).parent.parent / "outputs" / "reports"
     
     def load_json(filename):
