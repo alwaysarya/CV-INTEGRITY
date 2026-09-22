@@ -45,6 +45,14 @@ if FASTAPI_AVAILABLE:
     except Exception as e:
         print(f"⚠️ Failed to register premium routes: {e}")
     
+    # Register cybersecurity routes
+    try:
+        from api.routes.cybersecurity import router as cybersecurity_router
+        app.include_router(cybersecurity_router)
+        print("✅ Cybersecurity routes registered")
+    except Exception as e:
+        print(f"⚠️ Failed to register cybersecurity routes: {e}")
+    
     REPORTS = Path(__file__).parent.parent / "outputs" / "reports"
     
     def load_json(filename):
