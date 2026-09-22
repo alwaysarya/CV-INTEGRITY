@@ -3,36 +3,29 @@ import {
   LayoutDashboard, Database, Brain, Shield, BarChart3,
   Video, Users, Settings, Link as LinkIcon, Wallet,
   FileText, AlertTriangle, Activity, Lock, Cpu,
-  TrendingUp, Zap, Eye, Search, Menu
+  TrendingUp, Zap, Eye, Menu, Fingerprint
 } from 'lucide-react'
 import { useState } from 'react'
 
-interface NavItem {
-  label: string
-  path: string
-  icon: any
-  group?: string
-}
-
-const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard, group: 'main' },
-  { label: 'Datasets', path: '/datasets', icon: Database, group: 'data' },
-  { label: 'Models', path: '/models', icon: Brain, group: 'data' },
-  { label: 'Trust Scores', path: '/trust', icon: Shield, group: 'data' },
-  { label: 'Analytics', path: '/analytics', icon: BarChart3, group: 'data' },
-  { label: 'Blockchain', path: '/blockchain', icon: LinkIcon, group: 'security' },
-  { label: 'Cybersecurity', path: '/cybersecurity', icon: Lock, group: 'security' },
-  { label: 'Attack Simulator', path: '/attacks', icon: AlertTriangle, group: 'security' },
-  { label: 'Tamper Detection', path: '/tamper', icon: Eye, group: 'security' },
-  { label: 'XAI', path: '/xai', icon: Activity, group: 'ai' },
-  { label: 'Video Analysis', path: '/video', icon: Video, group: 'ai' },
-  { label: 'Drift Monitor', path: '/drift', icon: TrendingUp, group: 'ai' },
-  { label: 'Robustness', path: '/robustness', icon: Zap, group: 'ai' },
-  { label: 'Performance', path: '/performance', icon: Cpu, group: 'ai' },
-  { label: 'Wallets', path: '/wallets', icon: Wallet, group: 'blockchain' },
-  { label: 'Reports', path: '/reports', icon: FileText, group: 'team' },
-  { label: 'Team', path: '/team', icon: Users, group: 'team' },
-  { label: 'Settings', path: '/settings', icon: Settings, group: 'team' },
+const navItems = [
+  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Datasets', path: '/datasets', icon: Database },
+  { label: 'Models', path: '/models', icon: Brain },
+  { label: 'Trust Scores', path: '/trust', icon: Shield },
+  { label: 'Analytics', path: '/analytics', icon: BarChart3 },
+  { label: 'Blockchain', path: '/blockchain', icon: LinkIcon },
+  { label: 'Cybersecurity', path: '/cybersecurity', icon: Lock },
+  { label: 'Attack Simulator', path: '/attacks', icon: AlertTriangle },
+  { label: 'Tamper Detection', path: '/tamper', icon: Fingerprint },
+  { label: 'XAI', path: '/xai', icon: Activity },
+  { label: 'Video Analysis', path: '/video', icon: Video },
+  { label: 'Drift Monitor', path: '/drift', icon: TrendingUp },
+  { label: 'Robustness', path: '/robustness', icon: Zap },
+  { label: 'Performance', path: '/performance', icon: Cpu },
+  { label: 'Wallets', path: '/wallets', icon: Wallet },
+  { label: 'Reports', path: '/reports', icon: FileText },
+  { label: 'Team', path: '/team', icon: Users },
+  { label: 'Settings', path: '/settings', icon: Settings },
 ]
 
 export function Sidebar() {
@@ -47,7 +40,7 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-cyan-500/10">
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 hover-scale">
           <span className="text-lg">🧠</span>
         </div>
         {!collapsed && (
@@ -58,7 +51,7 @@ export function Sidebar() {
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-gray-500 hover:text-white transition-colors"
+          className="text-gray-500 hover:text-white transition-colors hover-scale"
         >
           <Menu size={16} />
         </button>
@@ -74,18 +67,21 @@ export function Sidebar() {
             <NavLink
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative ${
                 isActive
-                  ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/10 text-cyan-400 border border-cyan-500/30'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/10 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/10'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5 hover:translate-x-0.5'
               }`}
             >
-              <Icon size={18} className={isActive ? 'text-cyan-400' : ''} />
+              <Icon size={18} className={`${isActive ? 'text-cyan-400' : 'group-hover:text-cyan-400'} transition-colors`} />
               {!collapsed && (
                 <span className="text-sm font-medium">{item.label}</span>
               )}
               {isActive && !collapsed && (
                 <span className="ml-auto w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50" />
+              )}
+              {isActive && collapsed && (
+                <span className="absolute right-1 w-1 h-6 rounded-full bg-cyan-400" />
               )}
             </NavLink>
           )
@@ -95,7 +91,7 @@ export function Sidebar() {
       {/* Bottom Badge */}
       {!collapsed && (
         <div className="p-4 border-t border-cyan-500/10">
-          <div className="text-[10px] text-gray-600 tracking-wider text-center">
+          <div className="text-[10px] text-gray-600 tracking-wider text-center hover:text-cyan-400 transition-colors">
             SIH-1 · QUANTUM-EYE v1.0
           </div>
         </div>
