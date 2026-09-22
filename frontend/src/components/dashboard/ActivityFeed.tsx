@@ -1,57 +1,70 @@
+import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { CheckCircle, AlertCircle, Zap, UserPlus, Shield, Database } from 'lucide-react'
+import { Activity, Loader2 } from 'lucide-react'
+import apiClient from '@/lib/api'
 
-interface Activity {
-  id: number
-  icon: any
-  text: string
-  time: string
-  color: string
+const actionColors: Record<string, string> = {
+  GENESIS: '#8B5CF6',
+  DATASET_UPLOAD: '#38BDF8',
+  MODEL_TRAINING: '#10B981',
+  TRUST_EVALUATION: '#F59E0B',
+  INFERENCE_RECORD: '#EF4444',
 }
 
-const activities: Activity[] = [
-  { id: 1, icon: Database, text: "Dataset 'Drone-Detection' verified", time: '2 min ago', color: '#10B981' },
-  { id: 2, icon: Zap, text: "Model 'YOLOv8n' deployed", time: '14 min ago', color: '#38BDF8' },
-  { id: 3, icon: UserPlus, text: "New user 'Priya Sharma' joined", time: '28 min ago', color: '#8B5CF6' },
-  { id: 4, icon: AlertCircle, text: "Suspicious activity detected (CAM-04)", time: '42 min ago', color: '#EF4444' },
-  { id: 5, icon: Shield, text: "Blockchain block #006 mined", time: '1 hr ago', color: '#10B981' },
-  { id: 6, icon: CheckCircle, text: "COCO-2017 integrity check passed", time: '2 hr ago', color: '#10B981' },
-]
-
 export function ActivityFeed() {
+  const [activities, setActivities] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => { load() }, [])
+  const load = async () => {
+    try {
+      const res = await apiClient.getBlocks()
+      const blocks = res.data.blocks || []
+      const list = blocks.slice().reverse().slice(0, 6).map((b: any, i: number) => {
+        const action = b.data?.action || 'UNKNOWN'
+        const color = actionColors[action] || '#38BDF8'
+        let text = `Block #${b.index}: ${action}`
+        if (b.data?.dataset_name) text += ` — ${b.data.dataset_name}`
+        if (b.data?.model) text += ` — ${b.data.model}`
+        if (b.data?.trust_score) text += ` (${b.data.trust_score}%)`
+        return {
+          id: i,
+          text,
+          time: b.datetime ? new Date(b.datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+          color,
+        }
+      })
+      setActivities(list)
+    } catch (err) { console.error(err) } finally { setLoading(false) }
+  }
+
   return (
     <Card className="glass-card border-cyan-500/20 p-5 h-full">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-white font-bold text-sm">RECENT ACTIVITY</h3>
-          <p className="text-gray-500 text-xs mt-0.5">Latest actions across the platform</p>
-        </div>
-        <button className="text-cyan-400 text-xs hover:text-cyan-300">View Logs →</button>
+      <div className="mb-4">
+        <h3 className="text-white font-bold text-sm">RECENT ACTIVITY</h3>
+        <p className="text-gray-500 text-xs mt-0.5">Real blockchain events</p>
       </div>
 
-      <div className="space-y-2">
-        {activities.map((activity) => {
-          const Icon = activity.icon
-          return (
-            <div
-              key={activity.id}
-              className="group flex items-center gap-3 p-2.5 rounded-lg transition-all hover:translate-x-1"
-              style={{ borderLeft: `2px solid ${activity.color}`, backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
-            >
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: `${activity.color}15`, border: `1px solid ${activity.color}40` }}
-              >
-                <Icon size={12} style={{ color: activity.color }} />
+      {loading ? (
+        <div className="text-center py-8"><Loader2 className="animate-spin text-cyan-400 mx-auto" size={24} /></div>
+      ) : (
+        <div className="space-y-2">
+          {activities.map((a) => (
+            <div key={a.id} className="flex items-center gap-3 p-2.5 rounded-lg transition-all hover:translate-x-1" style={{
+              borderLeft: `2px solid ${a.color}`,
+              backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            }}>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${a.color}15`, border: `1px solid ${a.color}40` }}>
+                <Activity size={12} style={{ color: a.color }} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-gray-300 text-xs truncate">{activity.text}</div>
+                <div className="text-gray-300 text-xs truncate">{a.text}</div>
               </div>
-              <div className="text-gray-500 text-[10px] flex-shrink-0">{activity.time}</div>
+              <div className="text-gray-500 text-[10px] flex-shrink-0">{a.time}</div>
             </div>
-          )
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </Card>
   )
 }
