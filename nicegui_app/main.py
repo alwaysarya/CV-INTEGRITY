@@ -1,13 +1,12 @@
 """
 CV-INTEGRITY AI - NiceGUI Application
-TRUST COMMAND CENTER + Apple Liquid Glass
-All 21 pages registered
+Apple Liquid Glass Premium UI + All 21 pages registered
 """
 
 from nicegui import ui, app
 from pathlib import Path
 from search import search as global_search
-from styles import apply_styles, apply_apple_glass, apply_trust_command_styles
+from styles import apply_styles, apply_apple_glass
 
 # Import all page creators
 from blockchain_page import create_blockchain_page
@@ -119,16 +118,19 @@ def footer():
 
 
 # ============================================================
-# TRUST COMMAND CENTER — NEW HERO SECTION
+# HERO SECTION
 # ============================================================
 def hero_section():
-    """Split-screen hero with Trust Core 3D crystal."""
     ui.add_head_html('''
     <style>
         @keyframes gradient-shift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
+        }
+        @keyframes ping-dot {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
         }
         .hero-gradient-text {
             background: linear-gradient(90deg, #38BDF8, #8B5CF6, #10B981, #38BDF8);
@@ -142,11 +144,10 @@ def hero_section():
             background: linear-gradient(135deg, #38BDF8, #0EA5E9);
             color: white;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
         }
         .hero-cta-primary:hover {
             transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 0 60px rgba(56, 189, 248, 0.7), 0 15px 40px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 15px 40px rgba(56, 189, 248, 0.5), 0 0 80px rgba(56, 189, 248, 0.3);
         }
         .hero-cta-secondary {
             background: rgba(15, 23, 42, 0.6);
@@ -163,27 +164,17 @@ def hero_section():
         .stat-glow { transition: all 0.3s ease; }
         .stat-glow:hover { transform: scale(1.05); filter: drop-shadow(0 0 25px currentColor); }
         
-        .hero-command {
-            padding: 60px 80px !important;
-            gap: 80px !important;
+        .hero-balanced {
+            padding: 80px 80px !important;
+            gap: 60px !important;
             max-width: 1400px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
         }
-        .hero-left { flex: 1 1 50%; max-width: 620px; }
-        .hero-right { flex: 1 1 45%; display: flex; align-items: center; justify-content: center; }
+        .hero-left { flex: 1 1 55%; max-width: 640px; }
+        .hero-right { flex: 1 1 40%; max-width: 460px; }
         
-        .command-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            backdrop-filter: blur(20px);
-        }
         .live-dot {
             position: relative;
             display: inline-block;
@@ -203,128 +194,283 @@ def hero_section():
             background: #10B981;
             animation: ping-dot 1.5s ease-out infinite;
         }
-        @keyframes ping-dot {
-            0% { transform: scale(0.8); opacity: 1; }
-            100% { transform: scale(2.5); opacity: 0; }
-        }
     </style>
     ''')
     
-    with ui.row().classes('w-full items-center justify-center hero-command'):
-        # LEFT: Message
+
+
+
+
+
+    ui.add_head_html("""
+    <style>
+        /* === TEXT REVOLVE CIRCLES === */
+        @keyframes revolve-cw {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        @keyframes revolve-ccw {
+            from { transform: translate(-50%, -50%) rotate(360deg); }
+            to { transform: translate(-50%, -50%) rotate(0deg); }
+        }
+        @keyframes orbit-dot {
+            from { transform: translate(-50%, -50%) rotate(0deg) translateX(var(--orbit-r)) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg) translateX(var(--orbit-r)) rotate(-360deg); }
+        }
+        @keyframes pulse-ring {
+            0%, 100% { 
+                opacity: 0.4;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% { 
+                opacity: 0.7;
+                transform: translate(-50%, -50%) scale(1.03);
+            }
+        }
+        
+        .hero-text-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .hero-text-wrap .revolve-cluster {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Ring 1 - Cyan */
+        .hero-text-wrap .ring-1 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 380px;
+            height: 380px;
+            border: 1.5px solid rgba(56, 189, 248, 0.35);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: revolve-cw 18s linear infinite;
+            box-shadow: 
+                0 0 30px rgba(56, 189, 248, 0.2),
+                inset 0 0 30px rgba(56, 189, 248, 0.1);
+            backdrop-filter: blur(2px);
+        }
+        .hero-text-wrap .ring-1::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: #38BDF8;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 15px #38BDF8, 0 0 30px #38BDF8;
+        }
+        
+        /* Ring 2 - Purple */
+        .hero-text-wrap .ring-2 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 480px;
+            height: 480px;
+            border: 1.5px dashed rgba(139, 92, 246, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: revolve-ccw 25s linear infinite;
+            box-shadow: 
+                0 0 40px rgba(139, 92, 246, 0.15),
+                inset 0 0 40px rgba(139, 92, 246, 0.08);
+        }
+        .hero-text-wrap .ring-2::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -5px;
+            width: 8px;
+            height: 8px;
+            background: #8B5CF6;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #8B5CF6, 0 0 24px #8B5CF6;
+        }
+        
+        /* Ring 3 - Green dashed outer */
+        .hero-text-wrap .ring-3 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 580px;
+            height: 580px;
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: revolve-cw 35s linear infinite;
+        }
+        .hero-text-wrap .ring-3::before {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: #10B981;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px #10B981, 0 0 20px #10B981;
+        }
+        
+        /* Content on top */
+        .hero-text-wrap > .hero-text-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        @media (max-width: 1100px) {
+            .hero-text-wrap .ring-3 { display: none; }
+            .hero-text-wrap .ring-2 { width: 380px; height: 380px; }
+            .hero-text-wrap .ring-1 { width: 300px; height: 300px; }
+        }
+        @media (max-width: 768px) {
+            .hero-text-wrap .ring-2 { display: none; }
+            .hero-text-wrap .ring-1 { width: 250px; height: 250px; }
+        }
+    </style>
+    """)
+
+
+    ui.add_head_html("""
+    <style>
+        /* REVOLVE-CSS-V2: Circles behind hero (pure CSS) */
+        @keyframes revolve-slow {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        @keyframes revolve-reverse {
+            0% { transform: translate(-50%, -50%) rotate(360deg); }
+            100% { transform: translate(-50%, -50%) rotate(0deg); }
+        }
+        
+        .hero-balanced::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 700px;
+            height: 700px;
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: revolve-slow 40s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .hero-balanced::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 900px;
+            height: 900px;
+            border: 1px solid rgba(139, 92, 246, 0.12);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: revolve-reverse 60s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Ensure content is above circles */
+        .hero-balanced > * {
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Extra outer ring with 3rd circle via pseudo on body */
+        .q-page-container::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 1100px;
+            height: 1100px;
+            border: 1px dashed rgba(16, 185, 129, 0.08);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: revolve-slow 80s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @media (max-width: 1400px) {
+            .q-page-container::before { display: none; }
+        }
+        @media (max-width: 1100px) {
+            .hero-balanced::before,
+            .hero-balanced::after { display: none; }
+        }
+    </style>
+    """)
+
+    with ui.row().classes('w-full items-center justify-center hero-balanced'):
         with ui.column().classes('gap-6 hero-left'):
-            with ui.element('div').classes('command-badge'):
+            with ui.row().classes('items-center gap-2 px-4 py-2 rounded-full').style(
+                'background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); width: fit-content; backdrop-filter: blur(20px);'
+            ):
                 ui.html('<div class="live-dot"></div>')
-                ui.label('AI TRUST INFRASTRUCTURE').classes('text-purple-400 text-xs font-medium tracking-widest')
+                ui.label('AI-Powered Dataset Integrity').classes('text-purple-400 text-xs font-medium tracking-wide')
             
-            ui.label('VERIFY. PROTECT. TRUST.').classes('hero-gradient-text font-bold').style('font-size: 3.75rem; line-height: 1.05; font-weight: 900; letter-spacing: -0.03em;')
+            ui.label('Verify Your AI Datasets with Confidence').classes('hero-gradient-text font-bold').style('font-size: 3.5rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em;')
             
-            ui.label('Make every AI dataset verifiable before deployment.').classes('text-gray-400 text-lg').style('line-height: 1.7; max-width: 540px;')
+            ui.label('Detect tampering, ensure authenticity, and build trust in your AI models with blockchain-verified dataset integrity.').classes('text-gray-400 text-lg').style('line-height: 1.7; max-width: 540px;')
             
             with ui.row().classes('gap-3 mt-3'):
                 ui.button('Upload Dataset →', on_click=lambda: ui.navigate.to('/upload')).classes('hero-cta-primary magnetic-btn px-7 py-3 rounded-xl font-semibold text-sm')
-                ui.button('▶ Explore Platform').classes('hero-cta-secondary magnetic-btn px-7 py-3 rounded-xl font-semibold text-sm')
+                ui.button('▶ Watch Demo').classes('hero-cta-secondary magnetic-btn px-7 py-3 rounded-xl font-semibold text-sm')
             
             with ui.row().classes('items-center gap-12 mt-8'):
-                for val, label, color in [('1M+', 'Verifications', '#38BDF8'), ('50K+', 'Datasets', '#8B5CF6'), ('99.9%', 'Detection', '#10B981')]:
+                for val, label, color in [('99.9%', 'Accuracy', '#38BDF8'), ('50K+', 'Datasets', '#8B5CF6'), ('1M+', 'Verifications', '#10B981')]:
                     with ui.column().classes('gap-0 stat-glow').style(f'color: {color};'):
                         ui.label(val).classes('font-bold text-3xl').style(f'color: {color}; text-shadow: 0 0 30px {color}80; letter-spacing: -0.02em;')
-                        ui.label(label).classes('text-gray-500 text-xs tracking-widest uppercase')
+                        ui.label(label).classes('text-gray-500 text-xs tracking-wide uppercase')
         
-        # RIGHT: Trust Core
-        with ui.column().classes('hero-right'):
-            with ui.element('div').classes('trust-core-wrapper'):
-                # Orbiting nodes
-                ui.html('''
-                    <div class="orbit-node orbit-1">
-                        <span class="orbit-node-label">DATASET</span>
-                        <span class="orbit-node-value">ImageNet</span>
-                    </div>
-                    <div class="orbit-node orbit-2">
-                        <span class="orbit-node-label">SHA-256</span>
-                        <span class="orbit-node-value">7a3f</span>
-                    </div>
-                    <div class="orbit-node orbit-3">
-                        <span class="orbit-node-label">BLOCK</span>
-                        <span class="orbit-node-value">#006</span>
-                    </div>
-                ''')
-                # Center core
-                with ui.element('div').classes('trust-core'):
-                    with ui.element('div').classes('trust-core-inner'):
-                        ui.label('TRUST SCORE').classes('trust-core-label')
-                        ui.label('87%').classes('trust-core-value')
-                        ui.label('VERIFIED').classes('trust-core-sublabel')
-
-
-# ============================================================
-# ATTACK SIMULATOR SECTION
-# ============================================================
-def attack_simulator_section():
-    """Interactive attack injection demo."""
-    with ui.column().classes('w-full section-tight gap-6'):
-        with ui.column().classes('items-center gap-2 w-full'):
-            with ui.row().classes('items-center gap-3'):
-                ui.icon('warning').classes('text-red-400 text-3xl')
-                ui.label('Attack Simulation').classes('text-white font-bold text-3xl')
-            ui.label('Inject a real attack and see detection in action').classes('text-gray-400 text-sm')
-        
-        with ui.element('div').classes('attack-simulator-card'):
-            with ui.row().classes('w-full items-center justify-between'):
-                with ui.column().classes('gap-1'):
-                    ui.label('Data Poisoning Attack').classes('text-white font-bold text-xl')
-                    ui.label('Simulates malicious modification of dataset samples').classes('text-gray-400 text-sm')
-                ui.button('💉 INJECT POISONING', on_click=lambda: ui.navigate.to('/attack-simulator')).classes('inject-btn')
-            
-            # Attack stages preview (static visual)
-            with ui.element('div').classes('attack-stage'):
-                stages = [
-                    ('⚠️', 'ANOMALY DETECTED', '37 suspicious samples', '#EF4444'),
-                    ('📊', 'FEATURE DRIFT', '+18.4% change', '#F59E0B'),
-                    ('🔐', 'SHA-256 MISMATCH', 'Hash invalid', '#EF4444'),
-                    ('⛓️', 'BLOCKCHAIN FAILED', 'Verification failed', '#DC2626'),
-                ]
-                for icon, label, value, color in stages:
-                    with ui.element('div').classes('attack-stage-row'):
-                        with ui.element('div').classes('attack-stage-icon').style(f'background: {color}20; border: 1px solid {color}40;'):
-                            ui.label(icon).classes('text-sm')
-                        ui.label(label).classes('attack-stage-label')
-                        ui.label(value).classes('attack-stage-value').style(f'color: {color};')
+        with ui.column().classes('gap-4 hero-right'):
+            with ui.card().classes('liquid-glass specular w-full p-6').style('border-radius: 24px;'):
+                with ui.row().classes('w-full items-center justify-between mb-5'):
+                    with ui.row().classes('items-center gap-2'):
+                        ui.icon('verified').classes('text-green-400 text-2xl')
+                        with ui.column().classes('gap-0'):
+                            ui.label('Dataset Verified').classes('text-white font-bold text-sm')
+                            ui.label('Blockchain confirmed').classes('text-gray-500 text-xs')
+                    with ui.row().classes('items-center gap-1 px-3 py-1 rounded-full').style('background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3);'):
+                        ui.html('<div class="live-dot"></div>')
+                        ui.label('LIVE').classes('text-green-400 text-xs font-bold tracking-wider')
                 
-                with ui.element('div').classes('data-blocked'):
-                    ui.label('DATA BLOCKED').classes('text-red-400 font-bold text-2xl tracking-wider')
-                    ui.label('Dataset quarantined by blockchain verification').classes('text-gray-400 text-xs mt-1')
-
-
-# ============================================================
-# AI INTEGRITY LAYERS SECTION
-# ============================================================
-def integrity_layers():
-    """8 AI integrity feature cards with glow."""
-    with ui.column().classes('w-full section-tight gap-6'):
-        with ui.column().classes('items-center gap-2 w-full'):
-            with ui.row().classes('items-center gap-3'):
-                ui.icon('layers').classes('text-cyan-400 text-3xl')
-                ui.label('AI Integrity Layers').classes('text-white font-bold text-3xl')
-            ui.label('Eight specialized modules protecting your AI pipeline').classes('text-gray-400 text-sm')
-        
-        with ui.row().classes('w-full gap-4 justify-center flex-wrap'):
-            layers = [
-                ('shield', 'Blockchain', 'Immutable records', '#8B5CF6', '/blockchain'),
-                ('psychology', 'XAI', 'Explainable AI', '#3B82F6', '/xai'),
-                ('trending_up', 'Drift', 'Model monitoring', '#F59E0B', '/drift'),
-                ('security', 'Security', 'Attack detection', '#EF4444', '/cybersecurity'),
-                ('analytics', 'Analytics', 'Data insights', '#06B6D4', '/analytics'),
-                ('videocam', 'Video', 'Object detection', '#10B981', '/video'),
-                ('science', 'Robustness', 'Stress testing', '#A78BFA', '/robustness'),
-                ('speed', 'Performance', 'Model metrics', '#F472B6', '/performance'),
-            ]
-            for icon, title, subtitle, color, path in layers:
-                with ui.element('div').classes('integrity-card').style(f'--layer-color: {color}; --layer-glow: {color}20; min-width: 180px; flex: 0 0 calc(25% - 16px); max-width: 240px;').on('click', lambda p=path: ui.navigate.to(p)):
-                    with ui.element('div').classes('integrity-icon'):
-                        ui.icon(icon).classes('text-2xl').style(f'color: {color};')
-                    ui.label(title).classes('text-white font-bold text-base')
-                    ui.label(subtitle).classes('text-gray-500 text-xs mt-1')
+                with ui.column().classes('w-full gap-2 mb-4 p-4 rounded-xl').style('background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(139, 92, 246, 0.2); backdrop-filter: blur(20px);'):
+                    with ui.row().classes('items-center gap-2'):
+                        ui.icon('fingerprint').classes('text-purple-400 text-lg')
+                        ui.label('SHA-256 Hash').classes('text-gray-400 text-xs tracking-wider')
+                    ui.label('0x7a3f...9b2c').classes('text-purple-300 text-sm mono font-medium')
+                
+                with ui.column().classes('w-full gap-2 mb-4 p-4 rounded-xl').style('background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(20px);'):
+                    with ui.row().classes('items-center gap-2'):
+                        ui.icon('schedule').classes('text-cyan-400 text-lg')
+                        ui.label('Last Verified').classes('text-gray-400 text-xs tracking-wider')
+                    ui.label('2 minutes ago').classes('text-cyan-300 text-sm font-medium')
+                
+                with ui.column().classes('w-full gap-2 pt-4').style('border-top: 1px solid rgba(255,255,255,0.08);'):
+                    with ui.row().classes('w-full justify-between items-center'):
+                        ui.label('Trust Score').classes('text-gray-400 text-xs tracking-wider')
+                        ui.label('87%').classes('text-green-400 font-bold text-lg')
+                    ui.html('<div style="background: rgba(255,255,255,0.08); height: 6px; border-radius: 3px; overflow: hidden;"><div style="width: 87%; height: 100%; background: linear-gradient(90deg, #10B981, #38BDF8); border-radius: 3px;"></div></div>')
 
 
 # ============================================================
@@ -333,10 +479,52 @@ def integrity_layers():
 def live_stats_counter():
     ui.add_head_html('''
     <style>
-        .live-stat-card { text-align: center; position: relative; overflow: hidden; transition: all 0.4s ease; }
-        .live-stat-value { font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; color: var(--stat-color); text-shadow: 0 0 40px var(--stat-color); }
-        .live-stat-label { color: #6B7280; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin-top: 8px; }
-        .live-stat-icon { font-size: 2rem; color: var(--stat-color); margin-bottom: 12px; }
+        .live-stat-card {
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .live-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, var(--stat-color-alpha) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .live-stat-card:hover::before {
+            opacity: 1;
+        }
+        .live-stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--stat-color);
+            text-shadow: 0 0 40px var(--stat-color);
+            position: relative;
+            z-index: 1;
+        }
+        .live-stat-label {
+            color: #6B7280;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .live-stat-icon {
+            font-size: 2rem;
+            color: var(--stat-color);
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
     </style>
     ''')
     
@@ -348,16 +536,40 @@ def live_stats_counter():
             ('6', 'Blocks Mined', '#F59E0B', 'link'),
         ]
         for val, label, color, icon in stats:
-            with ui.card().classes('liquid-glass live-stat-card specular p-6').style(f'--stat-color: {color}; flex: 1; max-width: 280px; border-radius: 24px;'):
+            with ui.card().classes('liquid-glass live-stat-card specular p-6').style(f'--stat-color: {color}; --stat-color-alpha: {color}20; flex: 1; max-width: 280px; border-radius: 24px;'):
                 ui.icon(icon).classes('live-stat-icon').style(f'color: {color};')
                 ui.label(val).classes('live-stat-value')
                 ui.label(label).classes('live-stat-label')
 
 
 # ============================================================
+# FEATURE CARDS
+# ============================================================
+def feature_cards():
+    with ui.row().classes('w-full items-center justify-between gap-3 section-tight'):
+        cards = [
+            ('shield', 'Blockchain', 'Immutable records', '#8B5CF6', '/blockchain'),
+            ('psychology', 'XAI', 'Explainable AI', '#3B82F6', '/xai'),
+            ('videocam', 'Video', 'Object detection', '#10B981', '/video'),
+            ('trending_up', 'Drift', 'Model monitoring', '#F59E0B', '/drift'),
+            ('analytics', 'Analytics', 'Data insights', '#06B6D4', '/analytics'),
+            ('security', 'Cybersecurity', 'Attack detection', '#EF4444', '/cybersecurity'),
+            ('science', 'Robustness', 'Stress testing', '#A78BFA', '/robustness'),
+            ('speed', 'Performance', 'Model metrics', '#F472B6', '/performance'),
+        ]
+        for icon, title, subtitle, color, path in cards:
+            with ui.card().classes('liquid-glass specular flex-1 p-4 cursor-pointer').style('border-radius: 20px;').on('click', lambda p=path: ui.navigate.to(p)):
+                with ui.column().classes('items-center gap-2'):
+                    ui.icon(icon).classes('text-2xl').style(f'color: {color}; text-shadow: 0 0 20px {color}80;')
+                    ui.label(title).classes('text-white font-semibold text-xs text-center')
+                    ui.label(subtitle).classes('text-gray-500 text-xs text-center')
+
+
+# ============================================================
 # BLOCKCHAIN VISUALIZER
 # ============================================================
 def blockchain_visualizer():
+    """Zara hatke: Live animated blockchain visualization."""
     with ui.column().classes('w-full section-tight gap-4'):
         with ui.column().classes('items-center gap-2 w-full'):
             with ui.row().classes('items-center gap-3'):
@@ -367,6 +579,7 @@ def blockchain_visualizer():
         
         with ui.card().classes('liquid-glass specular w-full p-8').style('border-radius: 24px;'):
             with ui.row().classes('w-full items-center justify-center gap-4'):
+                # 5 blocks with connectors
                 blocks = [
                     ('#0', 'GENESIS', '#10B981', '0'),
                     ('#1', 'DATASET', '#38BDF8', '1'),
@@ -395,12 +608,68 @@ def blockchain_visualizer():
 def how_it_works():
     ui.add_head_html('''
     <style>
-        .step-card-upgraded { padding: 28px 20px !important; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; position: relative; overflow: hidden; text-align: center; border-radius: 24px; }
-        .step-badge-circle { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; margin: 0 auto; transition: all 0.4s ease; }
-        .step-card-upgraded:hover .step-badge-circle { transform: scale(1.1) rotate(5deg); }
-        .step-number-badge { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; border-radius: 50%; background: rgba(15, 23, 42, 0.95); border: 2px solid var(--step-color); color: var(--step-color); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
-        @keyframes gradient-slide { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
-        .timeline-progress { height: 4px; background: linear-gradient(90deg, #38BDF8, #8B5CF6, #10B981, #F59E0B, #38BDF8); background-size: 200% auto; animation: gradient-slide 3s linear infinite; border-radius: 2px; }
+        .step-card-upgraded {
+            padding: 28px 20px !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            border-radius: 24px;
+        }
+        .step-card-upgraded::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--step-color);
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+        .step-badge-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin: 0 auto;
+            transition: all 0.4s ease;
+        }
+        .step-card-upgraded:hover .step-badge-circle {
+            transform: scale(1.1) rotate(5deg);
+        }
+        .step-number-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid var(--step-color);
+            color: var(--step-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        @keyframes gradient-slide {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        .timeline-progress {
+            height: 4px;
+            background: linear-gradient(90deg, #38BDF8, #8B5CF6, #10B981, #F59E0B, #38BDF8);
+            background-size: 200% auto;
+            animation: gradient-slide 3s linear infinite;
+            border-radius: 2px;
+        }
     </style>
     ''')
     
@@ -428,6 +697,7 @@ def how_it_works():
                         with ui.element('div').style('position: relative; display: inline-block;'):
                             ui.html(f'<div class="step-badge-circle" style="background: linear-gradient(135deg, {color}, {color}cc); box-shadow: 0 0 30px {color}60;"><span style="font-size: 1.5rem;">{icon}</span></div>')
                             ui.html(f'<div class="step-number-badge" style="--step-color: {color};">{num}</div>')
+                        
                         ui.label(title).classes('text-white font-bold text-base mt-2')
                         ui.label(desc).classes('text-gray-400 text-xs').style('line-height: 1.5; max-width: 200px;')
                 
@@ -449,8 +719,13 @@ def trust_and_insights():
             with ui.row().classes('w-full gap-6 items-center'):
                 with ui.column().classes('items-center'):
                     ui.html('''
-                        <div style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#8B5CF6 0% 87%, #252540 87% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(139, 92, 246, 0.3);">
-                            <div style="width: 76px; height: 76px; border-radius: 50%; background: #0F0F1F; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div style="width: 100px; height: 100px; border-radius: 50%; 
+                                    background: conic-gradient(#8B5CF6 0% 87%, #252540 87% 100%);
+                                    display: flex; align-items: center; justify-content: center;
+                                    box-shadow: 0 0 40px rgba(139, 92, 246, 0.3);">
+                            <div style="width: 76px; height: 76px; border-radius: 50%; 
+                                        background: #0F0F1F; display: flex; flex-direction: column;
+                                        align-items: center; justify-content: center;">
                                 <span style="color: white; font-size: 1.25rem; font-weight: 700;">87%</span>
                                 <span style="color: #6B7280; font-size: 0.6rem;">TRUST</span>
                             </div>
@@ -479,6 +754,55 @@ def trust_and_insights():
 
 
 # ============================================================
+# LIVE ACTIVITY FEED
+# ============================================================
+def live_activity_feed():
+    ui.add_head_html('''
+    <style>
+        .activity-item {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 14px 18px;
+            transition: all 0.3s ease;
+            border-left: 3px solid var(--activity-color);
+            backdrop-filter: blur(20px);
+        }
+        .activity-item:hover {
+            background: rgba(15, 23, 42, 0.6);
+            border-left-width: 5px;
+            transform: translateX(4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+    ''')
+    
+    with ui.column().classes('w-full section-tight gap-4'):
+        with ui.element('div').classes('section-title'):
+            ui.label('📡').classes('text-xl')
+            ui.label('Live Activity Feed').classes('text-white font-bold text-lg')
+            ui.html('<div class="live-dot" style="margin-left: 8px;"></div>')
+        
+        activities = [
+            ('✅', 'ImageNet-1K verified on blockchain', '2 min ago', '#10B981', 'verified'),
+            ('🔗', 'Block #6 mined with difficulty 4', '5 min ago', '#38BDF8', 'link'),
+            ('🚨', 'Data poisoning attack detected & blocked', '12 min ago', '#EF4444', 'security'),
+            ('📤', 'good_dataset.zip uploaded (49.6 MB)', '15 min ago', '#8B5CF6', 'cloud_upload'),
+            ('🧠', 'XAI GradCAM heatmaps generated (12 images)', '28 min ago', '#F59E0B', 'psychology'),
+            ('📊', 'Trust score recalculated: 87% ACCEPTED', '1 hour ago', '#10B981', 'verified_user'),
+        ]
+        
+        with ui.column().classes('w-full gap-2'):
+            for icon, text, time, color, material_icon in activities:
+                with ui.element('div').classes('activity-item').style(f'--activity-color: {color};'):
+                    with ui.row().classes('w-full items-center justify-between'):
+                        with ui.row().classes('items-center gap-3'):
+                            ui.icon(material_icon).classes('text-xl').style(f'color: {color};')
+                            ui.label(text).classes('text-gray-300 text-sm')
+                        ui.label(time).classes('text-gray-500 text-xs')
+
+
+# ============================================================
 # TECH STACK BAND
 # ============================================================
 def tech_stack_band():
@@ -499,7 +823,7 @@ def tech_stack_band():
                 ('Proof of Work', 'gavel', '#06B6D4'),
             ]
             for name, icon, color in techs:
-                with ui.card().classes('liquid-glass specular px-5 py-3').style('border-radius: 16px;'):
+                with ui.card().classes('liquid-glass specular px-5 py-3').style(f'border-radius: 16px;'):
                     with ui.row().classes('items-center gap-2'):
                         ui.icon(icon).classes('text-lg').style(f'color: {color}; text-shadow: 0 0 15px {color}80;')
                         ui.label(name).classes('text-white font-medium text-sm')
@@ -513,7 +837,7 @@ def cta_section():
         with ui.card().classes('liquid-glass specular w-full p-12').style('border-radius: 32px; background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(139, 92, 246, 0.08)) !important;'):
             with ui.column().classes('items-center gap-4 w-full'):
                 ui.icon('rocket_launch').classes('text-cyan-400 text-5xl').style('text-shadow: 0 0 40px rgba(56, 189, 248, 0.6);')
-                ui.label('Secure Your AI Pipeline').classes('text-white font-bold text-3xl text-center')
+                ui.label('Ready to Secure Your AI Pipeline?').classes('text-white font-bold text-3xl text-center')
                 ui.label('Join 120+ enterprises already verifying their AI datasets with blockchain-grade integrity.').classes('text-gray-400 text-base text-center').style('max-width: 600px;')
                 with ui.row().classes('gap-3 mt-2'):
                     ui.button('Get Started Free →', on_click=lambda: ui.navigate.to('/upload')).classes('hero-cta-primary magnetic-btn px-8 py-3 rounded-xl font-semibold text-sm')
@@ -527,15 +851,14 @@ def cta_section():
 def home():
     apply_styles(ui)
     apply_apple_glass(ui)
-    apply_trust_command_styles(ui)
     navigation()
     hero_section()
     live_stats_counter()
-    integrity_layers()
-    attack_simulator_section()
+    feature_cards()
     blockchain_visualizer()
     how_it_works()
     trust_and_insights()
+    live_activity_feed()
     tech_stack_band()
     cta_section()
     footer()
@@ -548,7 +871,6 @@ def home():
 def solutions():
     apply_styles(ui)
     apply_apple_glass(ui)
-    apply_trust_command_styles(ui)
     navigation()
     with ui.column().classes('w-full section-tight gap-6'):
         ui.label('Our Solutions').classes('text-white font-bold text-4xl')
@@ -576,7 +898,6 @@ def solutions():
 def about():
     apply_styles(ui)
     apply_apple_glass(ui)
-    apply_trust_command_styles(ui)
     navigation()
     with ui.column().classes('w-full section-tight gap-6'):
         ui.label('About CV-INTEGRITY AI').classes('text-white font-bold text-4xl')

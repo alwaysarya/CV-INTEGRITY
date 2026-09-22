@@ -90,3 +90,8 @@ nicegui_app/*.broken
 nicegui_app/main_corrupted_backup.py
 nicegui_app/recovered_main.py
 nicegui_app/*.bak
+
+# NiceGUI backup files (personal)
+nicegui_app/*.before_*
+nicegui_app/*.backup_*
+nicegui_app/*.backup

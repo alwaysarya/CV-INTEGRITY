@@ -1054,3 +1054,237 @@ TRUST_COMMAND_CSS = '''
 def apply_trust_command_styles(ui):
     """Apply Trust Command Center styles."""
     ui.add_head_html(TRUST_COMMAND_CSS)
+
+
+# ============================================================
+# TRUST COMMAND CENTER — EXTRA SECTIONS CSS
+# ============================================================
+TRUST_COMMAND_EXTRA_CSS = '''
+<style>
+    /* === LIVE TRUST PIPELINE === */
+    .pipeline-flow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 32px;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 24px;
+        backdrop-filter: blur(30px);
+        position: relative;
+        overflow: hidden;
+    }
+    .pipeline-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        position: relative;
+        z-index: 1;
+    }
+    .pipeline-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: white;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        box-shadow: 0 0 30px var(--step-glow);
+        border: 1px solid var(--step-color);
+    }
+    .pipeline-step:hover .pipeline-icon {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 0 60px var(--step-glow), 0 0 100px var(--step-glow);
+    }
+    .pipeline-label {
+        color: #94A3B8;
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+    .pipeline-value {
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-align: center;
+    }
+    .pipeline-arrow {
+        color: #38BDF8;
+        font-size: 1.5rem;
+        opacity: 0.6;
+        animation: arrow-flow 2s ease-in-out infinite;
+    }
+    @keyframes arrow-flow {
+        0%, 100% { transform: translateX(0); opacity: 0.4; }
+        50% { transform: translateX(4px); opacity: 0.9; }
+    }
+    
+    /* === LIVE TRUST CARD === */
+    .live-trust-card {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(5, 9, 20, 0.9)) !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        border-radius: 24px !important;
+        padding: 28px !important;
+        font-family: 'JetBrains Mono', monospace;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(40px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 60px rgba(16, 185, 129, 0.1);
+    }
+    .live-trust-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #10B981, transparent);
+        animation: scan-horizontal 3s linear infinite;
+    }
+    @keyframes scan-horizontal {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    .trust-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+    }
+    .trust-row:last-child { border-bottom: none; }
+    .trust-row-label {
+        color: #6B7280;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .trust-row-value {
+        color: #D1D5DB;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .trust-progress {
+        height: 6px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+    .trust-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #10B981, #38BDF8);
+        border-radius: 3px;
+    }
+    
+    /* === XAI SECTION === */
+    .xai-card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        border-radius: 20px;
+        padding: 20px;
+        backdrop-filter: blur(30px);
+        transition: all 0.4s ease;
+    }
+    .xai-card:hover {
+        border-color: rgba(139, 92, 246, 0.5);
+        transform: translateY(-4px);
+        box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+    }
+    .xai-image-wrapper {
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        background: #000;
+    }
+    .xai-image-wrapper img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        display: block;
+    }
+    .xai-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    
+    /* === ANALYTICS SECTION === */
+    .analytics-card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 20px;
+        padding: 24px;
+        text-align: center;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(30px);
+    }
+    .analytics-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: var(--analytics-color);
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
+    }
+    .analytics-card:hover {
+        transform: translateY(-6px);
+        border-color: var(--analytics-color);
+        box-shadow: 0 20px 60px var(--analytics-glow);
+    }
+    .analytics-card:hover::before {
+        opacity: 1;
+    }
+    .analytics-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: var(--analytics-glow);
+        border: 1px solid var(--analytics-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+        transition: all 0.4s ease;
+    }
+    .analytics-card:hover .analytics-icon {
+        transform: scale(1.1) rotate(-5deg);
+        box-shadow: 0 0 30px var(--analytics-color);
+    }
+    .analytics-value {
+        color: white;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        text-shadow: 0 0 30px var(--analytics-color);
+    }
+    .analytics-label {
+        color: #6B7280;
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-top: 4px;
+    }
+</style>
+'''
+
+
+def apply_trust_command_extra(ui):
+    """Apply extra Trust Command Center styles."""
+    ui.add_head_html(TRUST_COMMAND_EXTRA_CSS)
