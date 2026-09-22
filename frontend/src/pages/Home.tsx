@@ -6,6 +6,10 @@ import { LiveMap } from '@/components/dashboard/LiveMap'
 import { ThreatFeed } from '@/components/dashboard/ThreatFeed'
 import { LiveVideoFeed } from '@/components/dashboard/LiveVideoFeed'
 import { AnalyticsOverview } from '@/components/dashboard/AnalyticsOverview'
+import { ModelTable } from '@/components/dashboard/ModelTable'
+import { DatasetTable } from '@/components/dashboard/DatasetTable'
+import { SystemResources } from '@/components/dashboard/SystemResources'
+import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
 import apiClient from '@/lib/api'
 
 export function Home() {
@@ -80,6 +84,18 @@ export function Home() {
 
       {/* SECTION 4: ANALYTICS OVERVIEW */}
       <AnalyticsOverview />
+
+      {/* SECTIONS 5+6: MODEL + DATASET TABLES (2 columns) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <ModelTable />
+        <DatasetTable />
+      </div>
+
+      {/* SECTIONS 7+8: SYSTEM RESOURCES + ACTIVITY FEED (2 columns) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <SystemResources />
+        <ActivityFeed />
+      </div>
 
     </div>
   )
