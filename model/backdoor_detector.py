@@ -1,25 +1,24 @@
 """
-Backdoor Trigger Detector
-Detects potential backdoor triggers in models and datasets.
-
-SIH Requirement 2.2.2: Trigger search or reconstruction
+Backdoor Trigger Detector — Real Implementation
+Detects backdoor triggers in models and datasets.
 """
 
 import numpy as np
 import json
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from datetime import datetime
-import hashlib
 
 
 class BackdoorDetector:
     """
-    Detect backdoor triggers using multiple methods:
-    - Trigger pattern search (white-box)
-    - Behavioural testing with random triggers (black-box)
-    - Activation clustering (white-box)
-    - Frequency analysis (black-box)
+    Real backdoor detection with multiple methods.
+    
+    Methods:
+    - Frequency analysis (FFT-based)
+    - Trigger pattern search (cross-sample consistency)
+    - Activation clustering (feature-space)
+    - Occlusion-based sensitivity
     """
     
     def __init__(self, model=None, access_level: str = "black-box"):
@@ -27,13 +26,7 @@ class BackdoorDetector:
         self.access_level = access_level
     
     def detect(self, inputs: np.ndarray, labels: Optional[np.ndarray] = None) -> Dict[str, Any]:
-        """
-        Run backdoor detection on inputs.
-        
-        Args:
-            inputs: Sample inputs (N, H, W, C)
-            labels: Optional ground truth labels
-        """
+        """Run comprehensive backdoor detection."""
         result = {
             "method": "backdoor_detection",
             "access_level": self.access_level,
@@ -44,29 +37,33 @@ class BackdoorDetector:
         try:
             findings = []
             
-            # Method 1: Frequency analysis
-            freq_analysis = self._frequency_analysis(inputs)
+            # 1. Frequency analysis
+            freq = self._frequency_analysis(inputs)
             findings.append({
                 "method": "frequency_analysis",
-                "confidence": freq_analysis["confidence"],
-                "suspicious_patterns": freq_analysis["patterns"],
+                "confidence": freq["confidence"],
+                "score": freq["hf_ratio"],
+                "suspicious_patterns": freq["patterns"],
             })
             
-            # Method 2: Trigger pattern search (if white-box)
+            # 2. Trigger pattern search (cross-sample)
+            trigger = self._trigger_search(inputs)
+            findings.append(trigger)
+            
+            # 3. Statistical anomalies
+            anomalies = self._statistical_anomaly(inputs)
+            findings.append(anomalies)
+            
+            # 4. White-box analysis (if model available)
             if self.access_level == "white-box" and self.model is not None:
-                trigger_result = self._trigger_search(inputs)
-                findings.append(trigger_result)
+                wb = self._white_box_analysis(inputs)
+                findings.append(wb)
             else:
                 findings.append({
-                    "method": "trigger_search",
+                    "method": "white_box_analysis",
                     "status": "unavailable",
                     "reason": "White-box access required",
                 })
-            
-            # Method 3: Activation clustering (if white-box)
-            if self.access_level == "white-box" and self.model is not None:
-                cluster_result = self._activation_clustering(inputs)
-                findings.append(cluster_result)
             
             # Aggregate
             result["status"] = "success"
@@ -82,102 +79,172 @@ class BackdoorDetector:
         return result
     
     def _frequency_analysis(self, inputs: np.ndarray) -> Dict[str, Any]:
-        """Analyze high-frequency patterns (triggers often use high-freq pixels)."""
+        """FFT-based high-frequency detection."""
         if len(inputs) == 0:
-            return {"confidence": 0.0, "patterns": []}
+            return {"confidence": 0.0, "hf_ratio": 0, "patterns": []}
         
-        # Convert to grayscale if needed
+        # Grayscale
         if inputs.ndim == 4 and inputs.shape[-1] == 3:
             gray = np.mean(inputs, axis=-1)
         else:
             gray = inputs
         
-        # Compute FFT
+        # FFT
         fft = np.fft.fft2(gray, axes=(-2, -1))
         magnitude = np.abs(fft)
         
-        # High-frequency energy ratio
+        # High-frequency ratio
         h, w = gray.shape[-2:]
-        hf_threshold = 0.25
         hf_mask = np.ones_like(magnitude)
-        hf_mask[..., :int(h*hf_threshold), :int(w*hf_threshold)] = 0
+        hf_mask[..., :int(h*0.25), :int(w*0.25)] = 0
         hf_energy = np.mean(magnitude * hf_mask)
         total_energy = np.mean(magnitude) + 1e-8
-        
         hf_ratio = hf_energy / total_energy
         
-        # Confidence based on high-freq ratio
-        confidence = min(hf_ratio * 2, 1.0)
+        # Natural images: hf_ratio typically 0.5-0.75 (with JPEG compression)
+        # Trigger injections: often > 0.85 (unnaturally sharp patches)
+        # Conservative thresholds to avoid false positives
+        if hf_ratio < 0.75:
+            confidence = 0.0  # Natural
+        elif hf_ratio < 0.85:
+            confidence = (hf_ratio - 0.75) * 3  # 0 to 0.3
+        else:
+            confidence = min(0.3 + (hf_ratio - 0.85) * 4, 1.0)
         
         patterns = []
         if confidence > 0.5:
             patterns.append({
                 "type": "high_frequency_anomaly",
                 "score": float(confidence),
-                "description": "Unusual high-frequency patterns detected",
+                "description": "Unusual high-frequency patterns detected"
             })
         
-        return {
-            "confidence": float(confidence),
-            "hf_ratio": float(hf_ratio),
-            "patterns": patterns,
-        }
+        return {"confidence": float(confidence), "hf_ratio": float(hf_ratio), "patterns": patterns}
     
-    def _trigger_search(self, inputs: np.ndarray) -> Dict[str, Any]:
-        """Search for trigger patterns (white-box)."""
-        # Simplified: detect small consistent patches across samples
-        if len(inputs) < 2:
-            return {"method": "trigger_search", "confidence": 0.0, "triggers": []}
+    def _trigger_search(self, inputs: np.ndarray, threshold: float = 0.05) -> Dict[str, Any]:
+        """Cross-sample consistency for trigger detection."""
+        if len(inputs) < 5:
+            return {"method": "trigger_search", "status": "insufficient_data", "confidence": 0.0}
         
-        # Compute pixel-wise std across samples
+        # Pixel-wise std across samples
         std_map = np.std(inputs, axis=0)
+        mean_std = np.mean(std_map)
         
-        # Low std regions = consistent patterns (potential triggers)
-        low_std_threshold = np.percentile(std_map, 10)
-        trigger_regions = std_map < low_std_threshold
+        # Low-variance regions across samples (potential triggers)
+        low_var = std_map < (mean_std * 0.3)
+        trigger_score = np.mean(low_var)
         
-        trigger_score = np.mean(trigger_regions)
+        # Small consistent patches = suspicious
+        confidence = min(trigger_score * 10, 1.0) if trigger_score < 0.1 else 0.0
         
         return {
             "method": "trigger_search",
-            "confidence": float(min(trigger_score * 5, 1.0)),
-            "trigger_pixels": int(np.sum(trigger_regions)),
             "status": "success",
+            "confidence": float(confidence),
+            "consistent_pixels": int(np.sum(low_var)),
+            "total_pixels": int(low_var.size),
+            "trigger_score": float(trigger_score),
         }
     
-    def _activation_clustering(self, inputs: np.ndarray) -> Dict[str, Any]:
-        """Cluster activations to find poisoned samples."""
-        # Simplified: use pixel statistics as proxy for activations
+    def _statistical_anomaly(self, inputs: np.ndarray) -> Dict[str, Any]:
+        """Statistical outlier detection."""
         if len(inputs) < 4:
-            return {"method": "activation_clustering", "status": "insufficient_data"}
+            return {"method": "statistical_anomaly", "status": "insufficient_data", "confidence": 0.0}
         
-        # Compute simple features
-        features = inputs.reshape(len(inputs), -1)
-        features = features[:, :100]  # Sample features
+        # Flatten
+        flat = inputs.reshape(len(inputs), -1)
         
-        # Simple 2-cluster separation
-        mean_feat = np.mean(features, axis=0)
-        distances = np.linalg.norm(features - mean_feat, axis=1)
+        # Per-sample mean and std
+        sample_means = np.mean(flat, axis=1)
+        sample_stds = np.std(flat, axis=1)
         
-        threshold = np.percentile(distances, 90)
-        outliers = np.sum(distances > threshold)
+        # Z-scores
+        mean_z = np.abs((sample_means - np.mean(sample_means)) / (np.std(sample_means) + 1e-8))
+        std_z = np.abs((sample_stds - np.mean(sample_stds)) / (np.std(sample_stds) + 1e-8))
+        
+        # Outliers (z > 3)
+        outlier_count = int(np.sum(mean_z > 3) + np.sum(std_z > 3))
+        outlier_ratio = outlier_count / len(inputs)
+        
+        confidence = min(outlier_ratio * 3, 1.0)
         
         return {
-            "method": "activation_clustering",
+            "method": "statistical_anomaly",
             "status": "success",
-            "confidence": float(outliers / len(inputs)),
-            "outlier_count": int(outliers),
+            "confidence": float(confidence),
+            "outlier_count": outlier_count,
             "total_samples": len(inputs),
+            "outlier_ratio": float(outlier_ratio),
         }
     
+    def _white_box_analysis(self, inputs: np.ndarray) -> Dict[str, Any]:
+        """Activation clustering (white-box)."""
+        try:
+            import torch
+            if not isinstance(self.model, torch.nn.Module):
+                return {"method": "white_box_analysis", "status": "unavailable"}
+            
+            # Get activations
+            activations = []
+            def hook(module, input, output):
+                activations.append(output.detach())
+            
+            # Hook first conv layer
+            first_conv = None
+            for module in self.model.modules():
+                if isinstance(module, torch.nn.Conv2d):
+                    first_conv = module
+                    break
+            
+            if first_conv is None:
+                return {"method": "white_box_analysis", "status": "no_conv_layer"}
+            
+            h = first_conv.register_forward_hook(hook)
+            try:
+                with torch.no_grad():
+                    for img in inputs[:20]:  # Sample
+                        tensor = torch.from_numpy(img).float()
+                        if tensor.ndim == 3:
+                            tensor = tensor.permute(2, 0, 1).unsqueeze(0)
+                        try:
+                            self.model(tensor)
+                        except Exception:
+                            pass
+            finally:
+                h.remove()
+            
+            if not activations:
+                return {"method": "white_box_analysis", "status": "no_activations"}
+            
+            # Cluster activations by distance
+            acts = torch.cat([a.flatten(1).mean(dim=1) for a in activations if a.numel() > 0])
+            acts_np = acts.numpy()
+            
+            # Distance from centroid
+            centroid = acts_np.mean(axis=0)
+            distances = np.linalg.norm(acts_np - centroid, axis=1)
+            
+            # Outliers
+            threshold = np.percentile(distances, 90)
+            outliers = int(np.sum(distances > threshold))
+            
+            return {
+                "method": "white_box_analysis",
+                "status": "success",
+                "confidence": float(outliers / len(activations)),
+                "activation_outliers": outliers,
+                "total_samples": len(activations),
+            }
+        except Exception as e:
+            return {"method": "white_box_analysis", "status": "failed", "error": str(e)}
+    
     def _aggregate_risk(self, findings: List[Dict]) -> Dict[str, Any]:
-        """Aggregate findings into overall risk."""
         confidences = [f.get("confidence", 0) for f in findings if "confidence" in f]
-        
         if not confidences:
             return {"score": 0.0, "level": "UNKNOWN"}
         
         max_conf = max(confidences)
+        avg_conf = sum(confidences) / len(confidences)
         
         if max_conf < 0.3:
             level = "LOW"
@@ -190,36 +257,34 @@ class BackdoorDetector:
         
         return {
             "score": round(max_conf * 100, 2),
+            "avg_score": round(avg_conf * 100, 2),
             "level": level,
-            "evidence": confidences,
+            "num_findings": len(findings),
         }
     
     def _get_recommendation(self, risk: Dict) -> str:
-        """Get recommendation based on risk."""
-        level = risk.get("level", "UNKNOWN")
         return {
             "LOW": "ACCEPT - No significant backdoor indicators",
             "MEDIUM": "REVIEW - Some suspicious patterns detected",
             "HIGH": "QUARANTINE - Multiple backdoor indicators",
             "CRITICAL": "REJECT - Strong backdoor evidence",
-            "UNKNOWN": "REVIEW - Insufficient data for assessment",
-        }.get(level, "REVIEW")
+            "UNKNOWN": "REVIEW - Insufficient data",
+        }.get(risk.get("level", "UNKNOWN"), "REVIEW")
     
     def _get_limitations(self) -> List[str]:
-        """List limitations of this detector."""
         limitations = [
-            "Frequency analysis may produce false positives on naturally textured images",
-            "Trigger search assumes consistent trigger patterns",
+            "Frequency analysis may produce false positives on textured images",
+            "Trigger search assumes small consistent patterns",
+            "Statistical anomalies can occur from natural variation",
         ]
         if self.access_level != "white-box":
-            limitations.append("Activation clustering unavailable without white-box access")
-            limitations.append("Trigger reconstruction requires white-box access")
+            limitations.append("Activation clustering unavailable (white-box required)")
         return limitations
 
 
 if __name__ == "__main__":
-    # Test
-    dummy_inputs = np.random.rand(10, 64, 64, 3)
+    # Test with dummy data
+    inputs = np.random.rand(20, 64, 64, 3).astype(np.float32)
     detector = BackdoorDetector(access_level="black-box")
-    result = detector.detect(dummy_inputs)
-    print(json.dumps(result, indent=2))
+    result = detector.detect(inputs)
+    print(json.dumps(result, indent=2, default=str))
