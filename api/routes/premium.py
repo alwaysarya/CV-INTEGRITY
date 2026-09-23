@@ -15,7 +15,7 @@ import sys
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-router = APIRouter(prefix="/api", tags=["premium"])
+router = APIRouter(prefix="/api/premium", tags=["premium"])
 
 
 # ============================================================
@@ -47,46 +47,6 @@ class DatasetLoadRequest(BaseModel):
 
 # ============================================================
 # 1. XAI EXPLAIN
-# ============================================================
-@router.post("/xai/explain")
-async def xai_explain(req: XAIRequest):
-    """Generate XAI explanation for an image."""
-    try:
-        from xai.explainer import XAIExplainer
-        
-        # Create dummy image if no path
-        if req.image_path and Path(req.image_path).exists():
-            import cv2
-            img = cv2.imread(req.image_path)
-            img = cv2.resize(img, (224, 224))
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
-        else:
-            # Gradient pattern image
-            img = np.zeros((64, 64, 3), dtype=np.float32)
-            for i in range(64):
-                for j in range(64):
-                    img[i, j] = [i/64, j/64, (i+j)/128]
-        
-        explainer = XAIExplainer(model_name=req.model_name)
-        result = explainer.explain(img, method=req.method)
-        
-        # Convert heatmap to smaller representation
-        if result.get('heatmap'):
-            heatmap = np.array(result['heatmap'])
-            # Downsample for response size
-            if heatmap.shape[0] > 32:
-                h, w = heatmap.shape
-                heatmap = heatmap[::h//32, ::w//32][:32, :32]
-            result['heatmap_small'] = heatmap.tolist()
-            del result['heatmap']
-        
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# ============================================================
-# 2. BACKDOOR DETECTION
 # ============================================================
 @router.post("/backdoor/detect")
 async def backdoor_detect(req: BackdoorRequest):

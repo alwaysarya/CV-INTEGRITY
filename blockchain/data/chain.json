@@ -1,0 +1,119 @@
+{
+  "chain": [
+    {
+      "index": 0,
+      "timestamp": 1790178073.130217,
+      "datetime": "2026-09-23T21:11:13.894578",
+      "data": {
+        "action": "GENESIS",
+        "user": "system",
+        "timestamp": "2026-09-23T21:11:13.130223",
+        "message": "CV-INTEGRITY Genesis Block",
+        "version": "1.0.0"
+      },
+      "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "nonce": 156125,
+      "hash": "00008e5e44faea06e6a5aeb54c3e4f8b6ae069dc4d5f5c32f0958e18e880a4de"
+    },
+    {
+      "index": 1,
+      "timestamp": 1790178074.894588,
+      "datetime": "2026-09-23T21:11:14.947358",
+      "data": {
+        "action": "DATASET_UPLOAD",
+        "user": "system",
+        "timestamp": "2026-09-23T21:11:13.894593",
+        "dataset_name": "good_dataset",
+        "num_images": 300,
+        "classes": [
+          "car",
+          "bike",
+          "bus",
+          "truck"
+        ]
+      },
+      "previous_hash": "00008e5e44faea06e6a5aeb54c3e4f8b6ae069dc4d5f5c32f0958e18e880a4de",
+      "nonce": 199526,
+      "hash": "00004484a42d5582d626e9ee1df1cecc4da12a3c19604aabebad0e1c2906445b"
+    },
+    {
+      "index": 2,
+      "timestamp": 1790178076.947368,
+      "datetime": "2026-09-23T21:11:14.958309",
+      "data": {
+        "action": "DATASET_UPLOAD",
+        "user": "system",
+        "timestamp": "2026-09-23T21:11:14.947373",
+        "dataset_name": "bad_dataset",
+        "num_images": 330
+      },
+      "previous_hash": "00004484a42d5582d626e9ee1df1cecc4da12a3c19604aabebad0e1c2906445b",
+      "nonce": 2306,
+      "hash": "0000647844de7b6294b6b2aef39efbaffa77a9b6f0b1ed1bd36b7f536836ec61"
+    },
+    {
+      "index": 3,
+      "timestamp": 1790178077.958315,
+      "datetime": "2026-09-23T21:11:15.097628",
+      "data": {
+        "action": "MODEL_TRAINING",
+        "user": "system",
+        "timestamp": "2026-09-23T21:11:14.958319",
+        "model": "yolov8n",
+        "epochs": 50,
+        "accuracy": 0.87
+      },
+      "previous_hash": "0000647844de7b6294b6b2aef39efbaffa77a9b6f0b1ed1bd36b7f536836ec61",
+      "nonce": 27293,
+      "hash": "0000740a3986803bc907e2426add74bce3c6d0dc190187d235fcf2e9ce708f09"
+    },
+    {
+      "index": 4,
+      "timestamp": 1790178079.097642,
+      "datetime": "2026-09-23T21:11:15.513623",
+      "data": {
+        "action": "TRUST_EVALUATION",
+        "user": "system",
+        "timestamp": "2026-09-23T21:11:15.097647",
+        "trust_score": 87,
+        "decision": "ACCEPTED"
+      },
+      "previous_hash": "0000740a3986803bc907e2426add74bce3c6d0dc190187d235fcf2e9ce708f09",
+      "nonce": 88655,
+      "hash": "0000ea6cec16e7eab4dd166c3760449d7831f1dcc54806905892084967f71291"
+    },
+    {
+      "index": 5,
+      "timestamp": 1790178080.513634,
+      "datetime": "2026-09-23T21:11:15.654708",
+      "data": {
+        "action": "INFERENCE_RECORD",
+        "user": "system",
+        "timestamp": "2026-09-23T21:11:15.513641",
+        "model_hash": "45964146a148723b",
+        "input_hash": "9e99a2e6847c1c61",
+        "output_hash": "01e441399b1336f0",
+        "decision": "APPROVED"
+      },
+      "previous_hash": "0000ea6cec16e7eab4dd166c3760449d7831f1dcc54806905892084967f71291",
+      "nonce": 27297,
+      "hash": "0000d47b922910f265470cb43cfd981f020b8b358e7f8002c255e144b5ee5e27"
+    },
+    {
+      "index": 6,
+      "timestamp": 1790178075.654721,
+      "datetime": "2026-09-23T21:11:16.051902",
+      "data": {
+        "action": "MODEL_TRAINING",
+        "user": "demo_system",
+        "timestamp": "2026-09-23T21:11:15.654727",
+        "model": "yolov8n",
+        "epochs": 50,
+        "accuracy": 0.87
+      },
+      "previous_hash": "0000d47b922910f265470cb43cfd981f020b8b358e7f8002c255e144b5ee5e27",
+      "nonce": 78880,
+      "hash": "00003916dd4c46d1f99f146f72ea4977180855f9f20d9c410479b35ab33c0c24"
+    }
+  ]
+}

@@ -53,6 +53,54 @@ if FASTAPI_AVAILABLE:
     except Exception as e:
         print(f"⚠️ Failed to register cybersecurity routes: {e}")
     
+    # Register attacks routes
+    try:
+        from api.routes.attacks import router as attacks_router
+        app.include_router(attacks_router)
+        print("✅ Attacks routes registered")
+    except Exception as e:
+        print(f"⚠️ Failed to register attacks routes: {e}")
+    
+    # Register XAI routes
+    try:
+        from api.routes.xai_route import router as xai_router
+        app.include_router(xai_router)
+        print("✅ XAI routes registered")
+    except Exception as e:
+        print(f"⚠️ Failed to register XAI routes: {e}")
+    
+    # Register backdoor routes
+    try:
+        from api.routes.backdoor_route import router as backdoor_router
+        app.include_router(backdoor_router)
+        print("✅ Backdoor routes registered")
+    except Exception as e:
+        print(f"⚠️ Failed to register backdoor routes: {e}")
+    
+    # Register assurance routes
+    try:
+        from api.routes.assurance_route import router as assurance_router
+        app.include_router(assurance_router)
+        print("✅ Assurance routes registered")
+    except Exception as e:
+        print(f"⚠️ Failed to register assurance routes: {e}")
+    
+    # Register blockchain live routes (dynamic)
+    try:
+        from api.routes.blockchain_route import router as blockchain_live_router
+        app.include_router(blockchain_live_router)
+        print("✅ Blockchain live routes registered")
+    except Exception as e:
+        print(f"⚠️ Failed to register blockchain live routes: {e}")
+    
+    # Register video routes
+    try:
+        from api.routes.video_route import router as video_router
+        app.include_router(video_router)
+        print("✅ Video routes registered")
+    except Exception as e:
+        print(f"⚠️ Failed to register video routes: {e}")
+    
     REPORTS = Path(__file__).parent.parent / "outputs" / "reports"
     
     def load_json(filename):
