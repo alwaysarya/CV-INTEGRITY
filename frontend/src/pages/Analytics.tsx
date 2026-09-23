@@ -66,10 +66,15 @@ export function Analytics() {
   }))
 
   // Chart 3: Trust Scores
-  const trustChartData = trustEntries.map(([key, val]: [string, any]) => ({
-    name: key.toUpperCase(),
-    score: val.score || 0,
-  }))
+  const trustChartData = trustEntries.map(([key, val]: [string, any]) => {
+    // Try multiple possible score fields
+    const score = typeof val === 'number' ? val :
+                  val?.score ?? val?.trust_score ?? val?.final_score ?? 0
+    return {
+      name: key.toUpperCase(),
+      score: Number(score) || 0,
+    }
+  })
 
   // Chart 4: Blockchain actions
   const actionCounts: Record<string, number> = {}

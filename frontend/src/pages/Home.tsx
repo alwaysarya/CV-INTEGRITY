@@ -32,7 +32,11 @@ export function Home() {
       const models = mRes.data.models || {}
       const blocks = bRes.data.blocks || []
       const trust = tRes.data.trust_scores || {}
-      const trustScores = Object.values(trust).map((t: any) => t.score || 0)
+      const trustScores = Object.entries(trust).map(([k, t]: [string, any]) => {
+        // Handle multiple possible formats
+        if (typeof t === 'number') return t
+        return t?.score ?? t?.trust_score ?? t?.final_score ?? 0
+      }).filter((s) => s > 0)
       setStats({
         datasets: Object.keys(datasets).length,
         models: Object.keys(models).length,
