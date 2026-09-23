@@ -101,6 +101,14 @@ if FASTAPI_AVAILABLE:
     except Exception as e:
         print(f"⚠️ Failed to register video routes: {e}")
     
+    # Register locations routes
+    try:
+        from api.routes.locations_route import router as locations_router
+        app.include_router(locations_router)
+        print("✅ Locations routes registered")
+    except Exception as e:
+        print(f"⚠️ Failed to register locations routes: {e}")
+    
     REPORTS = Path(__file__).parent.parent / "outputs" / "reports"
     
     def load_json(filename):

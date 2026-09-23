@@ -1,0 +1,59 @@
+{
+  "good": {
+    "name": "GOOD Dataset",
+    "lat": 12.9716,
+    "lng": 77.5946,
+    "city": "Bengaluru",
+    "country": "India",
+    "type": "dataset",
+    "quality_score": 97.07,
+    "total_images": 300
+  },
+  "bad": {
+    "name": "BAD Dataset",
+    "lat": 13.0827,
+    "lng": 80.2707,
+    "city": "Chennai",
+    "country": "India",
+    "type": "dataset",
+    "quality_score": 87.7,
+    "total_images": 330
+  },
+  "worst": {
+    "name": "WORST Dataset",
+    "lat": 19.076,
+    "lng": 72.8777,
+    "city": "Mumbai",
+    "country": "India",
+    "type": "dataset",
+    "quality_score": 77.64,
+    "total_images": 390
+  },
+  "yolov8n": {
+    "name": "YOLOv8n Model",
+    "lat": 28.6139,
+    "lng": 77.209,
+    "city": "New Delhi",
+    "country": "India",
+    "type": "model",
+    "mAP50": 19.28
+  },
+  "good_model": {
+    "name": "GOOD Model",
+    "lat": 12.9352,
+    "lng": 77.6245,
+    "city": "Bengaluru (HSR)",
+    "country": "India",
+    "type": "model",
+    "mAP50": 19.28
+  },
+  "bad_model": {
+    "name": "BAD Model",
+    "lat": 13.0358,
+    "lng": 77.597,
+    "city": "Bengaluru North",
+    "country": "India",
+    "type": "model",
+    "mAP50": 17.49
+  }
+}

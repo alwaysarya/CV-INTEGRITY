@@ -213,3 +213,33 @@ async def analyze_video(req: VideoAnalysisRequest):
             "error": str(e),
             "traceback": traceback.format_exc(),
         }
+
+
+@router.get("/thumbnails")
+async def get_video_thumbnails():
+    """Get real video thumbnails."""
+    import base64
+    from pathlib import Path
+    
+    thumbnails_dir = PROJECT_ROOT / "datasets" / "videos" / "thumbnails"
+    thumbnails = []
+    
+    if thumbnails_dir.exists():
+        for i in range(4):
+            thumb_file = thumbnails_dir / f"thumb_{i}.jpg"
+            if thumb_file.exists():
+                with open(thumb_file, 'rb') as f:
+                    b64 = base64.b64encode(f.read()).decode('utf-8')
+                thumbnails.append({
+                    "index": i,
+                    "frame": i * 75,
+                    "preview": b64,
+                    "detections": 2 if i % 2 == 0 else 1,  # Placeholder
+                    "class_counts": {"person": 2 if i % 2 == 0 else 1},
+                })
+    
+    return {
+        "status": "success",
+        "thumbnails": thumbnails,
+        "count": len(thumbnails),
+    }
