@@ -109,6 +109,14 @@ if FASTAPI_AVAILABLE:
     except Exception as e:
         print(f"⚠️ Failed to register locations routes: {e}")
     
+    # Register analytics routes
+    try:
+        from api.routes.analytics_route import router as analytics_router
+        app.include_router(analytics_router)
+        print("✅ Analytics routes registered")
+    except Exception as e:
+        print(f"⚠️ Failed to register analytics routes: {e}")
+    
     REPORTS = Path(__file__).parent.parent / "outputs" / "reports"
     
     def load_json(filename):

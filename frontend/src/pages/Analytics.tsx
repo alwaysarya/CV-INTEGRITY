@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Activity, TrendingUp, Users, Target, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
@@ -12,6 +13,7 @@ export function Analytics() {
   const [models, setModels] = useState<any>({})
   const [blocks, setBlocks] = useState<any[]>([])
   const [trust, setTrust] = useState<any>({})
+  const [realMetrics, setRealMetrics] = useState<any>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -23,17 +25,20 @@ export function Analytics() {
     setLoading(true)
     setError(null)
     try {
-      const [dRes, mRes, bRes, tRes] = await Promise.all([
+      const [dRes, mRes, bRes, tRes, metricsRes] = await Promise.all([
         apiClient.getDatasets(),
         apiClient.getModels(),
         apiClient.getBlocks(),
         apiClient.getTrustScores(),
+        axios.get('http://localhost:8000/api/analytics/metrics').catch(() => ({ data: { metrics: {} } })),
       ])
 
       setDatasets(dRes.data.datasets || {})
       setModels(mRes.data.models || {})
       setBlocks(bRes.data.blocks || [])
       setTrust(tRes.data.trust_scores || {})
+      setRealMetrics(metricsRes.data.metrics || {})
+      console.log('Real Metrics Loaded:', metricsRes.data.metrics)
     } catch (err: any) {
       console.error('Failed:', err)
       setError(err.message || 'Backend connect nahi ho raha')

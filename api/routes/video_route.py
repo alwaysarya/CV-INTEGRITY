@@ -217,29 +217,89 @@ async def analyze_video(req: VideoAnalysisRequest):
 
 @router.get("/thumbnails")
 async def get_video_thumbnails():
-    """Get real video thumbnails."""
+    """Get real video thumbnails with REAL YOLO detections."""
     import base64
     from pathlib import Path
     
     thumbnails_dir = PROJECT_ROOT / "datasets" / "videos" / "thumbnails"
     thumbnails = []
     
-    if thumbnails_dir.exists():
-        for i in range(4):
-            thumb_file = thumbnails_dir / f"thumb_{i}.jpg"
-            if thumb_file.exists():
+    if not thumbnails_dir.exists():
+        return {"status": "no_data", "thumbnails": [], "count": 0}
+    
+    # Load YOLO model once
+    try:
+        from ultralytics import YOLO
+        model_path = PROJECT_ROOT / "yolov8n.pt"
+        model = YOLO(str(model_path)) if model_path.exists() else None
+    except Exception:
+        model = None
+    
+    for i in range(4):
+        thumb_file = thumbnails_dir / f"thumb_{i}.jpg"
+        if not thumb_file.exists():
+            continue
+        
+        try:
+            # Read thumbnail image
+            img = cv2.imread(str(thumb_file))
+            if img is None:
+                continue
+            
+            # Run REAL YOLO inference
+            detections_list = []
+            class_counts = {}
+            
+            if model is not None:
+                results = model(img, conf=0.25, verbose=False)
+                for r in results:
+                    boxes = r.boxes
+                    if boxes is not None:
+                        for box in boxes:
+                            cls_id = int(box.cls[0])
+                            cls_name = model.names[cls_id]
+                            conf = float(box.conf[0])
+                            xyxy = box.xyxy[0].cpu().numpy().tolist()
+                            detections_list.append({
+                                "class": cls_name,
+                                "confidence": round(conf, 3),
+                                "bbox": [round(x, 1) for x in xyxy],
+                            })
+                            class_counts[cls_name] = class_counts.get(cls_name, 0) + 1
+                
+                # Draw bounding boxes on thumbnail for display
+                annotated = img.copy()
+                for det in detections_list:
+                    x1, y1, x2, y2 = [int(v) for v in det["bbox"]]
+                    cv2.rectangle(annotated, (x1, y1), (x2, y2), (0, 255, 200), 2)
+                    label = f"{det['class']} {det['confidence']:.2f}"
+                    (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)
+                    cv2.rectangle(annotated, (x1, y1 - th - 4), (x1 + tw + 4, y1), (0, 255, 200), -1)
+                    cv2.putText(annotated, label, (x1 + 2, y1 - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1)
+                
+                # Encode annotated image
+                _, buffer = cv2.imencode('.jpg', annotated, [cv2.IMWRITE_JPEG_QUALITY, 85])
+                b64 = base64.b64encode(buffer).decode('utf-8')
+            else:
+                # No model — just return original
                 with open(thumb_file, 'rb') as f:
                     b64 = base64.b64encode(f.read()).decode('utf-8')
-                thumbnails.append({
-                    "index": i,
-                    "frame": i * 75,
-                    "preview": b64,
-                    "detections": 2 if i % 2 == 0 else 1,  # Placeholder
-                    "class_counts": {"person": 2 if i % 2 == 0 else 1},
-                })
+            
+            thumbnails.append({
+                "index": i,
+                "frame": i * 75,
+                "preview": b64,
+                "detections": len(detections_list),
+                "class_counts": class_counts,
+                "detection_list": detections_list[:5],
+            })
+        except Exception as e:
+            print(f"Error on thumb {i}: {e}")
+            continue
     
     return {
         "status": "success",
         "thumbnails": thumbnails,
         "count": len(thumbnails),
+        "model": "yolov8n",
     }
