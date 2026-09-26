@@ -32,7 +32,7 @@ cd /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY && cat > README.md << 
 
 ## 🎯 Overview
 
-**CV-INTEGRITY AI** is a unified, evidence-based assurance layer that evaluates the integrity of computer vision pipelines across three critical stages:
+**CV-INTEGRITY AI** is an unified, evidence-based assurance layer that evaluates the integrity of computer vision pipelines across three critical stages:
 
 1. **Training Data** — Detect poisoning, backdoors, label flipping, and OOD samples
 2. **Trained Models** — Verify authenticity, detect substitution, and find hidden backdoors
