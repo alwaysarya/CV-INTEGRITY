@@ -1,0 +1,28 @@
+cd /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY && cat > COMMANDS.md << 'COMMANDS_END'
+# 🚀 CV-INTEGRITY AI - STARTUP COMMANDS
+
+**Har command alag terminal mein run karo. 4 terminal tabs kholo (Cmd + T x3).**
+
+---
+
+# 🖥️ TERMINAL 1 — DATABASE INIT
+
+```bash
+cd /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY
+python3 blockchain/database.py && python3 blockchain/blockchain.py && python3 blockchain/wallet.py
+
+
+2.##websocket
+
+cd /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY
+python3 websocket/server.py
+
+3.##RestApi
+
+cd /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY
+python3 api/main.py
+
+4.dashboard
+
+cd /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY
+streamlit run dashboard/app.py --server.port 8510

@@ -1,0 +1,43 @@
+{
+  "simulator": "AttackSimulator",
+  "generated_at": "2026-09-19T08:26:08.089875",
+  "total_attacks": 6,
+  "attacks": [
+    {
+      "attack_type": "BLUR",
+      "input": "/Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/uploaded/extracted/images/000000001532.jpg",
+      "output": "attack_simulator/results/000000001532_blur.jpg",
+      "timestamp": "2026-09-19T08:26:07.997131"
+    },
+    {
+      "attack_type": "NOISE",
+      "input": "/Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/uploaded/extracted/images/000000001532.jpg",
+      "output": "attack_simulator/results/000000001532_noise.jpg",
+      "timestamp": "2026-09-19T08:26:08.074534"
+    },
+    {
+      "attack_type": "BRIGHTNESS",
+      "input": "/Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/uploaded/extracted/images/000000001532.jpg",
+      "output": "attack_simulator/results/000000001532_bright.jpg",
+      "timestamp": "2026-09-19T08:26:08.080734"
+    },
+    {
+      "attack_type": "CONTRAST",
+      "input": "/Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/uploaded/extracted/images/000000001532.jpg",
+      "output": "attack_simulator/results/000000001532_contrast.jpg",
+      "timestamp": "2026-09-19T08:26:08.084775"
+    },
+    {
+      "attack_type": "ROTATION",
+      "input": "/Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/uploaded/extracted/images/000000001532.jpg",
+      "output": "attack_simulator/results/000000001532_rotated.jpg",
+      "timestamp": "2026-09-19T08:26:08.088454"
+    },
+    {
+      "attack_type": "DUPLICATE",
+      "input": "/Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/uploaded/extracted/images/000000001532.jpg",
+      "output": "['attack_simulator/results/000000001532_copy_dup0.jpg', 'attack_simulator/results/000000001532_copy_dup1.jpg', 'attack_simulator/results/000000001532_copy_dup2.jpg']",
+      "timestamp": "2026-09-19T08:26:08.089304"
+    }
+  ]
+}

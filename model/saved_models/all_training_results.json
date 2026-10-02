@@ -1,0 +1,38 @@
+{
+  "good": {
+    "dataset": "good",
+    "epochs": 20,
+    "model": "yolov8n",
+    "device": "cpu",
+    "metrics": {
+      "precision": 0.5282152836693188,
+      "recall": 0.19262794311608386,
+      "mAP50": 0.1928494366901424,
+      "mAP50_95": 0.11520862723725858
+    }
+  },
+  "bad": {
+    "dataset": "bad",
+    "epochs": 20,
+    "model": "yolov8n",
+    "device": "cpu",
+    "metrics": {
+      "precision": 0.5363191010552943,
+      "recall": 0.19236111111111112,
+      "mAP50": 0.17486651986053192,
+      "mAP50_95": 0.10189357787335074
+    }
+  },
+  "worst": {
+    "dataset": "worst",
+    "epochs": 20,
+    "model": "yolov8n",
+    "device": "cpu",
+    "metrics": {
+      "precision": 0.5671945381737261,
+      "recall": 0.16609350079744817,
+      "mAP50": 0.15272802692219345,
+      "mAP50_95": 0.08588993087736797
+    }
+  }
+}
