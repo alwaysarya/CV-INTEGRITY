@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Brain, Loader2, RefreshCw, Target, Zap, Image as ImageIcon, AlertCircle } from 'lucide-react'
+import { Brain, Loader2, RefreshCw, Target, Zap, Image as ImageIcon } from 'lucide-react'
 import axios from 'axios'
 import { notify } from '@/lib/toast'
 
@@ -13,10 +13,14 @@ interface XAIResult {
   access_level: string
   confidence: number
   limitations: string[]
-  image_source: string
+  image_source?: string
   original_image: string
   heatmap_overlay: string
+  heatmap_raw: string
   image_size: number[]
+  timestamp: string
+  overlay?: string
+  image?: string
 }
 
 const methods = [
@@ -37,7 +41,10 @@ export function XAI() {
     setLoading(true)
     try {
       notify.info(`Running ${selectedMethod}...`, 'Generating explanation')
-      const res = await axios.post(`${API}/api/xai/explain`, { method: selectedMethod, model_name: 'yolov8n' })
+      const res = await axios.post(`${API}/api/xai/explain`, {
+        method: selectedMethod,
+        model_name: 'yolov8n',
+      })
       if (res.data.status === 'success') {
         setResult(res.data)
         notify.success('Explanation generated!', `Method: ${selectedMethod}`)
@@ -46,153 +53,310 @@ export function XAI() {
       }
     } catch (err: any) {
       notify.error('Error', err.message)
-    } finally { setLoading(false) }
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const xaiLabFeatures = [
-    { name: 'Vehicle Windshield & Hood Silhouette', value: 41.0, positive: true },
-    { name: 'Wheel Contour & Shadow Baseline', value: 32.0, positive: true },
-    { name: 'Road Asphalt Contrast Line', value: 16.0, positive: true },
-    { name: 'Pedestrian Distractor Profile', value: -7.0, positive: false },
-    { name: 'Background Sky Lighting Artifact', value: -4.0, positive: false },
-  ]
+  const confidence = result?.confidence ?? 0
+  const confidencePct = (confidence * 100).toFixed(1)
+  const confidenceLabel =
+    confidence >= 0.7 ? 'HIGH' : confidence >= 0.4 ? 'MEDIUM' : 'LOW'
 
   return (
-    <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>
-
-      {/* Top header */}
-      <div className="flex items-center justify-between mb-6 pb-4 flex-wrap gap-3"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
+    <div
+      className="min-h-screen p-6"
+      style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}
+    >
+      {/* Header */}
+      <div
+        className="flex items-center justify-between mb-6 pb-4 flex-wrap gap-3"
+        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}
+      >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center"
-            style={{ background: 'rgba(167, 139, 250, 0.1)', border: '1px solid rgba(167, 139, 250, 0.4)' }}>
-            <Brain size={14} style={{ color: '#A78BFA' }} />
+          <div
+            className="w-8 h-8 rounded flex items-center justify-center"
+            style={{
+              background: 'rgba(94, 234, 212, 0.1)',
+              border: '1px solid rgba(94, 234, 212, 0.4)',
+            }}
+          >
+            <Brain size={14} style={{ color: '#5EEAD4' }} />
           </div>
           <div>
-            <div className="text-[13px] font-bold tracking-[0.2em]" style={{ color: '#5EEAD4' }}>EXPLAINABLE_AI</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>
+            <div
+              className="text-[13px] font-bold tracking-[0.2em]"
+              style={{ color: '#5EEAD4' }}
+            >
+              EXPLAINABLE_AI
+            </div>
+            <div
+              className="text-[9px] tracking-[0.2em]"
+              style={{ color: '#5EEAD4', opacity: 0.5 }}
+            >
               VISUAL_ATTRIBUTION_HEATMAPS · SALIENCY_MAPS
             </div>
           </div>
         </div>
 
         <div className="flex gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded"
-            style={{ background: 'rgba(167, 139, 250, 0.15)', border: '1px solid rgba(167, 139, 250, 0.4)' }}>
-            <Brain size={11} style={{ color: '#A78BFA' }} />
-            <span className="text-[10px] font-mono tracking-wider" style={{ color: '#A78BFA' }}>XAI_ACTIVE</span>
-          </div>
-          <button onClick={runExplanation} disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider disabled:opacity-50"
-            style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)', color: '#5EEAD4' }}>
+          <button
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
+            style={{
+              background: 'rgba(167, 139, 250, 0.15)',
+              border: '1px solid rgba(167, 139, 250, 0.5)',
+              color: '#A78BFA',
+            }}
+          >
+            ⚡ XAI_ACTIVE
+          </button>
+          <button
+            onClick={runExplanation}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider disabled:opacity-40"
+            style={{
+              background: 'rgba(94, 234, 212, 0.08)',
+              border: '1px solid rgba(94, 234, 212, 0.3)',
+              color: '#5EEAD4',
+            }}
+          >
             <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
             REGENERATE
           </button>
         </div>
       </div>
 
-      {/* Method Selector */}
-      <div className="p-4 rounded mb-5 flex items-center gap-3 flex-wrap"
-        style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <span className="text-[10px] font-mono tracking-wider" style={{ color: '#5EEAD4', opacity: 0.5 }}>METHOD:</span>
+      {/* Method switcher */}
+      <div
+        className="flex items-center gap-2 mb-5 p-3 rounded flex-wrap"
+        style={{
+          background: 'rgba(94, 234, 212, 0.02)',
+          border: '1px solid rgba(94, 234, 212, 0.15)',
+        }}
+      >
+        <span
+          className="text-[10px] font-mono tracking-wider mr-2"
+          style={{ color: '#5EEAD4', opacity: 0.6 }}
+        >
+          METHODS:
+        </span>
         {methods.map((m) => (
-          <button key={m.id} onClick={() => setSelectedMethod(m.id)} disabled={loading}
-            className="px-3 py-1.5 rounded text-[10px] font-mono tracking-wider transition-all"
-            style={selectedMethod === m.id
-              ? { background: 'rgba(94, 234, 212, 0.2)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.5)' }
-              : { background: 'transparent', color: '#5EEAD4', opacity: 0.5, border: '1px solid rgba(94, 234, 212, 0.15)' }}>
+          <button
+            key={m.id}
+            onClick={() => setSelectedMethod(m.id)}
+            disabled={loading}
+            className="px-3 py-1.5 rounded text-[10px] font-mono tracking-wider transition-all disabled:opacity-40"
+            style={{
+              background:
+                selectedMethod === m.id
+                  ? 'rgba(94, 234, 212, 0.15)'
+                  : 'rgba(94, 234, 212, 0.03)',
+              border: `1px solid ${
+                selectedMethod === m.id
+                  ? 'rgba(94, 234, 212, 0.5)'
+                  : 'rgba(94, 234, 212, 0.15)'
+              }`,
+              color: selectedMethod === m.id ? '#FFFFFF' : '#5EEAD4',
+            }}
+          >
             {m.label}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="p-12 rounded flex flex-col items-center justify-center"
-          style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-          <Loader2 className="animate-spin mb-4" size={40} style={{ color: '#5EEAD4' }} />
-          <div className="text-[12px] font-mono" style={{ color: '#5EEAD4', opacity: 0.8 }}>
-            RUNNING_{selectedMethod.toUpperCase()}...
-          </div>
-          <div className="text-[10px] font-mono mt-2" style={{ color: '#5EEAD4', opacity: 0.4 }}>
-            Analyzing image and generating heatmap
-          </div>
+        <div
+          className="flex flex-col items-center justify-center py-20 rounded"
+          style={{
+            background: 'rgba(94, 234, 212, 0.02)',
+            border: '1px solid rgba(94, 234, 212, 0.15)',
+          }}
+        >
+          <Loader2
+            className="animate-spin mb-4"
+            size={32}
+            style={{ color: '#5EEAD4' }}
+          />
+          <span
+            className="text-[11px] font-mono"
+            style={{ color: '#5EEAD4', opacity: 0.6 }}
+          >
+            RUNNING {selectedMethod.toUpperCase()}...
+          </span>
         </div>
       ) : result ? (
         <>
-          {/* Image + Heatmap */}
+          {/* Image comparison */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
-            <div className="p-5 rounded"
-              style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="flex items-center justify-between mb-4">
+            {/* Original Image */}
+            <div
+              className="p-4 rounded"
+              style={{
+                background: 'rgba(94, 234, 212, 0.02)',
+                border: '1px solid rgba(94, 234, 212, 0.15)',
+              }}
+            >
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <ImageIcon size={13} style={{ color: '#38BDF8' }} />
-                  <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>ORIGINAL_IMAGE</h3>
+                  <ImageIcon size={12} style={{ color: '#5EEAD4' }} />
+                  <span
+                    className="text-[10px] font-mono tracking-wider"
+                    style={{ color: '#5EEAD4' }}
+                  >
+                    ORIGINAL_IMAGE
+                  </span>
                 </div>
-                <span className="text-[9px] font-mono py-0.5 px-2 rounded tracking-wider"
-                  style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', border: '1px solid rgba(56, 189, 248, 0.4)' }}>
+                <span
+                  className="text-[9px] font-mono py-0.5 px-2 rounded"
+                  style={{
+                    background: 'rgba(94, 234, 212, 0.1)',
+                    color: '#5EEAD4',
+                    border: '1px solid rgba(94, 234, 212, 0.3)',
+                  }}
+                >
                   INPUT
                 </span>
               </div>
-              <div className="rounded overflow-hidden" style={{ background: '#050810', border: '1px solid rgba(94, 234, 212, 0.2)' }}>
-                <img src={`data:image/png;base64,${result.original_image}`} alt="Original" className="w-full h-64 object-contain" />
+              <div
+                className="rounded overflow-hidden flex items-center justify-center"
+                style={{
+                  background: '#050810',
+                  border: '1px solid rgba(94, 234, 212, 0.3)',
+                  minHeight: 280,
+                }}
+              >
+                <img
+                  src={`data:image/jpeg;base64,${result.original_image}`}
+                  alt="Original"
+                  style={{ width: '100%', display: 'block' }}
+                />
               </div>
-              <div className="mt-3 text-[9px] font-mono truncate" style={{ color: '#5EEAD4', opacity: 0.5 }}>
-                {result.image_source?.split('/').slice(-2).join('/') || 'synthetic'}
+              <div
+                className="text-[9px] font-mono mt-2 truncate"
+                style={{ color: '#5EEAD4', opacity: 0.5 }}
+              >
+                {result.image_source || 'input_image'}
               </div>
             </div>
 
-            <div className="p-5 rounded"
-              style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="flex items-center justify-between mb-4">
+            {/* Heatmap Overlay */}
+            <div
+              className="p-4 rounded"
+              style={{
+                background: 'rgba(94, 234, 212, 0.02)',
+                border: '1px solid rgba(94, 234, 212, 0.15)',
+              }}
+            >
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Target size={13} style={{ color: '#F87171' }} />
-                  <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>HEATMAP_OVERLAY</h3>
+                  <Target size={12} style={{ color: '#F87171' }} />
+                  <span
+                    className="text-[10px] font-mono tracking-wider"
+                    style={{ color: '#F87171' }}
+                  >
+                    HEATMAP_OVERLAY
+                  </span>
                 </div>
-                <span className="text-[9px] font-mono py-0.5 px-2 rounded tracking-wider"
-                  style={{ background: 'rgba(248, 113, 113, 0.15)', color: '#F87171', border: '1px solid rgba(248, 113, 113, 0.4)' }}>
-                  {result.method.toUpperCase()}
+                <span
+                  className="text-[9px] font-mono py-0.5 px-2 rounded"
+                  style={{
+                    background: 'rgba(248, 113, 113, 0.1)',
+                    color: '#F87171',
+                    border: '1px solid rgba(248, 113, 113, 0.3)',
+                  }}
+                >
+                  {result.method?.toUpperCase()}
                 </span>
               </div>
-              <div className="rounded overflow-hidden" style={{ background: '#050810', border: '1px solid rgba(94, 234, 212, 0.2)' }}>
-                <img src={`data:image/png;base64,${result.heatmap_overlay}`} alt="Heatmap" className="w-full h-64 object-contain" />
+              <div
+                className="rounded overflow-hidden flex items-center justify-center"
+                style={{
+                  background: '#050810',
+                  border: '1px solid rgba(94, 234, 212, 0.3)',
+                  minHeight: 280,
+                }}
+              >
+                <img
+                  src={`data:image/png;base64,${result.heatmap_overlay}`}
+                  alt="Heatmap Overlay"
+                  style={{ width: '100%', display: 'block' }}
+                />
               </div>
-              <div className="mt-3 flex items-center justify-between text-[9px] font-mono">
-                <span style={{ color: '#5EEAD4', opacity: 0.5 }}>RED = HIGH ATTENTION</span>
-                <span style={{ color: '#5EEAD4' }}>CONFIDENCE: {(result.confidence * 100).toFixed(1)}%</span>
+              <div className="flex items-center justify-between mt-2">
+                <span
+                  className="text-[9px] font-mono"
+                  style={{ color: '#F87171', opacity: 0.7 }}
+                >
+                  RED = HIGH ATTENTION
+                </span>
+                <span
+                  className="text-[9px] font-mono"
+                  style={{ color: '#5EEAD4', opacity: 0.7 }}
+                >
+                  CONFIDENCE: {confidencePct}%
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Details */}
+          {/* Metrics Row — real from backend */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
             {[
-              { label: 'METHOD_USED', value: result.method.toUpperCase(), sub: result.access_level, color: '#5EEAD4' },
-              { label: 'MODEL', value: result.model_name, sub: `Image: ${result.image_size?.join('×')}`, color: '#A78BFA' },
-              { label: 'CONFIDENCE', value: `${(result.confidence * 100).toFixed(1)}%`, color: result.confidence > 0.7 ? '#5EEAD4' : result.confidence > 0.4 ? '#FBBF24' : '#F87171' },
+              { label: 'MODEL', value: (result.model_name || 'N/A').toUpperCase(), color: '#FFFFFF' },
+              { label: 'METHOD', value: (result.method || 'N/A').toUpperCase(), color: '#5EEAD4' },
+              { label: 'CONFIDENCE', value: `${confidencePct}%`, color: '#5EEAD4' },
             ].map((item, i) => (
-              <div key={i} className="p-4 rounded"
-                style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-                <div className="text-[10px] font-mono tracking-[0.2em] mb-1.5" style={{ color: '#5EEAD4', opacity: 0.5 }}>{item.label}</div>
-                <div className="text-[20px] font-bold font-mono" style={{ color: item.color }}>{item.value}</div>
-                {item.sub && <div className="text-[10px] font-mono mt-1" style={{ color: '#5EEAD4', opacity: 0.5 }}>{item.sub}</div>}
+              <div
+                key={i}
+                className="p-4 rounded"
+                style={{
+                  background: 'rgba(94, 234, 212, 0.02)',
+                  border: '1px solid rgba(94, 234, 212, 0.15)',
+                }}
+              >
+                <div
+                  className="text-[9px] font-mono tracking-wider mb-1"
+                  style={{ color: '#5EEAD4', opacity: 0.5 }}
+                >
+                  {item.label}
+                </div>
+                <div
+                  className="text-[16px] font-bold font-mono"
+                  style={{ color: item.color }}
+                >
+                  {item.value}
+                </div>
               </div>
             ))}
           </div>
 
           {/* Limitations */}
           {result.limitations && result.limitations.length > 0 && (
-            <div className="p-5 rounded mb-5"
-              style={{ background: 'rgba(251, 191, 36, 0.03)', border: '1px solid rgba(251, 191, 36, 0.3)', borderLeft: '3px solid #FBBF24' }}>
+            <div
+              className="p-4 rounded mb-5"
+              style={{
+                background: 'rgba(251, 191, 36, 0.03)',
+                border: '1px solid rgba(251, 191, 36, 0.3)',
+              }}
+            >
               <div className="flex items-center gap-2 mb-3">
-                <AlertCircle size={13} style={{ color: '#FBBF24' }} />
-                <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#FBBF24' }}>LIMITATIONS</h3>
+                <span className="text-[13px]">⚠️</span>
+                <span
+                  className="text-[10px] font-mono tracking-[0.2em] font-bold"
+                  style={{ color: '#FBBF24' }}
+                >
+                  LIMITATIONS
+                </span>
               </div>
-              <ul className="space-y-1">
-                {result.limitations.map((lim, i) => (
-                  <li key={i} className="text-[11px] font-mono flex items-start gap-2"
-                    style={{ color: '#5EEAD4', opacity: 0.7 }}>
-                    <span style={{ color: '#FBBF24' }}>•</span>
-                    {lim}
+              <ul className="space-y-1.5">
+                {result.limitations.map((l, i) => (
+                  <li
+                    key={i}
+                    className="text-[10px] font-mono flex gap-2"
+                    style={{ color: '#FBBF24', opacity: 0.85 }}
+                  >
+                    <span>•</span>
+                    <span>{l}</span>
                   </li>
                 ))}
               </ul>
@@ -200,94 +364,156 @@ export function XAI() {
           )}
 
           {/* XAI Lab */}
-          <div className="pt-5" style={{ borderTop: '1px solid rgba(94, 234, 212, 0.15)' }}>
-            <div className="flex items-start justify-between mb-5 flex-wrap gap-3">
-              <div>
-                <h2 className="text-[16px] font-bold font-mono tracking-[0.15em] mb-1" style={{ color: '#5EEAD4' }}>
-                  XAI_LAB
-                </h2>
-                <p className="text-[11px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>
-                  Visual attribution heatmaps revealing what the vision model attends to
-                </p>
-              </div>
+          <div className="mt-8 pt-6" style={{ borderTop: '1px solid rgba(94, 234, 212, 0.15)' }}>
+            <div className="mb-4">
+              <h3
+                className="text-[13px] font-bold font-mono tracking-[0.2em] mb-1"
+                style={{ color: '#5EEAD4' }}
+              >
+                XAI_LAB
+              </h3>
+              <p
+                className="text-[10px] font-mono"
+                style={{ color: '#5EEAD4', opacity: 0.5 }}
+              >
+                Visual attribution heatmaps revealing what the vision model attends to
+              </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="p-5 rounded"
-                style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-                <div className="flex items-center justify-between mb-4">
+              {/* GradCAM Heatmap */}
+              <div
+                className="p-4 rounded"
+                style={{
+                  background: 'rgba(94, 234, 212, 0.02)',
+                  border: '1px solid rgba(94, 234, 212, 0.15)',
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Target size={13} style={{ color: '#5EEAD4' }} />
-                    <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>
+                    <Target size={12} style={{ color: '#5EEAD4' }} />
+                    <span
+                      className="text-[10px] font-mono tracking-wider"
+                      style={{ color: '#5EEAD4' }}
+                    >
                       GRADCAM_HEATMAP
-                    </h3>
+                    </span>
                   </div>
-                  <span className="text-[9px] font-mono py-0.5 px-2 rounded tracking-wider"
-                    style={{ background: 'rgba(94, 234, 212, 0.15)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-                    HIGH_CONFIDENCE
+                  <span
+                    className="text-[9px] font-mono py-0.5 px-2 rounded"
+                    style={{
+                      background: 'rgba(94, 234, 212, 0.1)',
+                      color: '#5EEAD4',
+                      border: '1px solid rgba(94, 234, 212, 0.3)',
+                    }}
+                  >
+                    {confidenceLabel}_CONFIDENCE
                   </span>
                 </div>
-                <div className="rounded overflow-hidden mb-4 aspect-video" style={{ background: '#050810', border: '1px solid rgba(94, 234, 212, 0.2)' }}>
-                  {result ? (
-                    <img src={`data:image/png;base64,${result.heatmap_overlay}`} alt="Heatmap" className="w-full h-full object-contain" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[10px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>
-                      LOADING...
-                    </div>
-                  )}
+                <div
+                  className="rounded overflow-hidden"
+                  style={{ border: '1px solid rgba(94, 234, 212, 0.3)' }}
+                >
+                  <img
+                    src={`data:image/png;base64,${result.heatmap_overlay}`}
+                    alt="GradCAM Heatmap"
+                    style={{ width: '100%', display: 'block' }}
+                  />
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2 mt-3">
                   {[
-                    { label: 'TARGET', value: 'CAR', color: '#FFFFFF' },
-                    { label: 'CONFIDENCE', value: '94.0%', color: '#5EEAD4' },
-                    { label: 'COMPUTE', value: '18.2ms', color: '#FFFFFF' },
-                  ].map((s, i) => (
-                    <div key={i} className="p-2.5 rounded" style={{ background: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(94, 234, 212, 0.1)' }}>
-                      <div className="text-[9px] font-mono tracking-wider mb-1" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</div>
-                      <div className="font-bold text-[11px] font-mono" style={{ color: s.color }}>{s.value}</div>
+                    { label: 'MODEL', value: (result.model_name || 'N/A').toUpperCase(), color: '#FFFFFF' },
+                    { label: 'METHOD', value: (result.method || 'N/A').toUpperCase(), color: '#5EEAD4' },
+                    { label: 'CONFIDENCE', value: `${confidencePct}%`, color: '#5EEAD4' },
+                  ].map((item, i) => (
+                    <div
+                      key={i}
+                      className="p-2 rounded"
+                      style={{
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        border: '1px solid rgba(94, 234, 212, 0.1)',
+                      }}
+                    >
+                      <div
+                        className="text-[8px] font-mono tracking-wider mb-1"
+                        style={{ color: '#5EEAD4', opacity: 0.5 }}
+                      >
+                        {item.label}
+                      </div>
+                      <div
+                        className="text-[11px] font-bold font-mono truncate"
+                        style={{ color: item.color }}
+                      >
+                        {item.value}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="p-5 rounded"
-                style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-                <div className="flex items-center justify-between mb-4">
+              {/* Feature Attributions — real heatmap */}
+              <div
+                className="p-4 rounded"
+                style={{
+                  background: 'rgba(94, 234, 212, 0.02)',
+                  border: '1px solid rgba(94, 234, 212, 0.15)',
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Zap size={13} style={{ color: '#5EEAD4' }} />
-                    <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>
-                      FEATURE_ATTRIBUTIONS
-                    </h3>
+                    <Zap size={12} style={{ color: '#5EEAD4' }} />
+                    <span
+                      className="text-[10px] font-mono tracking-wider"
+                      style={{ color: '#5EEAD4' }}
+                    >
+                      RAW_HEATMAP
+                    </span>
                   </div>
-                  <div className="text-[9px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>
-                    FAITHFULNESS: <span style={{ color: '#5EEAD4' }}>93.6%</span>
-                  </div>
+                  <span
+                    className="text-[9px] font-mono"
+                    style={{ color: '#5EEAD4', opacity: 0.6 }}
+                  >
+                    ACCESS: {(result.access_level || 'N/A').toUpperCase()}
+                  </span>
                 </div>
-                <div className="space-y-3">
-                  {xaiLabFeatures.map((feature, i) => {
-                    const barWidth = (Math.abs(feature.value) / 41) * 100
-                    const color = feature.positive ? '#5EEAD4' : '#F87171'
-                    return (
-                      <div key={i}>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-[10px] font-mono" style={{ color: '#FFFFFF', opacity: 0.85 }}>{feature.name}</span>
-                          <span className="text-[10px] font-bold font-mono" style={{ color }}>
-                            {feature.positive ? '+' : ''}{feature.value.toFixed(1)}%
-                          </span>
-                        </div>
-                        <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(94, 234, 212, 0.1)' }}>
-                          <div className="h-full rounded-full transition-all"
-                            style={{ width: `${barWidth}%`, background: color, boxShadow: `0 0 6px ${color}` }} />
-                        </div>
-                      </div>
-                    )
-                  })}
+                <div
+                  className="rounded overflow-hidden flex items-center justify-center"
+                  style={{
+                    background: '#050810',
+                    border: '1px solid rgba(94, 234, 212, 0.3)',
+                    minHeight: 280,
+                  }}
+                >
+                  <img
+                    src={`data:image/png;base64,${result.heatmap_raw}`}
+                    alt="Raw Heatmap"
+                    style={{ width: '100%', display: 'block' }}
+                  />
+                </div>
+                <div
+                  className="text-[9px] font-mono mt-3"
+                  style={{ color: '#5EEAD4', opacity: 0.5 }}
+                >
+                  Method: {result.method} · Size: {result.image_size?.join('×')}
                 </div>
               </div>
             </div>
           </div>
         </>
-      ) : null}
+      ) : (
+        <div
+          className="text-center py-16 rounded"
+          style={{
+            background: 'rgba(94, 234, 212, 0.02)',
+            border: '1px solid rgba(94, 234, 212, 0.15)',
+          }}
+        >
+          <Brain size={40} style={{ color: '#5EEAD4' }} className="mx-auto mb-3" />
+          <p className="text-[11px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>
+            Click REGENERATE to run XAI explanation
+          </p>
+        </div>
+      )}
     </div>
   )
 }
