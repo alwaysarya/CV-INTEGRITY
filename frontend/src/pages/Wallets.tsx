@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Wallet, Search, Copy, Loader2, RefreshCw, AlertCircle, Activity, Coins, Shield, ArrowUpRight, ArrowDownLeft, CheckCircle, Clock, Vote } from 'lucide-react'
+import { Wallet, Search, Copy, Loader2, RefreshCw, AlertCircle, Activity, Coins, Shield, CheckCircle, Clock, Vote, Plus, X } from 'lucide-react'
 import apiClient from '@/lib/api'
 
 interface Transaction {
@@ -27,10 +27,13 @@ interface WalletData {
 interface MultisigWallet {
   wallet_id: string
   name?: string
-  balance: number
-  required_signatures: number
+  owner?: string
+  required: number
+  total: number
   signers: string[]
-  transactions: MultisigTransaction[]
+  balance: number
+  transaction_count?: number
+  transactions?: MultisigTransaction[]
 }
 
 interface MultisigTransaction {
@@ -40,6 +43,7 @@ interface MultisigTransaction {
   reason: string
   signatures: string[]
   executed: boolean
+  required_signatures?: number
   created_at?: string
 }
 
@@ -56,6 +60,11 @@ export function Wallets() {
   const [multisigWallets, setMultisigWallets] = useState<MultisigWallet[]>([])
   const [multisigLoading, setMultisigLoading] = useState(true)
   const [actionMsg, setActionMsg] = useState<string | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState<string | null>(null) // wallet_id
+  const [formTo, setFormTo] = useState('')
+  const [formAmount, setFormAmount] = useState('')
+  const [formReason, setFormReason] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     loadWallets()
@@ -102,6 +111,41 @@ export function Wallets() {
       console.error('Multisig load failed:', err)
     } finally {
       setMultisigLoading(false)
+    }
+  }
+
+  const createTransaction = async (walletId: string) => {
+    if (!formTo || !formAmount || !formReason) {
+      setActionMsg('❌ Fill all fields')
+      setTimeout(() => setActionMsg(null), 2000)
+      return
+    }
+    setSubmitting(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/advanced/multisig/wallets/${walletId}/transactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to_wallet: formTo,
+          amount: parseFloat(formAmount),
+          reason: formReason,
+        }),
+      })
+      const data = await res.json()
+      if (data.status === 'success') {
+        setActionMsg('✅ Transaction created')
+        setShowCreateModal(null)
+        setFormTo(''); setFormAmount(''); setFormReason('')
+        await loadMultisigWallets()
+      } else {
+        setActionMsg(`❌ ${data.error || 'Failed'}`)
+      }
+      setTimeout(() => setActionMsg(null), 2500)
+    } catch (err) {
+      setActionMsg('❌ Create failed')
+      setTimeout(() => setActionMsg(null), 2500)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -153,10 +197,6 @@ export function Wallets() {
     totalTx: wallets.reduce((s, w) => s + w.txCount, 0),
   }
 
-  const getTxColor = (type: string) => {
-    return type === 'CREDIT' ? '#10B981' : '#EF4444'
-  }
-
   const getStatusColors = (status: string) => {
     if (status === 'EXECUTED') return { text: '#10B981', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.4)' }
     if (status === 'PENDING') return { text: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)', border: 'rgba(245, 158, 11, 0.4)' }
@@ -174,13 +214,13 @@ export function Wallets() {
             </p>
           </div>
           {actionMsg && (
-            <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/40 text-xs px-3 py-1">
+            <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/40 text-xs px-3 py-2">
               {actionMsg}
             </Badge>
           )}
         </div>
 
-        {/* GOVERNANCE WALLETS — LIVE FROM API */}
+        {/* Multisig wallets — LIVE */}
         <div className="space-y-4 mb-8">
           {multisigLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -191,9 +231,6 @@ export function Wallets() {
             <Card className="rounded-3xl p-8 text-center">
               <Shield size={32} className="mx-auto mb-3 text-cyan-400 opacity-40" />
               <p className="text-[#E5F5F0] text-sm font-bold mb-1">No multisig wallets yet</p>
-              <p className="text-[#8AA4A0] text-xs">
-                Backend API ready: POST /api/advanced/multisig/wallets to create one
-              </p>
             </Card>
           ) : (
             multisigWallets.map((wallet, wIdx) => (
@@ -206,39 +243,48 @@ export function Wallets() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="text-[#E5F5F0] font-bold text-base">
-                          {wallet.name || wallet.wallet_id}
+                          {wallet.owner || wallet.name || wallet.wallet_id}
                         </h3>
                         <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/40 text-[9px] font-mono">
                           {wallet.wallet_id}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-4 text-xs text-[#8AA4A0]">
-                        <span>Quorum: <span className="text-[#E5F5F0] font-bold">{wallet.required_signatures}/{wallet.signers?.length || 0}</span></span>
+                        <span>Quorum: <span className="text-[#E5F5F0] font-bold">{wallet.required}/{wallet.total}</span></span>
                         <span>•</span>
                         <span>Balance: <span className="text-green-400 font-bold">{wallet.balance || 0} CVI</span></span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    {(wallet.signers || []).slice(0, 5).map((s: string, i: number) => (
-                      <div key={i} className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-[#0A0F14] text-[9px] font-bold" title={s}>
-                        {s.substring(0, 2).toUpperCase()}
-                      </div>
-                    ))}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      {(wallet.signers || []).slice(0, 5).map((s: string, i: number) => (
+                        <div key={i} className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-[#0A0F14] text-[9px] font-bold" title={s}>
+                          {s.substring(0, 2).toUpperCase()}
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setShowCreateModal(wallet.wallet_id)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 text-[10px] font-medium hover:bg-cyan-500/30 transition"
+                    >
+                      <Plus size={12} />
+                      New Transaction
+                    </button>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   {(wallet.transactions || []).length === 0 ? (
                     <div className="text-center py-6 text-[#8AA4A0] text-xs">
-                      No transactions yet
+                      No transactions yet · Click "New Transaction" to create one
                     </div>
                   ) : (
-                    wallet.transactions.map((tx, tIdx) => {
+                    wallet.transactions.map((tx: any, tIdx: number) => {
                       const status = tx.executed ? 'EXECUTED' : 'PENDING'
                       const colors = getStatusColors(status)
                       const signerCount = tx.signatures?.length || 0
-                      const required = wallet.required_signatures || 1
+                      const required = wallet.required || 1
                       return (
                         <div key={tIdx} className="p-4 rounded-lg bg-[#0F1419] border" style={{ borderColor: colors.border }}>
                           <div className="flex items-start justify-between mb-2 flex-wrap gap-2">
@@ -296,7 +342,7 @@ export function Wallets() {
           )}
         </div>
 
-        {/* WALLETS SECTION — live from /api/wallets */}
+        {/* Regular wallets section */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-[#E5F5F0] mb-1">Wallets</h2>
           <p className="text-[#8AA4A0] text-sm">{wallets.length} wallets · {tokenName} Token</p>
@@ -331,7 +377,7 @@ export function Wallets() {
               />
             </div>
             <button
-              onClick={loadWallets}
+              onClick={() => { loadWallets(); loadMultisigWallets() }}
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs hover:bg-cyan-500/20 transition"
             >
               <RefreshCw size={12} />
@@ -383,6 +429,106 @@ export function Wallets() {
           )}
         </Card>
       </motion.div>
+
+      {/* CREATE TRANSACTION MODAL */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowCreateModal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="rounded-2xl p-6 w-full max-w-md"
+              style={{ background: '#0F1419', border: '1px solid rgba(94, 234, 212, 0.3)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-[#E5F5F0] font-bold text-lg">New Transaction</h3>
+                  <p className="text-[#8AA4A0] text-xs mt-0.5">Wallet: {showCreateModal}</p>
+                </div>
+                <button
+                  onClick={() => setShowCreateModal(null)}
+                  className="p-1 rounded hover:bg-white/5"
+                >
+                  <X size={16} className="text-[#8AA4A0]" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[#5EEAD4] text-[10px] font-mono uppercase tracking-wider mb-1 block">
+                    To Wallet Address
+                  </label>
+                  <Input
+                    value={formTo}
+                    onChange={(e) => setFormTo(e.target.value)}
+                    placeholder="0x..."
+                    className="bg-[#0A0F14] border-cyan-500/30 text-[#E5F5F0] placeholder:text-[#5EEAD4]/30"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[#5EEAD4] text-[10px] font-mono uppercase tracking-wider mb-1 block">
+                    Amount (CVIT)
+                  </label>
+                  <Input
+                    type="number"
+                    value={formAmount}
+                    onChange={(e) => setFormAmount(e.target.value)}
+                    placeholder="10"
+                    className="bg-[#0A0F14] border-cyan-500/30 text-[#E5F5F0] placeholder:text-[#5EEAD4]/30"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[#5EEAD4] text-[10px] font-mono uppercase tracking-wider mb-1 block">
+                    Reason
+                  </label>
+                  <Input
+                    value={formReason}
+                    onChange={(e) => setFormReason(e.target.value)}
+                    placeholder="Payment for services..."
+                    className="bg-[#0A0F14] border-cyan-500/30 text-[#E5F5F0] placeholder:text-[#5EEAD4]/30"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() => setShowCreateModal(null)}
+                    className="flex-1 px-4 py-2 rounded-lg bg-[#0A0F14] border border-cyan-500/20 text-[#8AA4A0] text-xs font-medium hover:bg-cyan-500/5 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => createTransaction(showCreateModal)}
+                    disabled={submitting}
+                    className="flex-1 px-4 py-2 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 text-xs font-bold hover:bg-cyan-500/30 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="animate-spin" size={12} />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={12} />
+                        Create
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

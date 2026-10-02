@@ -38,7 +38,7 @@ export const apiClient = {
     api.post('/api/source-risk/analyze', { contributors }),
   loadDataset: (datasetPath: string) =>
     api.post('/api/dataset/load', { dataset_path: datasetPath }),
-  getAvailableDatasets: () => api.get('/api/dataset/available'),
+  getAvailableDatasets: () => api.get('/api/premium/dataset/available'),
   getAssuranceReport: () => api.get('/api/assurance/report'),
 }
 
