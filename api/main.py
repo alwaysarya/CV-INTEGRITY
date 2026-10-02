@@ -165,6 +165,8 @@ if FASTAPI_AVAILABLE:
     try:
         from api.routes.drift_route import router as drift_router
         app.include_router(drift_router)
+        from api.routes.team_route import router as team_router
+        app.include_router(team_router)
         print("✅ Drift routes registered")
     except Exception as e:
         print(f"⚠️ Failed to register drift routes: {e}")

@@ -173,3 +173,20 @@ async def xai_explain(req: XAIRequest):
             "error": str(e),
             "traceback": traceback.format_exc(),
         }
+
+
+# ============================================================
+# XAI METHODS — Available explanation methods
+# ============================================================
+@router.get("/methods")
+async def get_xai_methods():
+    """Return available XAI methods"""
+    return {
+        "status": "success",
+        "methods": [
+            {"id": "occlusion", "label": "OCCLUSION", "type": "black-box", "description": "Sliding window occlusion sensitivity"},
+            {"id": "saliency",  "label": "SALIENCY",  "type": "white-box", "description": "Gradient-based saliency map"},
+            {"id": "lime",      "label": "LIME",      "type": "black-box", "description": "Local interpretable model-agnostic explanations"},
+            {"id": "shap",      "label": "SHAP",      "type": "black-box", "description": "SHapley Additive exPlanations"},
+        ]
+    }

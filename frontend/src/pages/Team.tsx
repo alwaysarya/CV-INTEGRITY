@@ -3,8 +3,10 @@ import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Users, Search, Mail, Loader2, RefreshCw, AlertCircle, Crown, Code, Activity, Shield, Award, Check } from 'lucide-react'
+import { Users, Search, Mail, Loader2, RefreshCw, AlertCircle, Crown, Code, Activity, Check } from 'lucide-react'
 import apiClient from '@/lib/api'
+
+const API = 'http://localhost:8000'
 
 interface Member {
   id: number
@@ -23,20 +25,19 @@ const roleColors: Record<string, any> = {
   Reviewer: { bg: 'rgba(56, 189, 248, 0.15)', text: '#38BDF8', border: 'rgba(56, 189, 248, 0.4)', icon: Code },
 }
 
-const rolePermissions: Record<string, string[]> = {
-  Admin: ['models:write', 'datasets:write', 'blockchain:write', 'contracts:execute', 'multisig:sign', 'settings:write'],
-  Contributor: ['models:read', 'datasets:read', 'datasets:write', 'trust:read'],
-  Reviewer: ['audit:read', 'reports:read', 'blockchain:read', 'verification:write'],
-}
-
 export function Team() {
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
 
+  // RBAC from backend
+  const [rbacModules, setRbacModules] = useState<string[]>([])
+  const [rolePermissions, setRolePermissions] = useState<Record<string, string[]>>({})
+
   useEffect(() => {
     loadTeam()
+    loadRbac()
   }, [])
 
   const loadTeam = async () => {
@@ -75,6 +76,25 @@ export function Team() {
     }
   }
 
+  const loadRbac = async () => {
+    try {
+      const res = await fetch(`${API}/api/team/rbac-modules`)
+      const d = await res.json()
+      if (d.status === 'success') {
+        setRbacModules(d.modules || [])
+        setRolePermissions(d.role_permissions || {})
+      }
+    } catch (err) {
+      console.error('RBAC load failed:', err)
+    }
+  }
+
+  const hasAccess = (role: string, module: string): boolean => {
+    const perms = rolePermissions[role] || []
+    if (perms.includes('*')) return true
+    return perms.includes(module)
+  }
+
   const filtered = members.filter((m) =>
     m.name.toLowerCase().includes(search.toLowerCase())
   )
@@ -84,19 +104,6 @@ export function Team() {
     admins: members.filter((m) => m.role === 'Admin').length,
     contributors: members.filter((m) => m.role === 'Contributor').length,
     totalTx: members.reduce((s, m) => s + m.transactions, 0),
-  }
-
-  // Real RBAC matrix — generated from actual members
-  const rbacModules = [
-    'Models', 'Datasets', 'Blockchain', 'Smart Contracts',
-    'Multisig Wallets', 'Cyber Attack', 'Audit Trail', 'Reports', 'Settings'
-  ]
-
-  const hasAccess = (role: string, module: string): boolean => {
-    if (role === 'Admin') return true
-    if (role === 'Contributor') return ['Models', 'Datasets', 'Reports'].includes(module)
-    if (role === 'Reviewer') return ['Blockchain', 'Cyber Attack', 'Audit Trail', 'Reports'].includes(module)
-    return false
   }
 
   return (
@@ -140,7 +147,13 @@ export function Team() {
             const Icon = stat.icon
             return (
               <Card key={i} className="rounded-2xl p-5 bg-[#0F1419] border border-cyan-500/20">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: `${stat.color}20`, border: `1px solid ${stat.color}40` }}>
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                  style={{
+                    backgroundColor: `${stat.color}20`,
+                    border: `1px solid ${stat.color}40`,
+                  }}
+                >
                   <Icon size={20} style={{ color: stat.color }} />
                 </div>
                 <div className="text-[#E5F5F0] text-3xl font-bold mb-1">{stat.value}</div>
@@ -150,7 +163,7 @@ export function Team() {
           })}
         </div>
 
-        {/* Member Cards — LIVE from API */}
+        {/* Member Cards */}
         {loading ? (
           <div className="flex items-center justify-center py-16 bg-[#0F1419] rounded-2xl border border-cyan-500/20">
             <Loader2 className="animate-spin text-cyan-400" size={28} />
@@ -163,15 +176,35 @@ export function Team() {
                 const rColors = roleColors[member.role] || roleColors.Contributor
                 const RoleIcon = rColors.icon
                 return (
-                  <motion.div key={member.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
+                  <motion.div
+                    key={member.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                  >
                     <Card className="rounded-2xl p-5 bg-[#0F1419] border border-cyan-500/20">
                       <div className="flex flex-col items-center mb-4">
-                        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3" style={{ backgroundColor: `${rColors.text}20`, border: `1px solid ${rColors.text}40` }}>
+                        <div
+                          className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3"
+                          style={{
+                            backgroundColor: `${rColors.text}20`,
+                            border: `1px solid ${rColors.text}40`,
+                          }}
+                        >
                           <RoleIcon size={22} style={{ color: rColors.text }} />
                         </div>
                         <div className="text-[#E5F5F0] font-bold text-sm text-center">{member.name}</div>
-                        <div className="text-[#5EEAD4] text-[10px] mb-2 font-mono">{member.wallet.slice(0, 10)}...</div>
-                        <Badge className="text-[9px] py-0.5 px-2" style={{ backgroundColor: rColors.bg, color: rColors.text, border: `1px solid ${rColors.border}` }}>
+                        <div className="text-[#5EEAD4] text-[10px] mb-2 font-mono">
+                          {member.wallet.slice(0, 10)}...
+                        </div>
+                        <Badge
+                          className="text-[9px] py-0.5 px-2"
+                          style={{
+                            backgroundColor: rColors.bg,
+                            color: rColors.text,
+                            border: `1px solid ${rColors.border}`,
+                          }}
+                        >
                           {member.role.toUpperCase()}
                         </Badge>
                       </div>
@@ -189,10 +222,17 @@ export function Team() {
                         </div>
                       </div>
                       <div className="pt-3 border-t border-cyan-500/10">
-                        <div className="text-[#5EEAD4] text-[9px] uppercase tracking-wider mb-2">Permissions</div>
+                        <div className="text-[#5EEAD4] text-[9px] uppercase tracking-wider mb-2">
+                          Permissions
+                        </div>
                         <div className="flex flex-wrap gap-1">
                           {(rolePermissions[member.role] || []).map((p, j) => (
-                            <Badge key={j} className="text-[8px] py-0.5 px-1.5 bg-[#0A0F14] border border-cyan-500/20 text-[#8AA4A0]">{p}</Badge>
+                            <Badge
+                              key={j}
+                              className="text-[8px] py-0.5 px-1.5 bg-[#0A0F14] border border-cyan-500/20 text-[#8AA4A0]"
+                            >
+                              {p}
+                            </Badge>
                           ))}
                         </div>
                       </div>
@@ -202,19 +242,26 @@ export function Team() {
               })}
             </div>
 
-            {/* RBAC Matrix — Real members */}
+            {/* RBAC Matrix */}
             <Card className="rounded-2xl p-6 bg-[#0F1419] border border-cyan-500/20 mb-6">
               <div className="mb-4">
                 <h3 className="text-[#E5F5F0] font-bold text-sm">RBAC Access Matrix</h3>
-                <p className="text-[#8AA4A0] text-xs mt-1">Role-based permissions across modules</p>
+                <p className="text-[#8AA4A0] text-xs mt-1">
+                  Role-based permissions across modules (live from backend)
+                </p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-cyan-500/20">
-                      <th className="text-left text-[#5EEAD4] text-[10px] font-bold tracking-wider uppercase pb-3">Module</th>
+                      <th className="text-left text-[#5EEAD4] text-[10px] font-bold tracking-wider uppercase pb-3">
+                        Module
+                      </th>
                       {members.slice(0, 4).map((m) => (
-                        <th key={m.id} className="text-center text-[#5EEAD4] text-[10px] font-bold tracking-wider uppercase pb-3">
+                        <th
+                          key={m.id}
+                          className="text-center text-[#5EEAD4] text-[10px] font-bold tracking-wider uppercase pb-3"
+                        >
                           {m.name.length > 10 ? m.name.slice(0, 10) + '...' : m.name}
                         </th>
                       ))}
@@ -245,7 +292,10 @@ export function Team() {
             {/* Search */}
             <Card className="rounded-2xl bg-[#0F1419] border border-cyan-500/20 p-4 mb-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5EEAD4] opacity-60" size={16} />
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5EEAD4] opacity-60"
+                  size={16}
+                />
                 <Input
                   placeholder="Search team members..."
                   value={search}
@@ -273,14 +323,23 @@ export function Team() {
                         <div>
                           <div className="text-[#E5F5F0] font-bold text-sm">{member.name}</div>
                           <div className="text-[#5EEAD4] text-xs flex items-center gap-1 font-mono">
-                            <Mail size={10} />{member.wallet.substring(0, 14)}...
+                            <Mail size={10} />
+                            {member.wallet.substring(0, 14)}...
                           </div>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mb-4">
-                      <Badge className="text-[10px] py-0.5 px-2" style={{ backgroundColor: rColors.bg, color: rColors.text, border: `1px solid ${rColors.border}` }}>
-                        <RoleIcon size={9} className="inline mr-0.5" />{member.role}
+                      <Badge
+                        className="text-[10px] py-0.5 px-2"
+                        style={{
+                          backgroundColor: rColors.bg,
+                          color: rColors.text,
+                          border: `1px solid ${rColors.border}`,
+                        }}
+                      >
+                        <RoleIcon size={9} className="inline mr-0.5" />
+                        {member.role}
                       </Badge>
                       <Badge className="text-[10px] py-0.5 px-2 bg-green-500/20 text-green-400 border-green-500/40">
                         ● {member.status}
@@ -292,7 +351,9 @@ export function Team() {
                         <div className="text-[#E5F5F0] text-sm font-bold">{member.balance} CVIT</div>
                       </div>
                       <div>
-                        <div className="text-[#5EEAD4] text-[10px] uppercase tracking-wider">Transactions</div>
+                        <div className="text-[#5EEAD4] text-[10px] uppercase tracking-wider">
+                          Transactions
+                        </div>
                         <div className="text-[#E5F5F0] text-xs">{member.transactions}</div>
                       </div>
                     </div>

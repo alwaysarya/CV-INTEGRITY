@@ -99,3 +99,21 @@ async def calibration_table():
         return {"status": "success", "table": RiskCalibrator.get_calibration_table()}
     except Exception as e:
         return {"status": "failed", "error": str(e)}
+
+
+# ============================================================
+# RISK LEVELS — Real threshold definitions
+# ============================================================
+@router.get("/risk-levels")
+async def get_risk_levels():
+    """Return risk level definitions used by drift detector"""
+    return {
+        "status": "success",
+        "risk_levels": [
+            {"level": "STABLE",   "color": "#5EEAD4", "psi": "< 0.10",      "ks": "< 0.15",      "mapDrop": "< 3%",     "policy": "AUTO-APPROVE: No drift detected."},
+            {"level": "MINOR",    "color": "#38BDF8", "psi": "0.10 - 0.20", "ks": "0.15 - 0.30", "mapDrop": "3% - 8%",  "policy": "MONITOR: Subtle feature variance detected."},
+            {"level": "MODERATE", "color": "#FBBF24", "psi": "0.20 - 0.35", "ks": "0.30 - 0.45", "mapDrop": "8% - 15%", "policy": "REVIEW: Model performance decaying."},
+            {"level": "SEVERE",   "color": "#FB923C", "psi": "0.35 - 0.50", "ks": "0.45 - 0.60", "mapDrop": "15% - 25%","policy": "WARN_QUARANTINE: Substantial data shift."},
+            {"level": "CRITICAL", "color": "#F87171", "psi": ">= 0.50",     "ks": ">= 0.60",     "mapDrop": "> 25%",    "policy": "HARD_QUARANTINE: Immediate lockdown."},
+        ]
+    }

@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import { TrendingDown, TrendingUp, AlertTriangle, CheckCircle, Activity, Loader2, RefreshCw, AlertCircle } from 'lucide-react'
 import apiClient from '@/lib/api'
 
+const API = 'http://localhost:8000'
+
 const severityColors: Record<string, string> = {
   Stable: '#5EEAD4',
   Warning: '#FBBF24',
@@ -14,7 +16,15 @@ export function DriftMonitor() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => { loadDrift() }, [])
+  const [riskLevels, setRiskLevels] = useState<any[]>([])
+
+  useEffect(() => {
+    loadDrift()
+    fetch(`${API}/api/drift/risk-levels`)
+      .then(r => r.json())
+      .then(d => { if (d.status === 'success') setRiskLevels(d.risk_levels || []) })
+      .catch(console.error)
+  }, [])
 
   const loadDrift = async () => {
     setLoading(true)
@@ -63,13 +73,6 @@ export function DriftMonitor() {
     critical: drifts.filter((d) => d.severity === 'Critical').length,
   }
 
-  const riskLevels = [
-    { level: 'STABLE', color: '#5EEAD4', psi: '< 0.10', ks: '< 0.15', mapDrop: '< 3%', policy: 'AUTO-APPROVE: No drift detected.' },
-    { level: 'MINOR', color: '#38BDF8', psi: '0.10 – 0.20', ks: '0.15 – 0.30', mapDrop: '3% – 8%', policy: 'MONITOR: Subtle feature variance detected.' },
-    { level: 'MODERATE', color: '#FBBF24', psi: '0.20 – 0.35', ks: '0.30 – 0.45', mapDrop: '8% – 15%', policy: 'REVIEW: Model performance decaying.' },
-    { level: 'SEVERE', color: '#FB923C', psi: '0.35 – 0.50', ks: '0.45 – 0.60', mapDrop: '15% – 25%', policy: 'WARN_QUARANTINE: Substantial data shift.' },
-    { level: 'CRITICAL', color: '#F87171', psi: '>= 0.50', ks: '>= 0.60', mapDrop: '> 25%', policy: 'HARD_QUARANTINE: Immediate lockdown.' },
-  ]
 
   return (
     <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>

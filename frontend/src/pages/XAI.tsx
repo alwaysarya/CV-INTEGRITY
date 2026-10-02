@@ -23,17 +23,24 @@ interface XAIResult {
   image?: string
 }
 
-const methods = [
-  { id: 'occlusion', label: 'OCCLUSION' },
-  { id: 'saliency', label: 'SALIENCY' },
-  { id: 'lime', label: 'LIME' },
-  { id: 'shap', label: 'SHAP' },
-]
+
 
 export function XAI() {
   const [result, setResult] = useState<XAIResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [selectedMethod, setSelectedMethod] = useState('occlusion')
+  const [methods, setMethods] = useState<{id: string; label: string}[]>([])
+
+  useEffect(() => {
+    fetch(`${API}/api/xai/methods`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'success') {
+          setMethods(d.methods || [])
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   useEffect(() => { runExplanation() }, [selectedMethod])
 
