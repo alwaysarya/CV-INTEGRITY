@@ -494,9 +494,14 @@ if FASTAPI_AVAILABLE:
         if REPORTS.exists():
             stats['reports'] = len(list(REPORTS.glob('*.json')))
         
-        blockchain = load_json('blockchain.json')
-        if blockchain:
-            stats['blocks'] = blockchain.get('length', 0)
+        try:
+            chain_file = Path(__file__).parent.parent / 'blockchain' / 'data' / 'chain.json'
+            if chain_file.exists():
+                with open(chain_file) as f:
+                    chain_data = json.load(f)
+                    stats['blocks'] = len(chain_data.get('chain', []))
+        except Exception as e:
+            print(f'⚠️ Blockchain load failed: {e}')
         
         wallets = load_json('wallets.json')
         if wallets:

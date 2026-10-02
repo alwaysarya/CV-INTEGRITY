@@ -53,9 +53,9 @@ export function Settings() {
     setLoading(true)
     setError(null)
     try {
-      const [health, bRes, wRes, dRes, mRes, aRes] = await Promise.all([
+      const [health, sRes, wRes, dRes, mRes, aRes] = await Promise.all([
         apiClient.getHealth(),
-        apiClient.getBlocks(),
+        apiClient.getStats(),
         apiClient.getWallets(),
         apiClient.getDatasets(),
         apiClient.getModels(),
@@ -64,7 +64,7 @@ export function Settings() {
 
       setSystemInfo({
         health: health.data,
-        blocks: (bRes.data.blocks || []).length,
+        blocks: sRes.data.stats?.blocks || 0,
         wallets: Object.keys(wRes.data.wallets || {}).length,
         datasets: Object.keys(dRes.data.datasets || {}).length,
         models: Object.keys(mRes.data.models || {}).length,
@@ -92,17 +92,17 @@ export function Settings() {
   ]
 
   return (
-    <div className="space-y-6 p-6" style={{ background: '#F5F5F0', minHeight: 'calc(100vh - 72px)' }}>
+    <div className="space-y-6 p-6" style={{ background: '#0A0F14', minHeight: 'calc(100vh - 72px)' }}>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#1A1A14] mb-1">Settings</h1>
-          <p className="text-[#6B6B60] text-sm">Manage account and platform preferences</p>
+          <h1 className="text-3xl font-bold text-[#E5F5F0] mb-1">Settings</h1>
+          <p className="text-[#8AA4A0] text-sm">Manage account and platform preferences</p>
         </div>
         <div className="flex gap-2">
           <button onClick={loadSystemInfo} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 text-sm font-medium">
             <RefreshCw size={16} /> Refresh
           </button>
-          <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-[#1A1A14] text-sm font-medium">
+          <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-[#E5F5F0] text-sm font-medium">
             {saved ? <Check size={16} /> : <Save size={16} />}
             {saved ? 'Saved!' : 'Save'}
           </button>
@@ -116,9 +116,9 @@ export function Settings() {
       )}
 
       {/* System Overview Bar */}
-      <Card className="rounded-3xl border-cyan-500/20 p-5">
+      <Card className="rounded-3xl border-cyan-500/30 p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[#1A1A14] font-bold text-sm">SYSTEM OVERVIEW</h3>
+          <h3 className="text-[#E5F5F0] font-bold text-sm">SYSTEM OVERVIEW</h3>
           {systemInfo.health?.status === 'healthy' ? (
             <Badge className="bg-green-500/20 text-green-400 border-green-500/40 gap-1.5">
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
@@ -141,12 +141,12 @@ export function Settings() {
           ].map((item, i) => {
             const Icon = item.icon
             return (
-              <div key={i} className="flex items-center gap-2 p-3 rounded-lg bg-[#F5F5F0] border border-cyan-500/10">
+              <div key={i} className="flex items-center gap-2 p-3 rounded-lg bg-[#0F1419] border border-cyan-500/20">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${item.color}20`, border: `1px solid ${item.color}40` }}>
                   <Icon size={14} style={{ color: item.color }} />
                 </div>
                 <div>
-                  <div className="text-[#1A1A14] text-sm font-bold">{loading ? '-' : item.value}</div>
+                  <div className="text-[#E5F5F0] text-sm font-bold">{loading ? '-' : item.value}</div>
                   <div className="text-[#8B8B80] text-[10px] uppercase">{item.label}</div>
                 </div>
               </div>
@@ -157,7 +157,7 @@ export function Settings() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Tabs */}
-        <Card className="rounded-3xl border-cyan-500/20 p-3 lg:col-span-1">
+        <Card className="rounded-3xl border-cyan-500/30 p-3 lg:col-span-1">
           <div className="space-y-1">
             {tabs.map((tab) => {
               const Icon = tab.icon
@@ -169,7 +169,7 @@ export function Settings() {
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     active
                       ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40'
-                      : 'text-[#6B6B60] hover:text-[#1A1A14] hover:bg-[#F5F5F0]'
+                      : 'text-[#8AA4A0] hover:text-[#E5F5F0] hover:bg-[#0F1419]'
                   }`}
                 >
                   <Icon size={16} />
@@ -183,44 +183,44 @@ export function Settings() {
         {/* Content */}
         <div className="lg:col-span-3 space-y-4">
           {activeTab === 'profile' && (
-            <Card className="rounded-3xl border-cyan-500/20 p-6">
+            <Card className="rounded-3xl border-cyan-500/30 p-6">
               <div className="flex items-center gap-2 mb-6">
                 <User size={18} className="text-cyan-400" />
-                <h3 className="text-[#1A1A14] font-bold text-base">Profile Information</h3>
+                <h3 className="text-[#E5F5F0] font-bold text-base">Profile Information</h3>
               </div>
 
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-[#1A1A14] font-bold text-2xl">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-[#E5F5F0] font-bold text-2xl">
                   AT
                 </div>
                 <div>
-                  <div className="text-[#1A1A14] font-bold text-lg">{profile.name}</div>
+                  <div className="text-[#E5F5F0] font-bold text-lg">{profile.name}</div>
                   <div className="text-[#8B8B80] text-xs">{profile.role}</div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[#6B6B60] text-xs font-medium mb-2 block">Full Name</label>
-                  <Input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="bg-[#F5F5F0] border-cyan-500/20 text-[#1A1A14] h-10" />
+                  <label className="text-[#8AA4A0] text-xs font-medium mb-2 block">Full Name</label>
+                  <Input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="bg-[#0F1419] border-cyan-500/30 text-[#E5F5F0] h-10" />
                 </div>
                 <div>
-                  <label className="text-[#6B6B60] text-xs font-medium mb-2 block">Email</label>
-                  <Input value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="bg-[#F5F5F0] border-cyan-500/20 text-[#1A1A14] h-10" />
+                  <label className="text-[#8AA4A0] text-xs font-medium mb-2 block">Email</label>
+                  <Input value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="bg-[#0F1419] border-cyan-500/30 text-[#E5F5F0] h-10" />
                 </div>
                 <div>
-                  <label className="text-[#6B6B60] text-xs font-medium mb-2 block">Organization</label>
-                  <Input value={profile.organization} onChange={(e) => setProfile({ ...profile, organization: e.target.value })} className="bg-[#F5F5F0] border-cyan-500/20 text-[#1A1A14] h-10" />
+                  <label className="text-[#8AA4A0] text-xs font-medium mb-2 block">Organization</label>
+                  <Input value={profile.organization} onChange={(e) => setProfile({ ...profile, organization: e.target.value })} className="bg-[#0F1419] border-cyan-500/30 text-[#E5F5F0] h-10" />
                 </div>
               </div>
             </Card>
           )}
 
           {activeTab === 'notifications' && (
-            <Card className="rounded-3xl border-cyan-500/20 p-6">
+            <Card className="rounded-3xl border-cyan-500/30 p-6">
               <div className="flex items-center gap-2 mb-6">
                 <Bell size={18} className="text-cyan-400" />
-                <h3 className="text-[#1A1A14] font-bold text-base">Notification Preferences</h3>
+                <h3 className="text-[#E5F5F0] font-bold text-base">Notification Preferences</h3>
               </div>
               <div className="space-y-3">
                 {[
@@ -231,9 +231,9 @@ export function Settings() {
                   { key: 'driftAlerts', label: 'Drift Alerts', desc: 'Model drift notifications' },
                   { key: 'securityAlerts', label: 'Security Alerts', desc: 'Security incidents' },
                 ].map((item) => (
-                  <div key={item.key} className="flex items-center justify-between p-3 rounded-lg bg-[#F5F5F0] border border-cyan-500/10">
+                  <div key={item.key} className="flex items-center justify-between p-3 rounded-lg bg-[#0F1419] border border-cyan-500/20">
                     <div>
-                      <div className="text-[#1A1A14] text-sm font-medium">{item.label}</div>
+                      <div className="text-[#E5F5F0] text-sm font-medium">{item.label}</div>
                       <div className="text-[#8B8B80] text-xs">{item.desc}</div>
                     </div>
                     <button
@@ -249,16 +249,16 @@ export function Settings() {
           )}
 
           {activeTab === 'security' && (
-            <Card className="rounded-3xl border-cyan-500/20 p-6">
+            <Card className="rounded-3xl border-cyan-500/30 p-6">
               <div className="flex items-center gap-2 mb-6">
                 <Shield size={18} className="text-cyan-400" />
-                <h3 className="text-[#1A1A14] font-bold text-base">Security Settings</h3>
+                <h3 className="text-[#E5F5F0] font-bold text-base">Security Settings</h3>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-[#F5F5F0] border border-cyan-500/10">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-[#0F1419] border border-cyan-500/20">
                   <div>
-                    <div className="text-[#1A1A14] text-sm font-medium">Two-Factor Authentication</div>
+                    <div className="text-[#E5F5F0] text-sm font-medium">Two-Factor Authentication</div>
                     <div className="text-[#8B8B80] text-xs">Add extra security layer</div>
                   </div>
                   <button
@@ -269,33 +269,33 @@ export function Settings() {
                   </button>
                 </div>
 
-                <div className="p-4 rounded-lg bg-[#F5F5F0] border border-cyan-500/10">
-                  <label className="text-[#6B6B60] text-xs font-medium mb-2 block">Session Timeout (minutes)</label>
-                  <Input type="number" value={security.sessionTimeout} onChange={(e) => setSecurity({ ...security, sessionTimeout: e.target.value })} className="bg-[#F5F5F0] border-cyan-500/20 text-[#1A1A14] h-10" />
+                <div className="p-4 rounded-lg bg-[#0F1419] border border-cyan-500/20">
+                  <label className="text-[#8AA4A0] text-xs font-medium mb-2 block">Session Timeout (minutes)</label>
+                  <Input type="number" value={security.sessionTimeout} onChange={(e) => setSecurity({ ...security, sessionTimeout: e.target.value })} className="bg-[#0F1419] border-cyan-500/30 text-[#E5F5F0] h-10" />
                 </div>
 
-                <div className="p-4 rounded-lg bg-[#F5F5F0] border border-cyan-500/10">
+                <div className="p-4 rounded-lg bg-[#0F1419] border border-cyan-500/20">
                   <div className="flex items-center gap-2 mb-3">
                     <Key size={14} className="text-yellow-400" />
-                    <span className="text-[#1A1A14] text-sm font-medium">API Endpoint</span>
+                    <span className="text-[#E5F5F0] text-sm font-medium">API Endpoint</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input value="http://localhost:8000" readOnly className="bg-[#F5F5F0] border-cyan-500/20 text-[#6B6B60] h-10 font-mono text-xs" />
+                    <Input value="http://localhost:8000" readOnly className="bg-[#0F1419] border-cyan-500/30 text-[#8AA4A0] h-10 font-mono text-xs" />
                     <Badge className="bg-green-500/20 text-green-400 border-green-500/40 text-xs">
                       {systemInfo.health?.status || 'offline'}
                     </Badge>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-lg bg-[#F5F5F0] border border-cyan-500/10">
+                <div className="p-4 rounded-lg bg-[#0F1419] border border-cyan-500/20">
                   <div className="flex items-center gap-2 mb-3">
                     <Hash size={14} className="text-cyan-400" />
-                    <span className="text-[#1A1A14] text-sm font-medium">Blockchain Status</span>
+                    <span className="text-[#E5F5F0] text-sm font-medium">Blockchain Status</span>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <div className="text-[#8B8B80] text-[10px] uppercase">Total Blocks</div>
-                      <div className="text-[#1A1A14] text-sm font-bold">{systemInfo.blocks}</div>
+                      <div className="text-[#E5F5F0] text-sm font-bold">{systemInfo.blocks}</div>
                     </div>
                     <div>
                       <div className="text-[#8B8B80] text-[10px] uppercase">Chain Status</div>
@@ -308,10 +308,10 @@ export function Settings() {
           )}
 
           {activeTab === 'data' && (
-            <Card className="rounded-3xl border-cyan-500/20 p-6">
+            <Card className="rounded-3xl border-cyan-500/30 p-6">
               <div className="flex items-center gap-2 mb-6">
                 <Database size={18} className="text-cyan-400" />
-                <h3 className="text-[#1A1A14] font-bold text-base">System Information</h3>
+                <h3 className="text-[#E5F5F0] font-bold text-base">System Information</h3>
               </div>
 
               <div className="space-y-3">
@@ -324,9 +324,9 @@ export function Settings() {
                   { label: 'Models Loaded', value: `${systemInfo.models} models`, status: 'Deployed' },
                   { label: 'Attack Simulations', value: `${systemInfo.attacks} attacks`, status: 'Available' },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-[#F5F5F0] border border-cyan-500/10">
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-[#0F1419] border border-cyan-500/20">
                     <div>
-                      <div className="text-[#1A1A14] text-sm font-medium">{item.label}</div>
+                      <div className="text-[#E5F5F0] text-sm font-medium">{item.label}</div>
                       <div className="text-[#8B8B80] text-xs font-mono">{item.value}</div>
                     </div>
                     <Badge className="text-[10px] py-0.5 px-2 bg-green-500/20 text-green-400 border-green-500/40">
@@ -339,10 +339,10 @@ export function Settings() {
           )}
 
           {activeTab === 'appearance' && (
-            <Card className="rounded-3xl border-cyan-500/20 p-6">
+            <Card className="rounded-3xl border-cyan-500/30 p-6">
               <div className="flex items-center gap-2 mb-6">
                 <Palette size={18} className="text-cyan-400" />
-                <h3 className="text-[#1A1A14] font-bold text-base">Appearance</h3>
+                <h3 className="text-[#E5F5F0] font-bold text-base">Appearance</h3>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {['dark', 'light', 'system'].map((option) => (
@@ -350,10 +350,10 @@ export function Settings() {
                     key={option}
                     onClick={() => setTheme(option)}
                     className={`p-4 rounded-lg border-2 transition-all ${
-                      theme === option ? 'border-cyan-500/50 bg-cyan-500/10' : 'border-cyan-500/10 hover:border-cyan-500/30'
+                      theme === option ? 'border-cyan-500/50 bg-cyan-500/10' : 'border-cyan-500/20 hover:border-cyan-500/30'
                     }`}
                   >
-                    <div className={`text-sm font-medium capitalize ${theme === option ? 'text-cyan-400' : 'text-[#6B6B60]'}`}>
+                    <div className={`text-sm font-medium capitalize ${theme === option ? 'text-cyan-400' : 'text-[#8AA4A0]'}`}>
                       {option}
                     </div>
                   </button>
