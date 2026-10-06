@@ -1,0 +1,23 @@
+{
+  "good": {
+    "precision": 0.0595,
+    "recall": 0.3154,
+    "mAP50": 0.055,
+    "mAP50_95": 0.0185,
+    "fitness": 0.0185
+  },
+  "bad": {
+    "precision": 0.001,
+    "recall": 0.0386,
+    "mAP50": 0.0001,
+    "mAP50_95": 0.0,
+    "fitness": 0.0
+  },
+  "worst": {
+    "precision": 0.0003,
+    "recall": 0.0188,
+    "mAP50": 0.0,
+    "mAP50_95": 0.0,
+    "fitness": 0.0
+  }
+}

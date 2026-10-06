@@ -78,14 +78,14 @@ export function Upload() {
   }))
 
   return (
-    <div className="space-y-6 p-6" style={{ background: '#F5F5F0', minHeight: 'calc(100vh - 72px)' }}>
+    <div className="space-y-6 p-6" style={{ background: '#0A0F14', minHeight: 'calc(100vh - 72px)' }}>
       {/* ============================================ */}
       {/* NAYA CONTENT — File Upload & Blockchain Notary */}
       {/* ============================================ */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
         <div className="mb-6">
-          <h1 className="text-4xl font-bold text-[#1A1A14] mb-1">File Upload & Blockchain Notary</h1>
-          <p className="text-[#6B6B60] text-sm">
+          <h1 className="text-4xl font-bold text-[#E5F5F0] mb-1">File Upload & Blockchain Notary</h1>
+          <p className="text-[#8AA4A0] text-sm">
             Every uploaded model or dataset file is cryptographically hashed with SHA-256 and minted into a new blockchain block.
           </p>
         </div>
@@ -127,10 +127,10 @@ export function Upload() {
                 <UploadIcon size={40} className="text-cyan-400" />
               </div>
               <div>
-                <div className="text-[#1A1A14] font-bold text-lg mb-1">
+                <div className="text-[#E5F5F0] font-bold text-lg mb-1">
                   {dragOver ? 'Drop file here' : 'Click to select or drag and drop a file'}
                 </div>
-                <div className="text-[#6B6B60] text-xs">
+                <div className="text-[#8AA4A0] text-xs">
                   Supports: PyTorch (.pt), ONNX (.onnx), YOLO YAML, Images (.jpg, .png), ZIP
                 </div>
               </div>
@@ -142,11 +142,11 @@ export function Upload() {
         {files.length > 0 && (
           <Card className="rounded-3xl p-5 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[#1A1A14] font-bold text-sm">FILES TO UPLOAD ({files.length})</h3>
+              <h3 className="text-[#E5F5F0] font-bold text-sm">FILES TO UPLOAD ({files.length})</h3>
               <button
                 onClick={uploadAll}
                 disabled={uploading}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-[#1A1A14] text-sm font-medium disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-[#E5F5F0] text-sm font-medium disabled:opacity-50"
               >
                 {uploading ? <Loader2 size={16} className="animate-spin" /> : <UploadIcon size={16} />}
                 {uploading ? 'Uploading...' : 'Upload All'}
@@ -154,11 +154,11 @@ export function Upload() {
             </div>
             <div className="space-y-2">
               {files.map((file, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-[#F5F5F0] border border-cyan-500/10">
+                <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-[#0F1419] border border-cyan-500/20">
                   <div className="flex items-center gap-3">
                     <FileText size={16} className="text-cyan-400" />
                     <div>
-                      <div className="text-[#1A1A14] text-xs font-bold">{file.name}</div>
+                      <div className="text-[#E5F5F0] text-xs font-bold">{file.name}</div>
                       <div className="text-[#8B8B80] text-[10px]">{(file.size / 1024 / 1024).toFixed(2)} MB</div>
                     </div>
                   </div>
@@ -176,12 +176,12 @@ export function Upload() {
           <Card className="rounded-3xl p-5 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Lock size={16} className="text-green-400" />
-              <h3 className="text-[#1A1A14] font-bold text-sm">Cryptographic Notary Receipt</h3>
+              <h3 className="text-[#E5F5F0] font-bold text-sm">Cryptographic Notary Receipt</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <div className="text-[#8B8B80] text-[10px] uppercase tracking-wider mb-1">Filename</div>
-                <div className="text-[#1A1A14] text-sm font-bold">{latest.file_name}</div>
+                <div className="text-[#E5F5F0] text-sm font-bold">{latest.file_name}</div>
               </div>
               <div>
                 <div className="text-[#8B8B80] text-[10px] uppercase tracking-wider mb-1">Blockchain Block</div>
@@ -189,10 +189,10 @@ export function Upload() {
               </div>
               <div>
                 <div className="text-[#8B8B80] text-[10px] uppercase tracking-wider mb-1">File Size</div>
-                <div className="text-[#1A1A14] text-sm font-bold">{latest.size_mb.toFixed(3)} MB</div>
+                <div className="text-[#E5F5F0] text-sm font-bold">{latest.size_mb.toFixed(3)} MB</div>
               </div>
             </div>
-            <div className="p-3 rounded-lg bg-[#F5F5F0] border border-cyan-500/10">
+            <div className="p-3 rounded-lg bg-[#0F1419] border border-cyan-500/20">
               <div className="flex items-center gap-2 mb-1">
                 <Hash size={10} className="text-cyan-400" />
                 <span className="text-[#8B8B80] text-[9px] uppercase tracking-wider">SHA-256 Digest</span>
@@ -208,14 +208,14 @@ export function Upload() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Database size={16} className="text-cyan-400" />
-                <h3 className="text-[#1A1A14] font-bold text-sm">Anchored File Registry</h3>
+                <h3 className="text-[#E5F5F0] font-bold text-sm">Anchored File Registry</h3>
               </div>
               <span className="text-[#8B8B80] text-[10px]">{registry.length} files notarized</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-cyan-500/10">
+                  <tr className="border-b border-cyan-500/20">
                     <th className="text-left text-[#8B8B80] text-[9px] font-bold tracking-wider uppercase pb-3">Filename</th>
                     <th className="text-left text-[#8B8B80] text-[9px] font-bold tracking-wider uppercase pb-3">SHA-256 Hash</th>
                     <th className="text-right text-[#8B8B80] text-[9px] font-bold tracking-wider uppercase pb-3">Size</th>
@@ -226,9 +226,9 @@ export function Upload() {
                 <tbody>
                   {registry.map((r, i) => (
                     <tr key={i} className="border-b border-cyan-500/5">
-                      <td className="py-3"><span className="text-[#1A1A14] text-xs font-bold">{r.filename}</span></td>
+                      <td className="py-3"><span className="text-[#E5F5F0] text-xs font-bold">{r.filename}</span></td>
                       <td className="py-3"><span className="text-cyan-400 text-[10px] font-mono">{r.hash.substring(0, 50)}...</span></td>
-                      <td className="py-3 text-right"><span className="text-[#1A1A14] text-xs font-mono">{r.size}</span></td>
+                      <td className="py-3 text-right"><span className="text-[#E5F5F0] text-xs font-mono">{r.size}</span></td>
                       <td className="py-3 text-right"><span className="text-cyan-400 text-xs font-mono">{r.block}</span></td>
                       <td className="py-3 text-right">
                         <Badge className="bg-green-500/20 text-green-400 border-green-500/40 text-[9px] gap-1">
@@ -258,15 +258,15 @@ export function Upload() {
                     <Activity size={24} className="text-cyan-400" />
                   </div>
                   <div>
-                    <div className="text-[#1A1A14] font-bold text-base">Ready for Analysis</div>
-                    <div className="text-[#6B6B60] text-xs">
+                    <div className="text-[#E5F5F0] font-bold text-base">Ready for Analysis</div>
+                    <div className="text-[#8AA4A0] text-xs">
                       {results.length} file{results.length > 1 ? 's' : ''} uploaded & anchored to blockchain
                     </div>
                   </div>
                 </div>
                 <button
                   onClick={() => navigate(`/dataset-analysis?file=${encodeURIComponent(results[0].file_name)}`)}
-                  className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-[#1A1A14] text-sm font-medium hover:opacity-90 transition-all"
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-[#E5F5F0] text-sm font-medium hover:opacity-90 transition-all"
                 >
                   Analyze This Dataset
                   <ArrowRight size={16} />
@@ -280,15 +280,15 @@ export function Upload() {
       {/* ============================================ */}
       {/* PURANA CONTENT — WAISE HI RAHEGA */}
       {/* ============================================ */}
-      <div className="border-t border-cyan-500/20 pt-6">
+      <div className="border-t border-cyan-500/30 pt-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-6"
         >
-          <h2 className="text-2xl font-bold text-[#1A1A14] mb-1">Upload Dataset</h2>
-          <p className="text-[#6B6B60] text-sm">
+          <h2 className="text-2xl font-bold text-[#E5F5F0] mb-1">Upload Dataset</h2>
+          <p className="text-[#8AA4A0] text-sm">
             Upload files with automatic SHA-256 hashing and blockchain recording
           </p>
         </motion.div>
@@ -321,10 +321,10 @@ export function Upload() {
                 <UploadIcon size={40} className="text-cyan-400" />
               </div>
               <div>
-                <div className="text-[#1A1A14] font-bold text-lg mb-1">
+                <div className="text-[#E5F5F0] font-bold text-lg mb-1">
                   {dragOver ? 'Drop files here' : 'Click or drag files to upload'}
                 </div>
-                <div className="text-[#6B6B60] text-sm">
+                <div className="text-[#8AA4A0] text-sm">
                   Supported: ZIP, TAR, GZ, JPG, PNG, MP4, AVI • Max 500 MB
                 </div>
               </div>
@@ -337,13 +337,13 @@ export function Upload() {
           <Card className="rounded-3xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <CheckCircle size={16} className="text-green-400" />
-              <h3 className="text-[#1A1A14] font-bold text-sm">UPLOADED SUCCESSFULLY</h3>
+              <h3 className="text-[#E5F5F0] font-bold text-sm">UPLOADED SUCCESSFULLY</h3>
             </div>
             <div className="space-y-2">
               {results.map((r, i) => (
                 <div key={i} className="p-3 rounded-lg bg-green-500/5 border border-green-500/30">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-[#1A1A14] text-xs font-bold">{r.file_name}</div>
+                    <div className="text-[#E5F5F0] text-xs font-bold">{r.file_name}</div>
                     <Badge className="bg-green-500/20 text-green-400 border-green-500/40 text-[10px]">
                       {r.size_mb} MB
                     </Badge>

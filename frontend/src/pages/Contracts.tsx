@@ -37,7 +37,7 @@ export function Contracts() {
   }
 
   return (
-    <div className="space-y-6 p-6" style={{ background: '#F5F5F0', minHeight: 'calc(100vh - 72px)' }}>
+    <div className="space-y-6 p-6" style={{ background: '#0A0F14', minHeight: 'calc(100vh - 72px)' }}>
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
@@ -109,7 +109,7 @@ export function Contracts() {
                   { label: 'Trigger', value: c.trigger?.type || 'N/A', color: '#3A7D8F' },
                   { label: 'Action', value: c.action?.type || 'N/A', color: '#6B4B94' },
                 ].map((item, k) => (
-                  <div key={k} className="p-2.5 rounded-xl" style={{ background: '#F5F5F0' }}>
+                  <div key={k} className="p-2.5 rounded-xl" style={{ background: '#0A0F14' }}>
                     <div className="text-[9px] uppercase mb-1" style={{ color: '#8B8B80' }}>{item.label}</div>
                     <div className="text-[11px] font-bold font-mono" style={{ color: item.color }}>{item.value}</div>
                   </div>
@@ -126,7 +126,7 @@ export function Contracts() {
           <h3 className="font-bold text-[13px] tracking-wide mb-4" style={{ color: '#1A1A14' }}>RECENT EXECUTIONS ({executions.length})</h3>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {executions.slice().reverse().map((e, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-2xl flex-wrap gap-2" style={{ background: '#F5F5F0' }}>
+              <div key={i} className="flex items-center justify-between p-3 rounded-2xl flex-wrap gap-2" style={{ background: '#0A0F14' }}>
                 <div className="flex items-center gap-2">
                   <CheckCircle size={14} style={{ color: '#2E7D4F' }} />
                   <span className="text-[12px] font-bold" style={{ color: '#1A1A14' }}>{e.contract_name}</span>

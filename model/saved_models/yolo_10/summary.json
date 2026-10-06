@@ -1,0 +1,47 @@
+{
+  "device": "mps",
+  "epochs": 2,
+  "total_time_min": 0.5,
+  "results": [
+    {
+      "model": "yolo11n",
+      "error": "\u001b[34m\u001b[1mtrain: \u001b[0mNo labels found in /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/coco_full/labels/val2017.cache. See https://docs.ultralytics.com/datasets for dataset formatting guidance."
+    },
+    {
+      "model": "yolo11s",
+      "error": "\u001b[34m\u001b[1mtrain: \u001b[0mNo labels found in /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/coco_full/labels/val2017.cache. See https://docs.ultralytics.com/datasets for dataset formatting guidance."
+    },
+    {
+      "model": "yolo11m",
+      "error": "ERROR \u274c\ufe0f model/pretrained/yolo11m.pt is not a loadable checkpoint \u2014 the file is empty, truncated or corrupted (RuntimeError: PytorchStreamReader failed reading zip archive: failed finding central directory. This is an internal miniz error. If you are seeing this error, there is a high likelihood that your checkpoint file is corrupted. This can happen if the checkpoint was not saved properly, was transferred incorrectly, or the file was modified after saving.).\nRecommended fixes are to re-download or re-export the file, or to run a command with an official Ultralytics model, i.e. 'yolo predict model=yolo26n.pt'"
+    },
+    {
+      "model": "yolo11l",
+      "error": "\u001b[34m\u001b[1mtrain: \u001b[0mNo labels found in /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/coco_full/labels/val2017.cache. See https://docs.ultralytics.com/datasets for dataset formatting guidance."
+    },
+    {
+      "model": "yolov10n",
+      "error": "\u001b[34m\u001b[1mtrain: \u001b[0mNo labels found in /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/coco_full/labels/val2017.cache. See https://docs.ultralytics.com/datasets for dataset formatting guidance."
+    },
+    {
+      "model": "yolov10m",
+      "error": "\u001b[34m\u001b[1mtrain: \u001b[0mNo labels found in /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/coco_full/labels/val2017.cache. See https://docs.ultralytics.com/datasets for dataset formatting guidance."
+    },
+    {
+      "model": "yolov10x",
+      "error": "\u001b[34m\u001b[1mtrain: \u001b[0mNo labels found in /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/coco_full/labels/val2017.cache. See https://docs.ultralytics.com/datasets for dataset formatting guidance."
+    },
+    {
+      "model": "yolov9c",
+      "error": "\u001b[34m\u001b[1mtrain: \u001b[0mNo labels found in /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/coco_full/labels/val2017.cache. See https://docs.ultralytics.com/datasets for dataset formatting guidance."
+    },
+    {
+      "model": "yolov9e",
+      "error": "\u001b[34m\u001b[1mtrain: \u001b[0mNo labels found in /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/coco_full/labels/val2017.cache. See https://docs.ultralytics.com/datasets for dataset formatting guidance."
+    },
+    {
+      "model": "yolov8x",
+      "error": "\u001b[34m\u001b[1mtrain: \u001b[0mNo labels found in /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/coco_full/labels/val2017.cache. See https://docs.ultralytics.com/datasets for dataset formatting guidance."
+    }
+  ]
+}

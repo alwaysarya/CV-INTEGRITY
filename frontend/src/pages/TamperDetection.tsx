@@ -49,20 +49,20 @@ export function TamperDetection() {
   }
 
   return (
-    <div className="space-y-6 p-6" style={{ background: '#F5F5F0', minHeight: 'calc(100vh - 72px)' }}>
+    <div className="space-y-6 p-6" style={{ background: '#0A0F14', minHeight: 'calc(100vh - 72px)' }}>
 
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-[32px] font-bold tracking-tight" style={{ color: '#1A1A14' }}>Tamper Detection</h1>
-          <p className="text-[13px] mt-1" style={{ color: '#6B6B60' }}>
+          <h1 className="text-[32px] font-bold tracking-tight" style={{ color: '#E5F5F0' }}>Tamper Detection</h1>
+          <p className="text-[13px] mt-1" style={{ color: '#8AA4A0' }}>
             {loading ? 'Verifying blockchain integrity...' : `Cryptographic validation of ${blocks.length} blocks`}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <button onClick={loadBlocks}
             className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-medium"
-            style={{ background: '#FFFFFF', color: '#1A1A14', border: '1px solid #E8E6DC' }}>
+            style={{ background: '#0F1419', color: '#E5F5F0', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
             <RefreshCw size={14} /> Re-validate
           </button>
           <div className="flex items-center gap-1.5 px-4 py-2.5 rounded-full"
@@ -95,11 +95,11 @@ export function TamperDetection() {
         ].map((stat, i) => {
           const Icon = stat.icon
           return (
-            <div key={i} className="p-5 rounded-3xl" style={{ background: '#FFFFFF' }}>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: '#F5F5F0' }}>
+            <div key={i} className="p-5 rounded-3xl" style={{ background: '#0F1419' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: '#0A0F14' }}>
                 <Icon size={18} style={{ color: stat.color }} />
               </div>
-              <div className="text-[28px] font-bold tracking-tight leading-none mb-1" style={{ color: '#1A1A14' }}>{stat.value}</div>
+              <div className="text-[28px] font-bold tracking-tight leading-none mb-1" style={{ color: '#E5F5F0' }}>{stat.value}</div>
               <div className="text-[12px]" style={{ color: '#8B8B80' }}>{stat.label}</div>
             </div>
           )
@@ -108,10 +108,10 @@ export function TamperDetection() {
 
       {/* Chain Integrity Visual */}
       {!loading && blocks.length > 0 && (
-        <div className="p-5 rounded-3xl" style={{ background: '#FFFFFF' }}>
+        <div className="p-5 rounded-3xl" style={{ background: '#0F1419' }}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
-              <h3 className="font-bold text-[13px] tracking-wide" style={{ color: '#1A1A14' }}>CHAIN INTEGRITY CHECK</h3>
+              <h3 className="font-bold text-[13px] tracking-wide" style={{ color: '#E5F5F0' }}>CHAIN INTEGRITY CHECK</h3>
               <p className="text-[11px] mt-0.5" style={{ color: '#8B8B80' }}>Each block links to previous via SHA-256 hash</p>
             </div>
             {validationStatus === 'valid' ? (
@@ -133,13 +133,13 @@ export function TamperDetection() {
               const linked = !isFirst ? block.previous_hash === blocks[i - 1].hash : true
               const linkColor = linked ? '#2E7D4F' : '#8B3A2E'
               return (
-                <div key={block.index} className="flex items-center gap-3 p-3 rounded-2xl" style={{ background: '#F5F5F0' }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#FFFFFF' }}>
+                <div key={block.index} className="flex items-center gap-3 p-3 rounded-2xl" style={{ background: '#0A0F14' }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#0F1419' }}>
                     {linked ? <CheckCircle size={14} style={{ color: linkColor }} /> : <XCircle size={14} style={{ color: linkColor }} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[12px] font-bold" style={{ color: '#1A1A14' }}>Block #{block.index}</span>
+                      <span className="text-[12px] font-bold" style={{ color: '#E5F5F0' }}>Block #{block.index}</span>
                       <span className="text-[9px] py-0.5 px-2 rounded-full font-bold"
                         style={{ background: '#E0EAEE', color: '#3A7D8F' }}>
                         {block.data?.action || 'UNKNOWN'}
@@ -167,12 +167,12 @@ export function TamperDetection() {
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#8B8B80' }} />
         <input placeholder="Search by block #, hash, or action..." value={search} onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-11 pr-4 py-3 rounded-2xl text-[13px] outline-none"
-          style={{ background: '#FFFFFF', color: '#1A1A14', border: '1px solid #EFEDE4' }} />
+          style={{ background: '#0F1419', color: '#E5F5F0', border: '1px solid #EFEDE4' }} />
       </div>
 
       {/* Table */}
-      <div className="p-5 rounded-3xl" style={{ background: '#FFFFFF' }}>
-        <h3 className="font-bold text-[13px] tracking-wide mb-4" style={{ color: '#1A1A14' }}>ALL BLOCKS — TAMPER STATUS</h3>
+      <div className="p-5 rounded-3xl" style={{ background: '#0F1419' }}>
+        <h3 className="font-bold text-[13px] tracking-wide mb-4" style={{ color: '#E5F5F0' }}>ALL BLOCKS — TAMPER STATUS</h3>
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -183,7 +183,7 @@ export function TamperDetection() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr style={{ borderBottom: '1px solid #F5F5F0' }}>
+                <tr style={{ borderBottom: '1px solid #0F1419' }}>
                   {['Block', 'Action', 'Hash', 'Nonce', 'Time', 'Integrity'].map((h, i) => (
                     <th key={i}
                       className={`text-[10px] font-bold tracking-wider uppercase pb-3 ${i < 3 ? 'text-left' : 'text-right'}`}
@@ -193,13 +193,13 @@ export function TamperDetection() {
               </thead>
               <tbody>
                 {filtered.map((block, i) => (
-                  <tr key={block.index} style={{ borderBottom: '1px solid #F5F5F0' }}>
+                  <tr key={block.index} style={{ borderBottom: '1px solid #0F1419' }}>
                     <td className="py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#E0EAEE' }}>
                           <Fingerprint size={14} style={{ color: '#3A7D8F' }} />
                         </div>
-                        <div className="text-[12px] font-bold" style={{ color: '#1A1A14' }}>#{block.index}</div>
+                        <div className="text-[12px] font-bold" style={{ color: '#E5F5F0' }}>#{block.index}</div>
                       </div>
                     </td>
                     <td className="py-3">
@@ -209,7 +209,7 @@ export function TamperDetection() {
                       </span>
                     </td>
                     <td className="py-3"><div className="text-[11px] font-mono" style={{ color: '#2E7D4F' }}>{block.hash.substring(0, 20)}...</div></td>
-                    <td className="py-3 text-right"><div className="text-[11px] font-mono" style={{ color: '#1A1A14' }}>{block.data?.nonce || 'N/A'}</div></td>
+                    <td className="py-3 text-right"><div className="text-[11px] font-mono" style={{ color: '#E5F5F0' }}>{block.data?.nonce || 'N/A'}</div></td>
                     <td className="py-3 text-right">
                       <div className="text-[11px] font-mono" style={{ color: '#8B8B80' }}>
                         {block.datetime?.split('T')[1]?.split('.')[0] || 'N/A'}

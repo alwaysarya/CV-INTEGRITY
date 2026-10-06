@@ -1,0 +1,5 @@
+path: /Users/aryanthakur/Documents/SIH/SIH26228/CV-INTEGRITY/datasets/coco_full
+train: images/val2017
+val: images/val2017
+nc: 20
+names: ['person','bicycle','car','motorcycle','airplane','bus','train','truck','boat','bird','cat','dog','traffic_light','fire_hydrant','stop_sign','bench','chair','couch','potted_plant','tv']
