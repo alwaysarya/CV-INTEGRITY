@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Activity, Loader2, RefreshCw, Users, Car, AlertTriangle, Target, Radio, BarChart3 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { Activity, Loader2, RefreshCw, Users, Car, AlertTriangle, Target, TrendingUp, Database, Brain, BarChart3 } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts'
 import axios from 'axios'
 import apiClient from '@/lib/api'
 
 const API = 'http://localhost:8000'
+
+const CHART_COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
 
 export function Analytics() {
   const [datasets, setDatasets] = useState<any>({})
@@ -23,9 +25,9 @@ export function Analytics() {
     setError(null)
     try {
       const [dRes, mRes, bRes, tRes, metricsRes] = await Promise.all([
-        apiClient.getDatasets(),
-        apiClient.getModels(),
-        apiClient.getBlocks(),
+        apiClient.getDatasets().catch(() => ({ data: { datasets: {} } })),
+        apiClient.getModels().catch(() => ({ data: { models: {} } })),
+        apiClient.getBlocks().catch(() => ({ data: { blocks: [] } })),
         apiClient.getTrustScores().catch(() => ({ data: { trust_scores: {} } })),
         axios.get(`${API}/api/analytics/metrics`).catch(() => ({ data: { metrics: {} } })),
       ])
@@ -41,240 +43,266 @@ export function Analytics() {
 
   const datasetChartData = Object.entries(datasets).map(([key, val]: [string, any]) => ({
     name: key.toUpperCase(),
-    overall: val.overall_score || 0,
-    blur: val.blur_score || 0,
-    noise: val.noise_score || 0,
+    overall: Number(val.overall_score || 0),
+    blur: Number(val.blur_score || 0),
+    noise: Number(val.noise_score || 0),
   }))
 
   const modelChartData = Object.entries(models).map(([key, val]: [string, any]) => ({
     name: key.toUpperCase(),
-    precision: val.precision || 0,
-    recall: val.recall || 0,
-    mAP50: val.mAP50 || 0,
+    precision: Number(val.precision || 0),
+    recall: Number(val.recall || 0),
+    mAP50: Number(val.mAP50 || 0),
   }))
 
-  const actionCounts: Record<string, number> = {}
-  blocks.forEach((b: any) => {
-    const action = b.data?.action || 'UNKNOWN'
-    actionCounts[action] = (actionCounts[action] || 0) + 1
-  })
-  const blockChartData = Object.entries(actionCounts).map(([name, count]) => ({
-    name: name.replace(/_/g, ' '),
-    count,
+  const trustChartData = Object.entries(trust).map(([key, val]: [string, any]) => ({
+    name: key.toUpperCase(),
+    score: Number(val.final_score || 0),
+    decision: val.decision || '',
   }))
 
-  const trustEntries = Object.entries(trust)
-  const avgTrust = trustEntries.length
-    ? Math.round(trustEntries.reduce((s: number, [, v]: [string, any]) => s + (v.final_score || 0), 0) / trustEntries.length)
+  const totalDatasets = Object.keys(datasets).length
+  const totalModels = Object.keys(models).length
+  const avgTrust = trustChartData.length
+    ? trustChartData.reduce((s, x) => s + x.score, 0) / trustChartData.length
     : 0
+  const totalBlocks = blocks.length
 
-  const stats = {
-    datasets: Object.keys(datasets).length,
-    models: Object.keys(models).length,
-    blocks: blocks.length,
-    avgTrust,
-  }
-
-  const chartTooltipStyle = {
-    backgroundColor: '#0A0F14',
-    border: '1px solid rgba(94, 234, 212, 0.3)',
-    borderRadius: '4px',
-    fontSize: '11px',
-    color: '#FFFFFF',
-  }
+  const metrics = realMetrics || {}
+  const peopleCount = metrics.people_count ?? 0
+  const vehicleCount = metrics.vehicle_count ?? 0
+  const anomalyCount = metrics.anomaly_count ?? 0
+  const accuracy = metrics.accuracy ?? 0
 
   return (
-    <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>
-
-      {/* Top header */}
-      <div className="flex items-center justify-between mb-6 pb-4"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center"
-            style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-            <BarChart3 size={14} style={{ color: '#5EEAD4' }} />
-          </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <div className="text-[13px] font-bold tracking-[0.2em]" style={{ color: '#5EEAD4' }}>ANALYTICS</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>PERFORMANCE_METRICS · LIVE_VIEW</div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded"
-          style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#5EEAD4' }} />
-          <span className="text-[10px] font-mono tracking-wider" style={{ color: '#5EEAD4' }}>REAL_DATA</span>
-        </div>
-
-        <button onClick={loadAll}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-          style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)', color: '#5EEAD4' }}>
-          <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
-          REFRESH
-        </button>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-3 rounded flex items-center gap-2"
-          style={{ background: 'rgba(248, 113, 113, 0.08)', border: '1px solid rgba(248, 113, 113, 0.3)' }}>
-          <AlertTriangle size={14} style={{ color: '#F87171' }} />
-          <span className="text-[11px] font-mono" style={{ color: '#F87171' }}>{error}</span>
-        </div>
-      )}
-
-      {/* Real Metrics from /api/analytics/metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        {[
-          { label: 'PEOPLE_COUNT', value: (realMetrics.people_count ?? 0).toLocaleString(), icon: Users, color: '#5EEAD4' },
-          { label: 'VEHICLE_COUNT', value: (realMetrics.vehicle_count ?? 0).toLocaleString(), icon: Car, color: '#38BDF8' },
-          { label: 'ANOMALY_COUNT', value: String(realMetrics.anomaly_count ?? 0), icon: AlertTriangle, color: '#F87171' },
-          { label: 'MODEL_ACCURACY', value: `${(realMetrics.accuracy ?? 0).toFixed(1)}%`, icon: Target, color: '#A78BFA' },
-        ].map((s, i) => {
-          const Icon = s.icon
-          return (
-            <div key={i} className="p-4 rounded"
-              style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-[10px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</div>
-                <Icon size={14} style={{ color: s.color, opacity: 0.7 }} />
-              </div>
-              <div className="text-[28px] font-bold font-mono leading-none" style={{ color: s.color }}>{s.value}</div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Analytics
             </div>
-          )
-        })}
-      </div>
-
-      {/* Secondary stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        {[
-          { label: 'TOTAL_DATASETS', value: stats.datasets },
-          { label: 'TOTAL_MODELS', value: stats.models },
-          { label: 'TOTAL_BLOCKS', value: stats.blocks },
-          { label: 'AVG_TRUST', value: `${stats.avgTrust}%` },
-        ].map((s, i) => (
-          <div key={i} className="p-4 rounded flex items-center justify-between"
-            style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-            <span className="text-[10px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</span>
-            <span className="text-[20px] font-bold font-mono" style={{ color: '#FFFFFF' }}>{s.value}</span>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Analytics
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Performance metrics, trust scores and operational telemetry across datasets and models.
+            </p>
           </div>
-        ))}
-      </div>
-
-      {/* Charts */}
-      {loading ? (
-        <div className="p-12 rounded flex items-center justify-center"
-          style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-          <Loader2 className="animate-spin" size={28} style={{ color: '#5EEAD4' }} />
-          <span className="ml-3 text-[12px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>LOADING...</span>
+          <button
+            onClick={loadAll}
+            className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Refresh
+          </button>
         </div>
-      ) : (
-        <>
-          {/* Row 1: Dataset + Model charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
-            <div className="p-5 rounded" style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="mb-4">
-                <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>DATASET_QUALITY_SCORES</h3>
-                <p className="text-[10px] font-mono mt-0.5" style={{ color: '#5EEAD4', opacity: 0.4 }}>FROM /api/datasets</p>
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Total Datasets', value: totalDatasets, color: '#10B981', icon: Database },
+            { label: 'Total Models', value: totalModels, color: '#3B82F6', icon: Brain },
+            { label: 'Avg Trust Score', value: `${avgTrust.toFixed(1)}%`, color: '#F59E0B', icon: TrendingUp },
+            { label: 'Ledger Blocks', value: totalBlocks, color: '#8B5CF6', icon: BarChart3 },
+          ].map((s) => (
+            <motion.div
+              key={s.label}
+              whileHover={{ y: -3 }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${s.color}15` }}>
+                  <s.icon size={14} style={{ color: s.color }} />
+                </div>
               </div>
-              <div className="w-full h-64">
+              <div className="mt-3 text-[32px] font-bold leading-none tracking-tight text-slate-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {s.value}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Real-time metrics row */}
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: 'People Count', value: peopleCount, color: '#10B981', icon: Users },
+            { label: 'Vehicle Count', value: vehicleCount, color: '#3B82F6', icon: Car },
+            { label: 'Anomalies', value: anomalyCount, color: '#EF4444', icon: AlertTriangle },
+            { label: 'Model Accuracy', value: `${accuracy.toFixed(1)}%`, color: '#F59E0B', icon: Target },
+          ].map((m) => (
+            <div key={m.label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md" style={{ background: `${m.color}15` }}>
+                  <m.icon size={13} style={{ color: m.color }} />
+                </div>
+                <span className="text-[11px] font-medium text-slate-500">{m.label}</span>
+              </div>
+              <div className="mt-3 text-[24px] font-bold tracking-tight text-slate-900">{m.value}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Charts grid */}
+        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {/* Dataset chart */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-4">
+              <div className="text-[14px] font-semibold text-slate-900">Dataset Quality</div>
+              <div className="mt-0.5 text-[11px] text-slate-500">Overall, blur and noise scores</div>
+            </div>
+            <div className="h-[260px]">
+              {datasetChartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={datasetChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(94, 234, 212, 0.08)" />
-                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#5EEAD4', opacity: 0.6 }} tickLine={false} axisLine={{ stroke: 'rgba(94, 234, 212, 0.2)' }} />
-                    <YAxis tick={{ fontSize: 10, fill: '#5EEAD4', opacity: 0.6 }} tickLine={false} axisLine={false} domain={[0, 100]} />
-                    <Tooltip contentStyle={chartTooltipStyle} />
-                    <Legend wrapperStyle={{ fontSize: '10px', fontFamily: 'monospace' }} />
-                    <Bar dataKey="overall" fill="#5EEAD4" radius={[3, 3, 0, 0]} name="OVERALL" />
-                    <Bar dataKey="blur" fill="#38BDF8" radius={[3, 3, 0, 0]} name="BLUR" />
-                    <Bar dataKey="noise" fill="#A78BFA" radius={[3, 3, 0, 0]} name="NOISE" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+                    <XAxis dataKey="name" stroke="#94A3B8" style={{ fontSize: 11 }} />
+                    <YAxis stroke="#94A3B8" style={{ fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ background: '#FFF', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 11 }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    <Bar dataKey="overall" fill="#10B981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="blur" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="noise" fill="#F59E0B" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
+              ) : (
+                <div className="flex h-full items-center justify-center text-[12px] text-slate-400">
+                  No dataset data available
+                </div>
+              )}
             </div>
+          </div>
 
-            <div className="p-5 rounded" style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="mb-4">
-                <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>MODEL_PERFORMANCE</h3>
-                <p className="text-[10px] font-mono mt-0.5" style={{ color: '#5EEAD4', opacity: 0.4 }}>FROM /api/models</p>
-              </div>
-              <div className="w-full h-64">
+          {/* Model chart */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-4">
+              <div className="text-[14px] font-semibold text-slate-900">Model Performance</div>
+              <div className="mt-0.5 text-[11px] text-slate-500">Precision, recall and mAP50</div>
+            </div>
+            <div className="h-[260px]">
+              {modelChartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={modelChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(94, 234, 212, 0.08)" />
-                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#5EEAD4', opacity: 0.6 }} tickLine={false} axisLine={{ stroke: 'rgba(94, 234, 212, 0.2)' }} />
-                    <YAxis tick={{ fontSize: 10, fill: '#5EEAD4', opacity: 0.6 }} tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={chartTooltipStyle} />
-                    <Legend wrapperStyle={{ fontSize: '10px', fontFamily: 'monospace' }} />
-                    <Bar dataKey="precision" fill="#5EEAD4" radius={[3, 3, 0, 0]} name="PRECISION" />
-                    <Bar dataKey="recall" fill="#A78BFA" radius={[3, 3, 0, 0]} name="RECALL" />
-                    <Bar dataKey="mAP50" fill="#38BDF8" radius={[3, 3, 0, 0]} name="MAP50" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+                    <XAxis dataKey="name" stroke="#94A3B8" style={{ fontSize: 11 }} />
+                    <YAxis stroke="#94A3B8" style={{ fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ background: '#FFF', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 11 }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    <Bar dataKey="precision" fill="#10B981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="recall" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="mAP50" fill="#F59E0B" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
+              ) : (
+                <div className="flex h-full items-center justify-center text-[12px] text-slate-400">
+                  No model data available
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Trust scores + Donut */}
+        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {/* Trust donut */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-4">
+              <div className="text-[14px] font-semibold text-slate-900">Trust Distribution</div>
+              <div className="mt-0.5 text-[11px] text-slate-500">Entity trust scores</div>
+            </div>
+            <div className="h-[240px]">
+              {trustChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={trustChartData}
+                      dataKey="score"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={85}
+                      paddingAngle={3}
+                    >
+                      {trustChartData.map((_: any, i: number) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ background: '#FFF', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 11 }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full items-center justify-center text-[12px] text-slate-400">
+                  No trust data
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Row 2: Blockchain Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="p-5 rounded" style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="mb-4">
-                <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>BLOCKCHAIN_ACTIVITY</h3>
-                <p className="text-[10px] font-mono mt-0.5" style={{ color: '#5EEAD4', opacity: 0.4 }}>FROM /api/blockchain/live</p>
-              </div>
-              <div className="w-full h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={blockChartData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(94, 234, 212, 0.08)" />
-                    <XAxis type="number" tick={{ fontSize: 10, fill: '#5EEAD4', opacity: 0.6 }} tickLine={false} axisLine={{ stroke: 'rgba(94, 234, 212, 0.2)' }} />
-                    <YAxis dataKey="name" type="category" tick={{ fontSize: 9, fill: '#5EEAD4', opacity: 0.6 }} tickLine={false} axisLine={false} width={130} />
-                    <Tooltip contentStyle={chartTooltipStyle} />
-                    <Bar dataKey="count" fill="#A78BFA" radius={[0, 3, 3, 0]} name="BLOCKS" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+          {/* Trust list */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+            <div className="mb-4">
+              <div className="text-[14px] font-semibold text-slate-900">Trust Scores</div>
+              <div className="mt-0.5 text-[11px] text-slate-500">Detailed per-entity breakdown</div>
             </div>
-
-            {/* Trust Overview */}
-            <div className="p-5 rounded" style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="mb-4">
-                <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>TRUST_OVERVIEW</h3>
-                <p className="text-[10px] font-mono mt-0.5" style={{ color: '#5EEAD4', opacity: 0.4 }}>FROM /api/trust-scores</p>
-              </div>
-              <div className="space-y-4">
-                {trustEntries.map(([key, val]: [string, any]) => {
-                  const score = val.final_score || 0
-                  const color = score >= 80 ? '#5EEAD4' : score >= 50 ? '#FBBF24' : '#F87171'
-                  return (
-                    <div key={key}>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[11px] font-mono uppercase tracking-wider" style={{ color: '#FFFFFF', opacity: 0.8 }}>{key}</span>
-                        <span className="text-[13px] font-bold font-mono" style={{ color }}>{score}</span>
+            <div className="space-y-2">
+              {trustChartData.length > 0 ? trustChartData.map((t: any, i: number) => {
+                const color = t.score >= 75 ? '#10B981' : t.score >= 50 ? '#F59E0B' : '#EF4444'
+                const label = t.score >= 75 ? 'Accept' : t.score >= 50 ? 'Review' : 'Quarantine'
+                return (
+                  <div
+                    key={t.name}
+                    className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${color}15` }}>
+                        <span className="text-[11px] font-bold" style={{ color }}>{t.name[0]}</span>
                       </div>
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(94, 234, 212, 0.1)' }}>
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${score}%` }}
-                          transition={{ duration: 1, ease: 'easeOut' }}
-                          className="h-full rounded-full"
-                          style={{ background: color, boxShadow: `0 0 8px ${color}` }}
-                        />
-                      </div>
-                      <div className="text-[9px] font-mono mt-1" style={{ color: '#5EEAD4', opacity: 0.5 }}>
-                        {(val.decision || '').replace(/[✅⚠️❌]/g, '').trim()}
+                      <div>
+                        <div className="text-[12px] font-semibold text-slate-800">{t.name}</div>
+                        <div className="text-[10px] text-slate-500">Trust Score</div>
                       </div>
                     </div>
-                  )
-                })}
-                {trustEntries.length === 0 && (
-                  <div className="text-[11px] font-mono text-center py-8" style={{ color: '#5EEAD4', opacity: 0.4 }}>
-                    NO TRUST DATA
+                    <div className="flex items-center gap-3">
+                      <div className="w-32 h-1.5 overflow-hidden rounded-full bg-slate-200">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${t.score}%` }}
+                          transition={{ duration: 0.8, delay: i * 0.08 }}
+                          className="h-full rounded-full"
+                          style={{ background: color }}
+                        />
+                      </div>
+                      <span className="font-mono text-[13px] font-bold" style={{ color }}>
+                        {t.score.toFixed(0)}%
+                      </span>
+                      <span
+                        className="rounded-md px-2 py-0.5 text-[9px] font-semibold"
+                        style={{ background: `${color}15`, color }}
+                      >
+                        {label}
+                      </span>
+                    </div>
                   </div>
-                )}
-              </div>
+                )
+              }) : (
+                <div className="py-8 text-center text-[12px] text-slate-400">No trust data available</div>
+              )}
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   )
 }
+
+export default Analytics

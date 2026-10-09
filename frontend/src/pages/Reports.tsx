@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
-  FileText, Search, Loader2, RefreshCw, AlertCircle, Shield, TrendingUp,
-  AlertTriangle, BarChart3, Download, ChevronDown, FileJson, FileType2, Radio
+  FileText, Search, Loader2, RefreshCw, Shield, TrendingUp,
+  AlertTriangle, BarChart3, Download, ChevronDown, FileJson, FileType2, Eye
 } from 'lucide-react'
 import apiClient from '@/lib/api'
 import { CoverageStatement } from '@/components/assurance/CoverageStatement'
 import jsPDF from 'jspdf'
+
+const API = 'http://localhost:8000'
 import autoTable from 'jspdf-autotable'
 
 interface Report {
@@ -19,13 +21,13 @@ interface Report {
   details: string
 }
 
-const typeColors: Record<string, string> = {
-  Trust: '#5EEAD4',
-  Model: '#38BDF8',
-  Blockchain: '#A78BFA',
-  Dataset: '#FBBF24',
-  Attack: '#F87171',
-  History: '#3A7D8F',
+const typeTheme: Record<string, { bg: string; text: string; border: string }> = {
+  Trust: { bg: '#D1FAE5', text: '#065F46', border: '#6EE7B7' },
+  Model: { bg: '#DBEAFE', text: '#1E40AF', border: '#93C5FD' },
+  Blockchain: { bg: '#EDE9FE', text: '#5B21B6', border: '#C4B5FD' },
+  Dataset: { bg: '#FEF3C7', text: '#92400E', border: '#FCD34D' },
+  Attack: { bg: '#FEE2E2', text: '#991B1B', border: '#FCA5A5' },
+  History: { bg: '#E0F2FE', text: '#075985', border: '#7DD3FC' },
 }
 
 export function Reports() {
@@ -51,289 +53,333 @@ export function Reports() {
     setLoading(true)
     setError(null)
     try {
-      const [dRes, mRes, bRes, aRes] = await Promise.all([
-        apiClient.getDatasets().catch(() => ({ data: { datasets: {} } })),
+      // Fetch all data sources in parallel
+      const [tRes, mRes, dRes, aRes, bRes] = await Promise.all([
+        fetch(`${API}/api/trust-scores`).then(r => r.json()).catch(() => ({ trust_scores: {} })),
         apiClient.getModels().catch(() => ({ data: { models: {} } })),
-        apiClient.getBlocks().catch(() => ({ data: { blocks: [] } })),
+        apiClient.getDatasets().catch(() => ({ data: { datasets: {} } })),
         apiClient.getAttacks().catch(() => ({ data: { attacks: {} } })),
+        apiClient.getBlocks().catch(() => ({ data: { blocks: [] } })),
       ])
-      const datasets = dRes.data.datasets || {}
-      const models = mRes.data.models || {}
-      const blocks = bRes.data.blocks || []
-      const attacks = aRes.data.attacks || {}
-      const list: Report[] = []
-      let id = 1
 
-      Object.entries(datasets).forEach(([key, val]: [string, any]) => {
-        list.push({
-          id: id++, title: `${key.toUpperCase()}_DATASET_ANALYSIS`, type: 'Dataset', source: key,
-          status: 'Final', createdAt: new Date().toISOString().split('T')[0],
-          details: `Quality: ${(val.overall_score || 0).toFixed(1)}% · ${val.total_images || 0} images`,
-        })
-      })
-      Object.entries(models).forEach(([key, val]: [string, any]) => {
-        list.push({
-          id: id++, title: `${key.toUpperCase()}_MODEL_PERFORMANCE`, type: 'Model', source: key,
-          status: 'Final', createdAt: new Date().toISOString().split('T')[0],
-          details: `Precision: ${(val.precision || 0).toFixed(1)}% · mAP50: ${(val.mAP50 || 0).toFixed(1)}%`,
-        })
-      })
-      if (blocks.length > 0) {
-        list.push({
-          id: id++, title: 'BLOCKCHAIN_AUDIT_REPORT', type: 'Blockchain', source: 'Ledger',
-          status: 'Final', createdAt: new Date().toISOString().split('T')[0],
-          details: `${blocks.length} blocks · Chain valid`,
-        })
-      }
-      // Attacks is a list, not object
-      const attacksList = Array.isArray(attacks) ? attacks : Object.values(attacks || {})
-      attacksList.forEach((val: any) => {
-        const name = val.name || val.id || 'Attack'
-        list.push({
-          id: id++,
-          title: name.toUpperCase().replace(/\s+/g, '_'),
+      const trustData = tRes.trust_scores || {}
+      const modelsData = mRes.data?.models || {}
+      const datasetsData = dRes.data?.datasets || {}
+      const attacksData = aRes.data?.attacks || {}
+      const blocksData = bRes.data?.blocks || []
+
+      const now = new Date().toISOString()
+      const generated: Report[] = [
+        {
+          id: 1,
+          title: 'Trust Score Evaluation',
+          type: 'Trust',
+          source: 'Trust Engine',
+          status: 'Ready',
+          createdAt: now,
+          details: `${Object.keys(trustData).length} entities evaluated · avg ${Object.keys(trustData).length ? Math.round(Object.values(trustData).reduce((s: number, t: any) => s + (t.final_score || 0), 0) / Object.keys(trustData).length) : 0}%`,
+        },
+        {
+          id: 2,
+          title: 'Model Integrity Report',
+          type: 'Model',
+          source: 'Model Registry',
+          status: 'Ready',
+          createdAt: now,
+          details: `${Object.keys(modelsData).length} models analyzed · mAP50 avg ${Object.keys(modelsData).length ? (Object.values(modelsData).reduce((s: number, m: any) => s + (m.mAP50 || 0), 0) / Object.keys(modelsData).length).toFixed(1) : 0}%`,
+        },
+        {
+          id: 3,
+          title: 'Dataset Quality Report',
+          type: 'Dataset',
+          source: 'Dataset Analyzer',
+          status: 'Ready',
+          createdAt: now,
+          details: `${Object.keys(datasetsData).length} datasets reviewed`,
+        },
+        {
+          id: 4,
+          title: 'Security Threat Report',
           type: 'Attack',
-          source: val.id || name,
-          status: 'Final',
-          createdAt: (val.timestamp || new Date().toISOString()).split('T')[0],
-          details: `Severity: ${val.severity || 'N/A'} · ${val.detected ? 'Detected' : 'Missed'}`,
-        })
-      })
-      setReports(list)
+          source: 'Threat Detection',
+          status: 'Ready',
+          createdAt: now,
+          details: `${Object.keys(attacksData).length} attack patterns cataloged`,
+        },
+        {
+          id: 5,
+          title: 'Blockchain Audit Trail',
+          type: 'Blockchain',
+          source: 'Ledger Service',
+          status: 'Ready',
+          createdAt: now,
+          details: `${blocksData.length} blocks recorded`,
+        },
+        {
+          id: 6,
+          title: 'Inference History Log',
+          type: 'History',
+          source: 'Inference Engine',
+          status: 'Ready',
+          createdAt: now,
+          details: `Recent inference events`,
+        },
+      ]
+
+      setReports(generated)
     } catch (err: any) {
-      setError(err?.message || 'Backend error')
+      setError(err.message || 'Backend error')
     } finally { setLoading(false) }
   }
 
-  const filtered = reports.filter((r) => {
-    const matchesSearch = r.title.toLowerCase().includes(search.toLowerCase())
-    const matchesFilter = filter === 'all' || r.type === filter
-    return matchesSearch && matchesFilter
+  // Filter
+  const filtered = reports.filter(r => {
+    const matchSearch = !search ||
+      r.title.toLowerCase().includes(search.toLowerCase()) ||
+      r.type.toLowerCase().includes(search.toLowerCase()) ||
+      r.source.toLowerCase().includes(search.toLowerCase())
+    const matchFilter = filter === 'all' || r.type.toLowerCase() === filter.toLowerCase()
+    return matchSearch && matchFilter
   })
 
-  const stats = {
-    total: reports.length,
-    final: reports.filter((r) => r.status === 'Final').length,
-    dataset: reports.filter((r) => r.type === 'Dataset').length,
-    model: reports.filter((r) => r.type === 'Model').length,
+  // Stats
+  const types = Array.from(new Set(reports.map(r => r.type)))
+  const readyCount = reports.filter(r => r.status.toLowerCase().includes('ready') || r.status.toLowerCase().includes('complete')).length
+
+  // Export functions
+  const exportJSON = () => {
+    const data = JSON.stringify(reports, null, 2)
+    const blob = new Blob([data], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `cv-integrity-reports-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    setShowDownloadMenu(false)
   }
 
-  const downloadJSON = async () => {
-    try {
-      const exportData = {
-        export_info: { exported_at: new Date().toISOString(), source: 'CV-INTEGRITY' },
-        reports,
-      }
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `cv_integrity_report_${new Date().toISOString().slice(0, 10)}.json`
-      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
-      setShowDownloadMenu(false)
-    } catch { alert('Download failed') }
-  }
+  const exportPDF = () => {
+    const doc = new jsPDF()
+    doc.setFontSize(18)
+    doc.text('CV-INTEGRITY — Reports', 14, 22)
+    doc.setFontSize(10)
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30)
 
-  const downloadPDF = async () => {
-    try {
-      const doc = new jsPDF()
-      doc.setFillColor(8, 8, 12); doc.rect(0, 0, 210, 40, 'F')
-      doc.setTextColor(94, 234, 212); doc.setFontSize(22); doc.setFont('helvetica', 'bold')
-      doc.text('CV-INTEGRITY', 15, 18)
-      doc.setFontSize(10); doc.setTextColor(150, 150, 150); doc.setFont('helvetica', 'normal')
-      doc.text('AI Trust Platform — Audit Report', 15, 26)
-      doc.setFontSize(8); doc.text(`Generated: ${new Date().toLocaleString()}`, 15, 33)
-      doc.setTextColor(0, 0, 0); doc.setFontSize(14); doc.setFont('helvetica', 'bold')
-      doc.text('Reports', 15, 55)
-      const tableData = reports.map((r) => [r.title, r.type, r.details, r.status, r.createdAt])
-      autoTable(doc, {
-        startY: 65,
-        head: [['Report', 'Type', 'Details', 'Status', 'Date']],
-        body: tableData,
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [94, 234, 212], textColor: [8, 8, 12] },
-      })
-      doc.save(`cv_integrity_report_${new Date().toISOString().slice(0, 10)}.pdf`)
-      setShowDownloadMenu(false)
-    } catch { alert('PDF failed') }
+    autoTable(doc, {
+      startY: 40,
+      head: [['ID', 'Title', 'Type', 'Source', 'Status']],
+      body: reports.map(r => [r.id, r.title, r.type, r.source, r.status]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [16, 185, 129] },
+    })
+    doc.save(`cv-integrity-reports-${Date.now()}.pdf`)
+    setShowDownloadMenu(false)
   }
 
   return (
-    <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>
-
-      {/* Top header */}
-      <div className="flex items-center justify-between mb-6 pb-4"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center"
-            style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-            <FileText size={14} style={{ color: '#5EEAD4' }} />
-          </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <div className="text-[13px] font-bold tracking-[0.2em]" style={{ color: '#5EEAD4' }}>REPORTS</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>AUDIT_ARTIFACTS · EXPORTABLE</div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Reports
+            </div>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Reports & Evidence
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Generated assurance reports, evidence records, and exportable compliance documentation.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={loadReports}
+              className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                className="flex h-9 items-center gap-2 rounded-lg bg-emerald-600 px-3 text-[11px] font-semibold text-white transition-colors hover:bg-emerald-700"
+              >
+                <Download size={13} />
+                Export
+                <ChevronDown size={12} />
+              </button>
+              {showDownloadMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute right-0 top-full mt-2 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+                >
+                  <button
+                    onClick={exportPDF}
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                  >
+                    <FileType2 size={14} className="text-red-500" />
+                    Export as PDF
+                  </button>
+                  <button
+                    onClick={exportJSON}
+                    className="flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2.5 text-left text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                  >
+                    <FileJson size={14} className="text-blue-500" />
+                    Export as JSON
+                  </button>
+                </motion.div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5EEAD4', opacity: 0.5 }} />
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Total Reports', value: reports.length, color: '#0F172A', icon: FileText },
+            { label: 'Ready', value: readyCount, color: '#10B981', icon: Shield },
+            { label: 'Report Types', value: types.length, color: '#3B82F6', icon: BarChart3 },
+            { label: 'Sources', value: Array.from(new Set(reports.map(r => r.source))).length, color: '#8B5CF6', icon: TrendingUp },
+          ].map((s) => (
+            <motion.div
+              key={s.label}
+              whileHover={{ y: -3 }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100">
+                  <s.icon size={14} className="text-slate-500" />
+                </div>
+              </div>
+              <div className="mt-3 text-[32px] font-bold leading-none tracking-tight text-slate-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {s.value}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Search + filter */}
+        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              placeholder="Search reports..."
+              type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 pr-3 py-1.5 rounded text-[11px] font-mono outline-none w-52"
-              style={{ background: 'rgba(94, 234, 212, 0.05)', border: '1px solid rgba(94, 234, 212, 0.2)', color: '#FFFFFF' }}
+              placeholder="Search reports..."
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-[13px] text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {['all', ...types].map((t) => (
+              <button
+                key={t}
+                onClick={() => setFilter(t)}
+                className={`rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-all ${
+                  filter === t
+                    ? 'border-emerald-600 bg-emerald-600 text-white'
+                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                {t === 'all' ? 'All Types' : t}
+              </button>
+            ))}
+          </div>
+        </div>
 
-          <div className="relative" ref={dropdownRef}>
-            <button onClick={() => setShowDownloadMenu(!showDownloadMenu)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-              style={{ background: 'rgba(94, 234, 212, 0.15)', border: '1px solid rgba(94, 234, 212, 0.5)', color: '#5EEAD4' }}>
-              <Download size={11} />
-              EXPORT
-              <ChevronDown size={10} />
-            </button>
-            {showDownloadMenu && (
-              <div className="absolute right-0 mt-2 w-48 rounded z-50 overflow-hidden"
-                style={{ background: '#0A0F14', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
-                <button onClick={downloadJSON}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all hover:bg-[rgba(94,234,212,0.08)]"
-                  style={{ color: '#5EEAD4', borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-                  <FileJson size={14} />
-                  <div>
-                    <div className="text-[11px] font-mono font-bold">DOWNLOAD_JSON</div>
-                    <div className="text-[9px] font-mono" style={{ opacity: 0.5 }}>Machine-readable</div>
-                  </div>
-                </button>
-                <button onClick={downloadPDF}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all hover:bg-[rgba(94,234,212,0.08)]"
-                  style={{ color: '#5EEAD4' }}>
-                  <FileType2 size={14} />
-                  <div>
-                    <div className="text-[11px] font-mono font-bold">DOWNLOAD_PDF</div>
-                    <div className="text-[9px] font-mono" style={{ opacity: 0.5 }}>Human-readable</div>
-                  </div>
-                </button>
+        {/* Reports list */}
+        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          {loading && reports.length === 0 ? (
+            <div className="flex items-center justify-center gap-2 py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Loading reports...
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-20">
+              <AlertTriangle size={24} className="text-red-500" />
+              <div className="text-[13px] font-medium text-slate-700">Failed to load reports</div>
+              <div className="text-[11px] text-slate-400">{error}</div>
+              <button
+                onClick={loadReports}
+                className="mt-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Retry
+              </button>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-20">
+              <FileText size={24} className="text-slate-400" />
+              <div className="text-[13px] font-medium text-slate-700">No matching reports</div>
+              <div className="text-[11px] text-slate-400">Try a different filter or search term</div>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              <div className="grid grid-cols-12 gap-4 bg-slate-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                <div className="col-span-5">Report</div>
+                <div className="col-span-2">Type</div>
+                <div className="col-span-2">Source</div>
+                <div className="col-span-2">Status</div>
+                <div className="col-span-1 text-right">Action</div>
               </div>
-            )}
-          </div>
 
-          <button onClick={loadReports}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-            style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)', color: '#5EEAD4' }}>
-            <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
-            REFRESH
-          </button>
+              {filtered.map((r) => {
+                const theme = typeTheme[r.type] || typeTheme.Trust
+                return (
+                  <div
+                    key={r.id}
+                    className="grid grid-cols-12 items-center gap-4 px-5 py-4 transition-colors hover:bg-slate-50"
+                  >
+                    <div className="col-span-5 flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: theme.bg }}>
+                        <FileText size={15} style={{ color: theme.text }} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="truncate text-[13px] font-medium text-slate-900">{r.title}</div>
+                        <div className="mt-0.5 truncate text-[11px] text-slate-500">{r.details}</div>
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <span
+                        className="inline-flex rounded-md px-2 py-1 text-[10px] font-semibold"
+                        style={{ background: theme.bg, color: theme.text }}
+                      >
+                        {r.type}
+                      </span>
+                    </div>
+                    <div className="col-span-2 truncate text-[12px] text-slate-600">{r.source}</div>
+                    <div className="col-span-2">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        {r.status}
+                      </span>
+                    </div>
+                    <div className="col-span-1 flex justify-end">
+                      <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200">
+                        <Eye size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          <div className="border-t border-slate-100 bg-slate-50 px-5 py-3 text-[11px] text-slate-500">
+            Showing {filtered.length} of {reports.length} report{reports.length !== 1 ? 's' : ''}
+          </div>
+        </div>
+
+        {/* Coverage Statement */}
+        <div className="mt-6">
+          <CoverageStatement />
         </div>
       </div>
-
-      {error && (
-        <div className="mb-4 p-3 rounded flex items-center gap-2"
-          style={{ background: 'rgba(248, 113, 113, 0.08)', border: '1px solid rgba(248, 113, 113, 0.3)' }}>
-          <AlertCircle size={14} style={{ color: '#F87171' }} />
-          <span className="text-[11px] font-mono" style={{ color: '#F87171' }}>{error}</span>
-        </div>
-      )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        {[
-          { label: 'TOTAL_REPORTS', value: stats.total, color: '#3A7D8F' },
-          { label: 'FINAL_REPORTS', value: stats.final, color: '#5EEAD4' },
-          { label: 'DATASET_REPORTS', value: stats.dataset, color: '#FBBF24' },
-          { label: 'MODEL_REPORTS', value: stats.model, color: '#A78BFA' },
-        ].map((s, i) => (
-          <div key={i} className="p-4 rounded"
-            style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-            <div className="text-[10px] font-mono tracking-[0.2em] mb-2" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</div>
-            <div className="text-[28px] font-bold font-mono leading-none" style={{ color: s.color }}>{s.value}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Filters */}
-      <div className="p-4 rounded mb-5 flex gap-2 flex-wrap"
-        style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        {['all', 'Dataset', 'Model', 'Blockchain', 'Attack'].map((f) => (
-          <button key={f} onClick={() => setFilter(f)}
-            className="px-3 py-1.5 rounded text-[10px] font-mono tracking-wider transition-all"
-            style={filter === f
-              ? { background: 'rgba(94, 234, 212, 0.2)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.5)' }
-              : { background: 'transparent', color: '#5EEAD4', opacity: 0.5, border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-            {f === 'all' ? 'ALL' : f.toUpperCase()}
-          </button>
-        ))}
-      </div>
-
-      {/* Table */}
-      <div className="p-5 rounded mb-5"
-        style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="animate-spin" size={28} style={{ color: '#5EEAD4' }} />
-            <span className="ml-3 text-[12px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>GENERATING REPORTS...</span>
-          </div>
-        ) : filtered.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-                  {['REPORT', 'TYPE', 'DETAILS', 'STATUS', 'DATE'].map((h, i) => (
-                    <th key={h}
-                      className={`text-[10px] font-mono tracking-[0.15em] uppercase pb-3 ${i < 3 ? 'text-left' : 'text-right'}`}
-                      style={{ color: '#5EEAD4', opacity: 0.5 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((report) => {
-                  const color = typeColors[report.type] || '#5EEAD4'
-                  return (
-                    <tr key={report.id} style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.06)' }}>
-                      <td className="py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded flex items-center justify-center"
-                            style={{ background: `${color}15`, border: `1px solid ${color}40` }}>
-                            <FileText size={14} style={{ color }} />
-                          </div>
-                          <div className="text-[12px] font-bold font-mono" style={{ color: '#FFFFFF' }}>{report.title}</div>
-                        </div>
-                      </td>
-                      <td className="py-3">
-                        <span className="text-[10px] font-mono tracking-wider px-2.5 py-1 rounded"
-                          style={{ background: `${color}15`, color, border: `1px solid ${color}40` }}>
-                          {report.type.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="py-3">
-                        <div className="text-[10px] font-mono truncate max-w-md" style={{ color: '#5EEAD4', opacity: 0.7 }}>{report.details}</div>
-                      </td>
-                      <td className="py-3 text-right">
-                        <span className="text-[10px] font-mono tracking-wider px-2.5 py-1 rounded"
-                          style={{ background: 'rgba(94, 234, 212, 0.15)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
-                          ● {report.status.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="py-3 text-right">
-                        <div className="text-[10px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>{report.createdAt}</div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <FileText size={40} className="mx-auto mb-3" style={{ color: '#5EEAD4', opacity: 0.3 }} />
-            <div className="text-[12px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>NO REPORTS FOUND</div>
-          </div>
-        )}
-      </div>
-
-      <CoverageStatement />
     </div>
   )
 }
+
+export default Reports

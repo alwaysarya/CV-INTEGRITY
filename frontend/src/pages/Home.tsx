@@ -119,7 +119,7 @@ function LiveVision({ frame, online }: any) {
       {/* Footer stats */}
       <div className="grid grid-cols-4 gap-3 border-t border-white/10 bg-slate-950 px-5 py-3">
         {[
-          { label: 'FRAME', value: `#${String(frame?.frame || 0).padStart(6, '0')}` },
+          { label: 'FRAME', value: `#${String(frame?.frame || 0).padStart(4, '0')}` },
           { label: 'OBJECTS', value: String(frame?.detections || 0) },
           { label: 'DETECTIONS', value: String(frame?.detectionList?.length || 0) },
           { label: 'CAMERA', value: online ? 'ONLINE' : 'OFFLINE' },
@@ -477,7 +477,7 @@ export function Home() {
                   <div className="mt-0.5 text-[11px] text-slate-500">Real-time scene analysis and detection preview</div>
                 </div>
                 <div className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-mono text-slate-600">
-                  Frame {String(frame?.frame || 0).padStart(6, '0')}
+                  Frame {String(frame?.frame || 0).padStart(4, '0')}
                 </div>
               </div>
               <LiveVision frame={frame} online={backendOnline} />

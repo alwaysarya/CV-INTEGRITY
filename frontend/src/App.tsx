@@ -21,6 +21,7 @@ import { Wallets } from '@/pages/Wallets'
 import { Reports } from '@/pages/Reports'
 import { Team } from '@/pages/Team'
 import { Settings } from '@/pages/Settings'
+import { Help } from '@/pages/Help'
 import { TamperDetection } from '@/pages/TamperDetection'
 import { NotFound } from '@/pages/NotFound'
 import { Contracts } from '@/pages/Contracts'
@@ -60,6 +61,7 @@ function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="team" element={<Team />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="help" element={<Help />} />
           <Route path="tamper" element={<TamperDetection />} />
           <Route path="model-integrity" element={<ModelIntegrity />} />
           <Route path="security-governance" element={<SecurityGovernance />} />
