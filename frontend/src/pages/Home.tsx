@@ -161,6 +161,139 @@ function EventRow({ event }: any) {
     </motion.div>
   )
 }
+function VisionSentry({ frame, stats, avgTrust, backendOnline }: any) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <div className="text-[14px] font-semibold text-slate-900">VisionSentry</div>
+          <div className="mt-0.5 text-[11px] text-slate-500">Anomaly field and system state</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-12 gap-4">
+        {/* Radar */}
+        <div className="col-span-5">
+          <div className="flex flex-col items-center">
+            <div className="relative flex h-[140px] w-[140px] items-center justify-center">
+              {/* Concentric rings */}
+              <div className="absolute inset-0 rounded-full border border-emerald-200" />
+              <div className="absolute inset-[14px] rounded-full border border-emerald-200/70" />
+              <div className="absolute inset-[28px] rounded-full border border-emerald-200/50" />
+              <div className="absolute inset-[42px] rounded-full border border-emerald-200/30" />
+
+              {/* Crosshair */}
+              <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-emerald-200/40" />
+              <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-emerald-200/40" />
+
+              {/* Rotating sweep */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: 'conic-gradient(from 0deg, transparent 0deg, rgba(16,185,129,.25) 25deg, transparent 55deg)',
+                }}
+              />
+
+              {/* Detection blips */}
+              <motion.div
+                animate={{ opacity: [0.4, 1, 0.4], scale: [1, 1.3, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute h-2 w-2 rounded-full bg-red-500"
+                style={{ top: '20%', left: '60%' }}
+              />
+              <motion.div
+                animate={{ opacity: [0.4, 1, 0.4], scale: [1, 1.3, 1] }}
+                transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
+                className="absolute h-1.5 w-1.5 rounded-full bg-amber-500"
+                style={{ bottom: '28%', right: '22%' }}
+              />
+
+              {/* Center dot */}
+              <div className="absolute h-1.5 w-1.5 rounded-full bg-emerald-500" />
+
+              {/* Compass */}
+              <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[8px] font-medium text-slate-400">N</span>
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[8px] font-medium text-slate-400">S</span>
+              <span className="absolute -left-2 top-1/2 -translate-y-1/2 text-[8px] font-medium text-slate-400">W</span>
+              <span className="absolute -right-2 top-1/2 -translate-y-1/2 text-[8px] font-medium text-slate-400">E</span>
+            </div>
+            <div className="mt-3 text-center text-[10px] font-medium tracking-wider text-slate-400">
+              ANOMALY FIELD
+            </div>
+          </div>
+        </div>
+
+        {/* Right tiles */}
+        <div className="col-span-7 grid grid-cols-2 gap-2.5">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div className="text-[10px] font-medium text-slate-500">Objects</div>
+            <div className="mt-1.5 text-[20px] font-bold text-slate-900">{frame?.detections || 0}</div>
+            <div className="mt-0.5 text-[9px] text-slate-400">Detected</div>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div className="text-[10px] font-medium text-slate-500">Threat</div>
+            <div className="mt-1.5 text-[16px] font-bold text-amber-600">HIGH</div>
+            <div className="mt-0.5 text-[9px] text-slate-400">Level</div>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div className="text-[10px] font-medium text-slate-500">Integrity</div>
+            <div className="mt-1.5 text-[20px] font-bold text-slate-900">{Math.round(avgTrust)}%</div>
+            <div className="mt-0.5 text-[9px] text-slate-400">Assurance</div>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div className="text-[10px] font-medium text-slate-500">Status</div>
+            <div className={`mt-1.5 text-[16px] font-bold ${backendOnline ? 'text-emerald-600' : 'text-red-600'}`}>
+              {backendOnline ? 'READY' : 'OFFLINE'}
+            </div>
+            <div className="mt-0.5 text-[9px] text-slate-400">System</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AssuranceControl({ onAction, onRefresh }: any) {
+  const actions = [
+    { label: 'Verify Integrity', icon: ShieldCheck },
+    { label: 'Deep Analysis', icon: Search },
+    { label: 'Track Object', icon: Eye },
+    { label: 'Audit Output', icon: FileCheck2 },
+    { label: 'Review Threats', icon: AlertTriangle },
+    { label: 'Refresh Data', icon: RefreshCw },
+  ]
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4">
+        <div className="text-[14px] font-semibold text-slate-900">Assurance Control</div>
+        <div className="mt-0.5 text-[11px] text-slate-500">Operational actions and checks</div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2.5">
+        {actions.map(({ label, icon: Icon }) => (
+          <motion.button
+            key={label}
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.15 }}
+            onClick={() => label === 'Refresh Data' ? onRefresh() : onAction(label)}
+            className="group flex min-h-[80px] flex-col items-start rounded-xl border border-slate-200 bg-white p-3 text-left transition-all hover:border-emerald-300 hover:bg-emerald-50/40"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 transition-colors group-hover:bg-emerald-100">
+              <Icon size={15} className="text-slate-500 transition-colors group-hover:text-emerald-700" />
+            </div>
+            <div className="mt-3 text-[11px] font-medium text-slate-700 group-hover:text-emerald-900">
+              {label}
+            </div>
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 
 export function Home() {
   const [stats, setStats] = useState({ datasets: 0, models: 0, blocks: 0, wallets: 0 })
@@ -496,6 +629,12 @@ export function Home() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* VisionSentry + Assurance Control */}
+        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <VisionSentry frame={frame} stats={stats} avgTrust={avgTrust} backendOnline={backendOnline} />
+          <AssuranceControl onAction={(a: string) => console.log('Action:', a)} onRefresh={load} />
         </div>
       </div>
     </div>
