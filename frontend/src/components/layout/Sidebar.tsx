@@ -1,279 +1,169 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
-  Home, MapPin, Video, AlertTriangle, ShieldCheck, BarChart3, FileText,
-  Settings, RotateCw, Database, Brain, Link as LinkIcon, Lock,
-  Fingerprint, FileCode, Zap, Bug, Cpu, TrendingUp, Hash, Wallet,
-  Activity, Eye
+  LayoutGrid, Shield, Video, BarChart3, FileCheck2,
+  Settings, HelpCircle, LogOut, Download
 } from 'lucide-react'
 
-interface SubItem { label: string; path: string; icon: any }
-interface NavGroup { key: string; label: string; path: string; icon: any; items?: SubItem[] }
+interface NavItem {
+  label: string
+  path: string
+  icon: any
+  badge?: string
+}
 
-const navGroups: NavGroup[] = [
-  { key: 'home', label: 'Home', path: '/', icon: Home },
-  {
-    key: 'monitoring', label: 'Live Monitoring', path: '/video', icon: Video,
-    items: [
-      { label: 'Live Video Feed', path: '/video', icon: Video },
-      { label: 'Video Analysis', path: '/video', icon: Video },
-    ],
-  },
-  {
-    key: 'threats', label: 'Threats', path: '/attacks', icon: AlertTriangle,
-    items: [
-      { label: 'Attack Catalog', path: '/attacks', icon: AlertTriangle },
-      { label: 'Cyber Command', path: '/cybersecurity', icon: Lock },
-      { label: 'Live Cyber Simulator', path: '/cyber-attack', icon: Bug },
-      { label: 'Backdoor Scanner', path: '/backdoor', icon: Bug },
-    ],
-  },
-  {
-    key: 'compliance', label: 'Compliance', path: '/security-governance', icon: ShieldCheck,
-    items: [
-      { label: 'Security Governance', path: '/security-governance', icon: ShieldCheck },
-      { label: 'Trust Matrix', path: '/trust', icon: ShieldCheck },
-      { label: 'Audit Trail', path: '/audit', icon: FileText },
-      { label: 'Assurance & Standards', path: '/assurance', icon: FileText },
-    ],
-  },
-  {
-    key: 'models', label: 'Models', path: '/models', icon: Brain,
-    items: [
-      { label: 'Models', path: '/models', icon: Brain },
-      { label: 'Model Registry', path: '/model-registry', icon: Hash },
-      { label: 'Model Integrity', path: '/model-integrity', icon: Fingerprint },
-      { label: 'Explainable AI', path: '/xai', icon: Activity },
-      { label: 'Drift Detection', path: '/drift', icon: TrendingUp },
-      { label: 'Adversarial Robustness', path: '/robustness', icon: Zap },
-      { label: 'Performance', path: '/performance', icon: Cpu },
-      { label: 'Provenance', path: '/provenance', icon: Eye },
-    ],
-  },
-  {
-    key: 'data', label: 'Data & Blockchain', path: '/datasets', icon: Database,
-    items: [
-      { label: 'Datasets', path: '/datasets', icon: Database },
-      { label: 'Dataset Analysis', path: '/dataset-analysis', icon: Database },
-      { label: 'Blockchain', path: '/blockchain', icon: LinkIcon },
-      { label: 'Smart Contracts', path: '/contracts', icon: FileCode },
-      { label: 'Contracts Engine', path: '/contracts-engine', icon: Zap },
-      { label: 'Wallets', path: '/wallets', icon: Wallet },
-    ],
-  },
-  { key: 'analytics', label: 'Analytics', path: '/analytics', icon: BarChart3 },
-  { key: 'reports', label: 'Reports', path: '/reports', icon: FileText },
+const workspaceItems: NavItem[] = [
+  { label: 'Dashboard', path: '/', icon: LayoutGrid },
+  { label: 'Threats', path: '/attacks', icon: Shield, badge: '12+' },
+  { label: 'Live Vision', path: '/video', icon: Video },
+  { label: 'Analytics', path: '/analytics', icon: BarChart3 },
+  { label: 'Compliance', path: '/security-governance', icon: FileCheck2 },
+]
+
+const generalItems: NavItem[] = [
+  { label: 'Settings', path: '/settings', icon: Settings },
+  { label: 'Help', path: '/help', icon: HelpCircle },
 ]
 
 export function Sidebar() {
   const location = useLocation()
-  const [hovered, setHovered] = useState<string | null>(null)
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    return () => { if (closeTimer.current) clearTimeout(closeTimer.current) }
-  }, [])
-
-  const cancelClose = () => {
-    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null }
-  }
-
-  const scheduleClose = () => {
-    cancelClose()
-    closeTimer.current = setTimeout(() => {
-      setHovered(null)
-      closeTimer.current = null
-    }, 250)
-  }
-
-  const openMenu = (key: string) => {
-    cancelClose()
-    setHovered(key)
-  }
-
-  const isGroupActive = (group: NavGroup) => {
-    if (location.pathname === group.path) return true
-    if (group.items) return group.items.some((i) => location.pathname === i.path)
-    return false
+  const isActive = (path: string) => {
+    if (path === '/') return location.pathname === '/'
+    return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 
   return (
-    <aside className="flex flex-col items-center py-5 gap-2 w-[72px] shrink-0 relative z-30"
-      style={{ background: '#08080C', borderRight: '1px solid rgba(94, 234, 212, 0.1)' }}>
-
+    <aside className="flex w-[240px] shrink-0 flex-col border-r border-slate-200 bg-white">
       {/* Logo */}
-      <div className="w-10 h-10 rounded flex items-center justify-center mb-4"
-        style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-        <span className="font-black text-[14px] tracking-tight" style={{ color: '#5EEAD4' }}>CV</span>
+      <div className="flex items-center gap-2.5 px-6 py-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 shadow-sm">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        </div>
+        <div>
+          <div className="text-[15px] font-bold tracking-tight text-slate-900">CV-INTEGRITY</div>
+          <div className="text-[9px] font-medium tracking-wider text-slate-400">VISION ASSURANCE</div>
+        </div>
       </div>
 
-      {navGroups.map((group) => {
-        const Icon = group.icon
-        const active = isGroupActive(group)
-        const hasItems = group.items && group.items.length > 0
-        const isOpen = hovered === group.key
+      {/* MENU section */}
+      <div className="flex-1 overflow-y-auto px-3">
+        <div className="px-3 pb-2 pt-2">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+            Menu
+          </span>
+        </div>
 
-        return (
-          <div
-            key={group.key}
-            className="relative"
-            onMouseEnter={() => hasItems && openMenu(group.key)}
-            onMouseLeave={() => hasItems && scheduleClose()}>
+        <nav className="space-y-0.5">
+          {workspaceItems.map((item) => {
+            const active = isActive(item.path)
+            const Icon = item.icon
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium transition-all duration-150 ${
+                  active
+                    ? 'bg-emerald-50 text-emerald-900'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                {active && (
+                  <motion.div
+                    layoutId="sidebar-active"
+                    className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-emerald-700"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <Icon
+                  size={18}
+                  className={active ? 'text-emerald-700' : 'text-slate-400 group-hover:text-slate-600'}
+                  strokeWidth={2}
+                />
+                <span className="flex-1">{item.label}</span>
+                {item.badge && (
+                  <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                    {item.badge}
+                  </span>
+                )}
+              </NavLink>
+            )
+          })}
+        </nav>
 
-            <NavLink
-              to={group.path}
-              title={group.label}
-              className="w-11 h-11 rounded flex items-center justify-center relative group-icon"
-              style={{
-                background: active ? 'rgba(94, 234, 212, 0.18)' : 'transparent',
-                border: active ? '1px solid rgba(94, 234, 212, 0.6)' : '1px solid transparent',
-                color: '#5EEAD4',
-                opacity: active ? 1 : 0.45,
-                boxShadow: active ? '0 0 16px rgba(94, 234, 212, 0.25), inset 0 0 8px rgba(94, 234, 212, 0.08)' : 'none',
-                transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
-              onMouseEnter={(e) => {
-                if (!active) {
-                  e.currentTarget.style.opacity = '0.85'
-                  e.currentTarget.style.background = 'rgba(94, 234, 212, 0.08)'
-                  e.currentTarget.style.borderColor = 'rgba(94, 234, 212, 0.3)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!active) {
-                  e.currentTarget.style.opacity = '0.45'
-                  e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.borderColor = 'transparent'
-                }
-              }}>
-              <Icon size={18} strokeWidth={active ? 2.2 : 1.8} />
-              {hasItems && (
-                <span className="absolute bottom-1 right-1 w-1 h-1 rounded-full"
-                  style={{
-                    background: active ? '#5EEAD4' : 'rgba(94, 234, 212, 0.3)',
-                    boxShadow: active ? '0 0 6px #5EEAD4' : 'none',
-                    transition: 'all 300ms ease',
-                  }} />
-              )}
-            </NavLink>
+        {/* GENERAL section */}
+        <div className="px-3 pb-2 pt-6">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+            General
+          </span>
+        </div>
 
-            <AnimatePresence>
-              {hasItems && isOpen && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -8 }}
-                  transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-                  className="absolute left-full top-0 z-50"
-                  style={{ paddingLeft: '2px' }}
-                  onMouseEnter={cancelClose}
-                  onMouseLeave={scheduleClose}>
-                  <div className="min-w-[240px] rounded overflow-hidden"
-                    style={{
-                      background: '#0A0F14',
-                      border: '1px solid rgba(94, 234, 212, 0.3)',
-                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6), 0 0 24px rgba(94, 234, 212, 0.08)',
-                    }}>
-                    <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-                      <div className="text-[10px] font-mono tracking-[0.2em] font-bold" style={{ color: '#5EEAD4' }}>
-                        {group.label.toUpperCase()}
-                      </div>
-                    </div>
-                    <div className="py-1.5">
-                      {group.items!.map((item) => {
-                        const ItemIcon = item.icon
-                        const itemActive = location.pathname === item.path
-                        return (
-                          <NavLink
-                            key={item.path + item.label}
-                            to={item.path}
-                            onMouseEnter={cancelClose}
-                            className="relative flex items-center gap-3 px-4 py-2.5"
-                            style={{
-                              background: itemActive ? 'rgba(94, 234, 212, 0.14)' : 'transparent',
-                              transition: 'background 200ms ease, padding-left 200ms ease',
-                            }}
-                            onMouseOver={(e) => {
-                              if (!itemActive) {
-                                e.currentTarget.style.background = 'rgba(94, 234, 212, 0.06)'
-                                e.currentTarget.style.paddingLeft = '20px'
-                              }
-                            }}
-                            onMouseOut={(e) => {
-                              if (!itemActive) {
-                                e.currentTarget.style.background = 'transparent'
-                                e.currentTarget.style.paddingLeft = '16px'
-                              }
-                            }}>
-                            {/* Active left bar */}
-                            {itemActive && (
-                              <motion.span
-                                layoutId="activeBar"
-                                className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r"
-                                style={{ background: '#5EEAD4', boxShadow: '0 0 8px #5EEAD4' }}
-                              />
-                            )}
-                            <ItemIcon
-                              size={13}
-                              style={{
-                                color: itemActive ? '#5EEAD4' : '#5EEAD4',
-                                opacity: itemActive ? 1 : 0.5,
-                                transition: 'opacity 200ms ease',
-                                filter: itemActive ? 'drop-shadow(0 0 4px rgba(94, 234, 212, 0.6))' : 'none',
-                              }} />
-                            <span className="text-[11px] font-mono tracking-wider"
-                              style={{
-                                color: itemActive ? '#5EEAD4' : '#FFFFFF',
-                                opacity: itemActive ? 1 : 0.75,
-                                fontWeight: itemActive ? 700 : 400,
-                                transition: 'all 200ms ease',
-                              }}>
-                              {item.label}
-                            </span>
-                            {itemActive && (
-                              <motion.span
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="ml-auto w-1.5 h-1.5 rounded-full"
-                                style={{ background: '#5EEAD4', boxShadow: '0 0 8px #5EEAD4' }}
-                              />
-                            )}
-                          </NavLink>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+        <nav className="space-y-0.5">
+          {generalItems.map((item) => {
+            const active = isActive(item.path)
+            const Icon = item.icon
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium transition-all duration-150 ${
+                  active
+                    ? 'bg-emerald-50 text-emerald-900'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                {active && (
+                  <motion.div
+                    layoutId="sidebar-active-general"
+                    className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-emerald-700"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <Icon
+                  size={18}
+                  className={active ? 'text-emerald-700' : 'text-slate-400 group-hover:text-slate-600'}
+                  strokeWidth={2}
+                />
+                <span className="flex-1">{item.label}</span>
+              </NavLink>
+            )
+          })}
+
+          {/* Logout */}
+          <button
+            type="button"
+            className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium text-slate-600 transition-all duration-150 hover:bg-slate-50 hover:text-slate-900"
+          >
+            <LogOut size={18} className="text-slate-400 group-hover:text-slate-600" strokeWidth={2} />
+            <span className="flex-1 text-left">Logout</span>
+          </button>
+        </nav>
+      </div>
+
+      {/* Bottom promo card */}
+      <div className="p-3">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 to-emerald-950 p-4">
+          {/* Decorative curves */}
+          <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-500/20 blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-12 -left-8 h-24 w-24 rounded-full bg-emerald-700/30 blur-2xl" />
+
+          <div className="relative">
+            <div className="mb-2 flex h-7 w-7 items-center justify-center rounded-lg bg-white/10">
+              <Download size={13} className="text-white" />
+            </div>
+            <div className="text-[12px] font-semibold text-white">Download our Desktop App</div>
+            <div className="mt-1 text-[10px] leading-relaxed text-white/55">
+              Get real-time alerts on your desktop
+            </div>
+            <button className="mt-3 w-full rounded-lg bg-emerald-600 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-emerald-500">
+              Download
+            </button>
           </div>
-        )
-      })}
-
-      <div className="flex-1" />
-
-      <button className="w-11 h-11 rounded flex items-center justify-center"
-        style={{ color: '#5EEAD4', opacity: 0.4, transition: 'opacity 200ms ease' }}
-        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-        onMouseLeave={(e) => e.currentTarget.style.opacity = '0.4'}
-        title="Refresh">
-        <RotateCw size={18} strokeWidth={1.8} />
-      </button>
-      <NavLink to="/settings"
-        className="w-11 h-11 rounded flex items-center justify-center"
-        style={{
-          background: location.pathname === '/settings' ? 'rgba(94, 234, 212, 0.15)' : 'transparent',
-          border: location.pathname === '/settings' ? '1px solid rgba(94, 234, 212, 0.5)' : '1px solid transparent',
-          color: '#5EEAD4',
-          opacity: location.pathname === '/settings' ? 1 : 0.4,
-          transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-        }}
-        onMouseEnter={(e) => { if (location.pathname !== '/settings') e.currentTarget.style.opacity = '0.8' }}
-        onMouseLeave={(e) => { if (location.pathname !== '/settings') e.currentTarget.style.opacity = '0.4' }}
-        title="Settings">
-        <Settings size={18} strokeWidth={1.8} />
-      </NavLink>
+        </div>
+      </div>
     </aside>
   )
 }

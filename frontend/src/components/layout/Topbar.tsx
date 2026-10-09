@@ -1,86 +1,57 @@
-import { Search, MapPin, Settings, ChevronDown } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Search, Mail, Bell, ChevronDown } from 'lucide-react'
 import { LiveClock } from '@/components/ui/LiveClock'
 
-const tabs = [
-  { label: 'Overview', path: '/' },
-  { label: 'Map', path: '/video' },
-  { label: 'Video', path: '/video' },
-  { label: 'Threats', path: '/attacks' },
-  { label: 'Compliance', path: '/security-governance' },
-  { label: 'Reports', path: '/reports' },
-]
-
 export function Topbar() {
-  const location = useLocation()
-  const navigate = useNavigate()
-
   const openCommandPalette = () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))
   }
 
   return (
-    <header className="h-[72px] flex items-center gap-4 px-6 sticky top-0 z-40"
-      style={{ background: '#08080C', borderBottom: '1px solid rgba(94, 234, 212, 0.1)' }}>
-
-      {/* Tabs */}
-      <div className="flex items-center gap-1">
-        {tabs.map((tab) => {
-          const active = location.pathname === tab.path || (tab.label === 'Overview' && location.pathname === '/')
-          return (
-            <button
-              key={tab.label}
-              onClick={() => navigate(tab.path)}
-              className="px-4 py-2 rounded text-[10px] font-mono tracking-[0.15em] uppercase transition-all"
-              style={active
-                ? { background: 'rgba(94, 234, 212, 0.15)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.5)' }
-                : { background: 'transparent', color: '#5EEAD4', opacity: 0.4, border: '1px solid transparent' }}>
-              {tab.label}
-            </button>
-          )
-        })}
-      </div>
-
+    <header className="sticky top-0 z-40 flex h-[72px] items-center gap-4 border-b border-slate-200 bg-white px-6">
       {/* Search */}
       <button
         onClick={openCommandPalette}
-        className="relative flex-1 max-w-md text-left group"
+        className="group relative flex h-11 max-w-[520px] flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/60 px-4 text-left transition-all hover:border-slate-300 hover:bg-white"
       >
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 z-10" size={13} style={{ color: '#5EEAD4', opacity: 0.5 }} />
-        <div className="pl-10 pr-4 py-2 rounded text-[11px] font-mono transition-all"
-          style={{ background: 'rgba(94, 234, 212, 0.05)', border: '1px solid rgba(94, 234, 212, 0.2)', color: '#5EEAD4', opacity: 0.6 }}>
-          SEARCH...
-        </div>
+        <Search size={16} className="text-slate-400 group-hover:text-slate-600" />
+        <span className="flex-1 text-[13px] text-slate-400">
+          Search events, threats, severity...
+        </span>
+        <span className="flex items-center gap-0.5 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+          <span className="text-[11px]">⌘</span>K
+        </span>
       </button>
 
       <div className="flex-1" />
 
-      {/* Location */}
-      <div className="flex items-center gap-2 px-3 py-2 rounded"
-        style={{ background: 'rgba(94, 234, 212, 0.05)', border: '1px solid rgba(94, 234, 212, 0.2)' }}>
-        <MapPin size={12} style={{ color: '#5EEAD4' }} />
-        <span className="text-[10px] font-mono tracking-wider" style={{ color: '#5EEAD4' }}>BENGALURU</span>
+      {/* System status */}
+      <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/60 px-3 py-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        <span className="text-[11px] font-medium text-emerald-700">System online</span>
       </div>
 
-      {/* Clock */}
-      <div className="hidden lg:block text-[10px] font-mono tracking-wider" style={{ color: '#5EEAD4', opacity: 0.6 }}>
-        <LiveClock />
-      </div>
-
-      {/* Settings */}
-      <button className="w-9 h-9 rounded flex items-center justify-center"
-        style={{ background: 'rgba(94, 234, 212, 0.05)', border: '1px solid rgba(94, 234, 212, 0.2)' }}>
-        <Settings size={14} style={{ color: '#5EEAD4', opacity: 0.6 }} />
+      {/* Mail */}
+      <button className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700">
+        <Mail size={16} />
       </button>
 
-      {/* Avatar */}
-      <button className="flex items-center gap-2 pl-1 pr-3 py-1 rounded"
-        style={{ background: 'rgba(94, 234, 212, 0.05)', border: '1px solid rgba(94, 234, 212, 0.2)' }}>
-        <div className="w-7 h-7 rounded flex items-center justify-center"
-          style={{ background: 'rgba(94, 234, 212, 0.15)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-          <span className="text-[10px] font-mono font-bold" style={{ color: '#5EEAD4' }}>AT</span>
+      {/* Bell */}
+      <button className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700">
+        <Bell size={16} />
+      </button>
+
+      {/* Profile */}
+      <button className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white py-1.5 pl-1.5 pr-3 transition-colors hover:bg-slate-50">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-800">
+          <span className="text-[12px] font-bold text-white">AA</span>
         </div>
-        <ChevronDown size={11} style={{ color: '#5EEAD4', opacity: 0.6 }} />
+        <div className="text-left">
+          <div className="text-[12.5px] font-semibold leading-tight text-slate-900">
+            Assurance Admin
+          </div>
+          <div className="text-[10.5px] leading-tight text-slate-500">Workspace</div>
+        </div>
+        <ChevronDown size={14} className="text-slate-400" />
       </button>
     </header>
   )
