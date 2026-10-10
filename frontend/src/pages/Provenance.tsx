@@ -1,8 +1,13 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, ShieldCheck, Hash, Lock, CheckCircle, AlertTriangle, Upload, Key, Clock, Fingerprint } from 'lucide-react'
+import {
+  Loader2, ShieldCheck, Hash, CheckCircle, AlertTriangle, Upload,
+  Key, Fingerprint, FileImage, Link as LinkIcon, XCircle, Eye
+} from 'lucide-react'
 
-const truncate = (s: string, n = 20) => s ? s.substring(0, n) + '...' : ''
+const API = 'http://localhost:8000'
+
+const truncate = (s: string, n = 24) => s ? s.substring(0, n) + '...' : '—'
 
 export function Provenance() {
   const [file, setFile] = useState<File | null>(null)
@@ -10,15 +15,16 @@ export function Provenance() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [verifyResult, setVerifyResult] = useState<any>(null)
+  const [tamperResult, setTamperResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
 
   const runInference = async () => {
     if (!file) return
-    setLoading(true); setError(null); setResult(null); setVerifyResult(null)
+    setLoading(true); setError(null); setResult(null); setVerifyResult(null); setTamperResult(null)
     try {
       const formData = new FormData()
       formData.append('file', file)
-      const res = await fetch(`http://localhost:8000/api/provenance/infer?model_name=${modelName}`, {
+      const res = await fetch(`${API}/api/provenance/infer?model_name=${modelName}`, {
         method: 'POST', body: formData,
       })
       const data = await res.json()
@@ -30,7 +36,7 @@ export function Provenance() {
   const verifyBinding = async () => {
     if (!result) return
     try {
-      const res = await fetch('http://localhost:8000/api/provenance/verify', {
+      const res = await fetch(`${API}/api/provenance/verify`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(result.provenance),
       })
@@ -43,264 +49,262 @@ export function Provenance() {
     if (!result) return
     const tampered = { ...result.provenance, output_hash: '0' + result.provenance.output_hash.substring(1) }
     try {
-      const res = await fetch('http://localhost:8000/api/provenance/verify', {
+      const res = await fetch(`${API}/api/provenance/verify`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(tampered),
       })
       const data = await res.json()
-      setVerifyResult(data.verification)
+      setTamperResult(data.verification)
     } catch (err: any) { setError(err.message) }
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    if (f) {
+      setFile(f)
+      setResult(null)
+      setVerifyResult(null)
+      setTamperResult(null)
+    }
+  }
+
   return (
-    <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 pb-4 flex-wrap gap-3"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center"
-            style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-            <Fingerprint size={14} style={{ color: '#5EEAD4' }} />
-          </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <div className="text-[13px] font-bold tracking-[0.2em]" style={{ color: '#5EEAD4' }}>INFERENCE_PROVENANCE</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>
-              CRYPTOGRAPHIC_BINDING · PS_2.2.3
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Provenance
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Upload + Config */}
-      <div className="p-5 rounded mb-5"
-        style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="md:col-span-2">
-            <label className="text-[10px] font-mono tracking-[0.2em] mb-2 block" style={{ color: '#5EEAD4', opacity: 0.6 }}>
-              INPUT_IMAGE
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="w-full px-3 py-2.5 rounded text-[11px] font-mono outline-none file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-[10px] file:font-mono file:tracking-wider"
-              style={{
-                background: 'rgba(94, 234, 212, 0.05)',
-                color: '#5EEAD4',
-                border: '1px solid rgba(94, 234, 212, 0.2)',
-              }}
-            />
-          </div>
-          <div>
-            <label className="text-[10px] font-mono tracking-[0.2em] mb-2 block" style={{ color: '#5EEAD4', opacity: 0.6 }}>
-              MODEL
-            </label>
-            <select value={modelName} onChange={(e) => setModelName(e.target.value)}
-              className="w-full px-3 py-2.5 rounded text-[11px] font-mono outline-none"
-              style={{ background: 'rgba(94, 234, 212, 0.05)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.2)' }}>
-              <option value="good" style={{ background: '#0A0F14' }}>GOOD</option>
-              <option value="bad" style={{ background: '#0A0F14' }}>BAD</option>
-              <option value="worst" style={{ background: '#0A0F14' }}>WORST</option>
-              <option value="base" style={{ background: '#0A0F14' }}>BASE (YOLOV8N)</option>
-            </select>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Inference Provenance
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Cryptographic binding of input → model → config → output with tamper detection.
+            </p>
           </div>
         </div>
 
-        <button onClick={runInference} disabled={!file || loading}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded text-[11px] font-mono tracking-[0.15em] font-bold disabled:opacity-40"
-          style={{
-            background: 'rgba(94, 234, 212, 0.15)',
-            border: '1px solid rgba(94, 234, 212, 0.5)',
-            color: '#5EEAD4',
-            boxShadow: !file || loading ? 'none' : '0 0 16px rgba(94, 234, 212, 0.2)',
-          }}>
-          {loading ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={14} />}
-          {loading ? 'RUNNING_INFERENCE_&_GENERATING_BINDING...' : 'RUN_INFERENCE_&_GENERATE_PROVENANCE'}
-        </button>
+        {/* Input section */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Upload */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
+            <div className="mb-4">
+              <div className="text-[14px] font-semibold text-slate-900">Input Image</div>
+              <div className="mt-0.5 text-[11px] text-slate-500">
+                Upload an image to run inference and generate a cryptographic provenance record
+              </div>
+            </div>
 
-        {error && (
-          <div className="mt-4 p-3 rounded flex items-center gap-2"
-            style={{ background: 'rgba(248, 113, 113, 0.08)', border: '1px solid rgba(248, 113, 113, 0.3)' }}>
-            <AlertTriangle size={13} style={{ color: '#F87171' }} />
-            <span className="text-[11px] font-mono" style={{ color: '#F87171' }}>{error}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Results */}
-      {result && (
-        <>
-          {/* Detections */}
-          <div className="p-5 rounded mb-5"
-            style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-            <h2 className="font-bold text-[11px] font-mono tracking-[0.2em] mb-3" style={{ color: '#5EEAD4' }}>
-              DETECTIONS ({result.total_detections})
-            </h2>
-            {result.detections.length === 0 ? (
-              <div className="text-[11px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>NO_OBJECTS_DETECTED</div>
-            ) : (
-              <div className="space-y-2">
-                {result.detections.map((d: any, i: number) => (
-                  <div key={i} className="p-3 rounded flex items-center justify-between flex-wrap gap-2"
-                    style={{ background: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(94, 234, 212, 0.1)' }}>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[11px] font-bold font-mono" style={{ color: '#5EEAD4' }}>{d.class_name}</span>
-                      <span className="text-[10px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>conf: {(d.confidence * 100).toFixed(1)}%</span>
+            <label className="block cursor-pointer">
+              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+              <div className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-colors ${
+                file ? 'border-emerald-400 bg-emerald-50/50' : 'border-slate-200 bg-slate-50 hover:border-emerald-300 hover:bg-emerald-50/30'
+              }`}>
+                {file ? (
+                  <>
+                    <FileImage size={32} className="text-emerald-600" />
+                    <div className="mt-3 text-[13px] font-medium text-slate-800">{file.name}</div>
+                    <div className="mt-0.5 text-[11px] text-slate-500">
+                      {(file.size / 1024).toFixed(1)} KB · Click to change
                     </div>
-                    <span className="text-[10px] font-mono" style={{ color: '#A78BFA' }}>
-                      bbox: [{d.bbox.map((v: number) => v.toFixed(0)).join(', ')}]
-                    </span>
-                  </div>
-                ))}
+                  </>
+                ) : (
+                  <>
+                    <Upload size={32} className="text-slate-400" />
+                    <div className="mt-3 text-[13px] font-medium text-slate-700">Click to upload image</div>
+                    <div className="mt-0.5 text-[11px] text-slate-500">PNG, JPG, or WEBP</div>
+                  </>
+                )}
+              </div>
+            </label>
+
+            {/* Model selector */}
+            <div className="mt-5">
+              <label className="mb-1.5 block text-[11px] font-medium text-slate-500">Model</label>
+              <select
+                value={modelName}
+                onChange={(e) => setModelName(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-[13px] text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20"
+              >
+                <option value="good">good</option>
+                <option value="bad">bad</option>
+                <option value="worst">worst</option>
+              </select>
+            </div>
+
+            {/* Actions */}
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                onClick={runInference}
+                disabled={!file || loading}
+                className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-[12px] font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? <Loader2 size={13} className="animate-spin" /> : <Fingerprint size={13} />}
+                {loading ? 'Running...' : 'Run Inference'}
+              </button>
+              <button
+                onClick={verifyBinding}
+                disabled={!result}
+                className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ShieldCheck size={13} />
+                Verify Binding
+              </button>
+              <button
+                onClick={tamperTest}
+                disabled={!result}
+                className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-[12px] font-medium text-red-700 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <AlertTriangle size={13} />
+                Tamper Test
+              </button>
+            </div>
+
+            {error && (
+              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                <div className="text-[12px] font-medium text-red-700">{error}</div>
               </div>
             )}
           </div>
 
-          {/* Binding */}
-          <div className="p-5 rounded mb-5"
-            style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded flex items-center justify-center"
-                style={{ background: 'rgba(94, 234, 212, 0.15)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-                <Fingerprint size={16} style={{ color: '#5EEAD4' }} />
-              </div>
-              <div>
-                <h2 className="font-bold text-[12px] font-mono tracking-[0.15em]" style={{ color: '#5EEAD4' }}>
-                  CRYPTOGRAPHIC_BINDING
-                </h2>
-                <p className="text-[10px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>
-                  All components bound together with SHA-256
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              {[
-                { label: 'INPUT_HASH', value: result.provenance.input_hash, icon: Upload, color: '#38BDF8' },
-                { label: 'MODEL_WEIGHT_DIGEST', value: result.provenance.model_hash, icon: Key, color: '#A78BFA' },
-                { label: 'PREPROCESSING_HASH', value: result.provenance.preprocess_hash, icon: Hash, color: '#FBBF24' },
-                { label: 'INFERENCE_CONFIG_HASH', value: result.provenance.config_hash, icon: Lock, color: '#F87171' },
-                { label: 'OUTPUT_HASH', value: result.provenance.output_hash, icon: CheckCircle, color: '#5EEAD4' },
-              ].map((item, i) => {
-                const Icon = item.icon
-                return (
-                  <div key={i} className="p-3 rounded"
-                    style={{ background: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(94, 234, 212, 0.1)' }}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Icon size={11} style={{ color: item.color }} />
-                      <span className="text-[9px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>{item.label}</span>
+          {/* Verification status */}
+          <div className="space-y-4">
+            {verifyResult && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`rounded-2xl border p-5 shadow-sm ${
+                  verifyResult.valid ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  {verifyResult.valid ? (
+                    <CheckCircle size={24} className="text-emerald-600" />
+                  ) : (
+                    <XCircle size={24} className="text-red-600" />
+                  )}
+                  <div>
+                    <div className={`text-[14px] font-semibold ${verifyResult.valid ? 'text-emerald-900' : 'text-red-900'}`}>
+                      {verifyResult.valid ? 'Binding Verified' : 'Binding Invalid'}
                     </div>
-                    <div className="text-[10px] font-mono break-all" style={{ color: item.color }}>
-                      {item.value}
+                    <div className={`mt-0.5 text-[11px] ${verifyResult.valid ? 'text-emerald-700' : 'text-red-700'}`}>
+                      {verifyResult.valid ? 'Cryptographic chain is intact' : 'Tampering detected'}
                     </div>
                   </div>
-                )
-              })}
+                </div>
+              </motion.div>
+            )}
+
+            {tamperResult && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`rounded-2xl border p-5 shadow-sm ${
+                  !tamperResult.valid ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  {!tamperResult.valid ? (
+                    <ShieldCheck size={24} className="text-emerald-600" />
+                  ) : (
+                    <AlertTriangle size={24} className="text-amber-600" />
+                  )}
+                  <div>
+                    <div className={`text-[14px] font-semibold ${!tamperResult.valid ? 'text-emerald-900' : 'text-amber-900'}`}>
+                      {!tamperResult.valid ? 'Tamper Detected' : 'Not Detected'}
+                    </div>
+                    <div className={`mt-0.5 text-[11px] ${!tamperResult.valid ? 'text-emerald-700' : 'text-amber-700'}`}>
+                      {!tamperResult.valid ? 'System correctly rejected tampered binding' : 'Warning: Tampering was not detected'}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {result && !verifyResult && !tamperResult && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <LinkIcon size={20} className="text-slate-400" />
+                  <div>
+                    <div className="text-[13px] font-semibold text-slate-800">Ready to verify</div>
+                    <div className="mt-0.5 text-[11px] text-slate-500">Run verify or tamper test</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Provenance chain */}
+        {result?.provenance && (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
+                <Hash size={14} className="text-emerald-600" />
+              </div>
+              <div>
+                <div className="text-[14px] font-semibold text-slate-900">Provenance Chain</div>
+                <div className="mt-0.5 text-[11px] text-slate-500">
+                  Cryptographic binding of input, model, config and output
+                </div>
+              </div>
             </div>
 
-            <div className="mt-4 p-4 rounded"
-              style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-              <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck size={14} style={{ color: '#5EEAD4' }} />
-                <span className="font-bold text-[11px] font-mono tracking-[0.15em]" style={{ color: '#5EEAD4' }}>
-                  COMBINED_BINDING
-                </span>
-              </div>
-              <div className="text-[10px] font-mono break-all" style={{ color: '#5EEAD4' }}>
-                {result.provenance.binding}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 mt-4">
-              {[
-                { label: 'SEQUENCE', value: result.provenance.sequence },
-                { label: 'TIMESTAMP', value: truncate(result.provenance.timestamp, 16) },
-                { label: 'NONCE', value: truncate(result.provenance.nonce, 12) },
-              ].map((s, i) => (
-                <div key={i} className="p-3 rounded"
-                  style={{ background: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(94, 234, 212, 0.1)' }}>
-                  <div className="text-[9px] font-mono tracking-wider mb-1" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</div>
-                  <div className="text-[11px] font-mono" style={{ color: '#FFFFFF' }}>{s.value}</div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {Object.entries(result.provenance).map(([key, val]: [string, any]) => (
+                <div key={key} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      {key.replace(/_/g, ' ')}
+                    </span>
+                    <Key size={11} className="text-slate-400" />
+                  </div>
+                  <div className="mt-1.5 break-all font-mono text-[11px] text-slate-700">
+                    {typeof val === 'string' && val.length > 40 ? truncate(val, 48) : String(val)}
+                  </div>
                 </div>
               ))}
             </div>
-
-            <div className="flex gap-2 mt-4">
-              <button onClick={verifyBinding}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded text-[10px] font-mono tracking-wider font-bold"
-                style={{ background: 'rgba(94, 234, 212, 0.15)', border: '1px solid rgba(94, 234, 212, 0.5)', color: '#5EEAD4' }}>
-                <CheckCircle size={12} /> VERIFY_BINDING
-              </button>
-              <button onClick={tamperTest}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded text-[10px] font-mono tracking-wider font-bold"
-                style={{ background: 'rgba(248, 113, 113, 0.15)', border: '1px solid rgba(248, 113, 113, 0.5)', color: '#F87171' }}>
-                <AlertTriangle size={12} /> TAMPER_TEST
-              </button>
-            </div>
           </div>
+        )}
 
-          {/* Verification */}
-          {verifyResult && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-5 rounded"
-              style={{
-                background: verifyResult.binding_valid ? 'rgba(94, 234, 212, 0.06)' : 'rgba(248, 113, 113, 0.06)',
-                border: `1px solid ${verifyResult.binding_valid ? 'rgba(94, 234, 212, 0.4)' : 'rgba(248, 113, 113, 0.4)'}`,
-              }}>
-              <div className="flex items-center gap-3">
-                {verifyResult.binding_valid ? (
-                  <CheckCircle size={28} style={{ color: '#5EEAD4' }} />
-                ) : (
-                  <AlertTriangle size={28} style={{ color: '#F87171' }} />
-                )}
-                <div>
-                  <div className="font-bold text-[14px] font-mono tracking-wider"
-                    style={{ color: verifyResult.binding_valid ? '#5EEAD4' : '#F87171' }}>
-                    {verifyResult.binding_valid ? 'BINDING_VALID' : 'TAMPERING_DETECTED'}
-                  </div>
-                  <div className="text-[10px] font-mono mt-0.5" style={{ color: '#5EEAD4', opacity: 0.7 }}>
-                    {verifyResult.binding_valid
-                      ? 'Cryptographic binding matches — no tampering'
-                      : 'Binding mismatch — record has been altered'}
-                  </div>
+        {/* Detections */}
+        {result?.detections && result.detections.length > 0 && (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
+                <Eye size={14} className="text-blue-600" />
+              </div>
+              <div>
+                <div className="text-[14px] font-semibold text-slate-900">Detections</div>
+                <div className="mt-0.5 text-[11px] text-slate-500">
+                  {result.detections.length} objects detected in this inference
                 </div>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-2 mt-4">
-                {[
-                  { label: 'RECOMPUTED', value: truncate(verifyResult.recomputed_binding, 30) },
-                  { label: 'CLAIMED', value: truncate(verifyResult.claimed_binding, 30) },
-                ].map((s, i) => (
-                  <div key={i} className="p-3 rounded"
-                    style={{ background: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(94, 234, 212, 0.1)' }}>
-                    <div className="text-[9px] font-mono tracking-wider mb-1" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</div>
-                    <div className="text-[10px] font-mono break-all" style={{ color: '#FFFFFF' }}>{s.value}</div>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+              {result.detections.map((d: any, i: number) => (
+                <div key={i} className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="text-[12px] font-medium capitalize text-slate-800">
+                      {d.class || 'Object'}
+                    </span>
                   </div>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-3 mt-3 pt-3 flex-wrap"
-                style={{ borderTop: '1px solid rgba(94, 234, 212, 0.1)' }}>
-                <Clock size={11} style={{ color: '#5EEAD4', opacity: 0.5 }} />
-                <span className="text-[10px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>
-                  Record age: {verifyResult.record_age_seconds}s
-                </span>
-                <span className="text-[9px] font-mono py-0.5 px-2 rounded tracking-wider font-bold"
-                  style={{
-                    background: verifyResult.replay_risk === 'low' ? 'rgba(94, 234, 212, 0.15)' : 'rgba(248, 113, 113, 0.15)',
-                    color: verifyResult.replay_risk === 'low' ? '#5EEAD4' : '#F87171',
-                    border: `1px solid ${verifyResult.replay_risk === 'low' ? 'rgba(94, 234, 212, 0.4)' : 'rgba(248, 113, 113, 0.4)'}`,
-                  }}>
-                  REPLAY_RISK: {verifyResult.replay_risk.toUpperCase()}
-                </span>
-              </div>
-            </motion.div>
-          )}
-        </>
-      )}
+                  <span className="font-mono text-[11px] font-semibold text-emerald-700">
+                    {((d.confidence || 0) * 100).toFixed(1)}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
+
+export default Provenance

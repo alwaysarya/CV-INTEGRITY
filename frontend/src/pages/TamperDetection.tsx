@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Fingerprint, Search, Loader2, RefreshCw, AlertCircle, CheckCircle, XCircle, Shield, Hash } from 'lucide-react'
+import { motion } from 'framer-motion'
+import {
+  Fingerprint, Search, Loader2, RefreshCw, CheckCircle, XCircle,
+  Shield, Hash, AlertTriangle, Link as LinkIcon
+} from 'lucide-react'
 import apiClient from '@/lib/api'
 
 export function TamperDetection() {
@@ -16,7 +20,7 @@ export function TamperDetection() {
     setError(null)
     setValidationStatus('checking')
     try {
-      const res = await apiClient.getBlocks()
+      const res = await apiClient.getBlocks().catch(() => ({ data: { blocks: [] } }))
       const data = res.data
       const blockList = data.blocks || []
 
@@ -32,7 +36,9 @@ export function TamperDetection() {
     } catch (err: any) {
       setError(err?.message || 'Backend error')
       setValidationStatus('invalid')
-    } finally { setLoading(false) }
+    } finally {
+      setLoading(false)
+    }
   }
 
   const filtered = blocks.filter((b) =>
@@ -41,193 +47,212 @@ export function TamperDetection() {
     (b.data?.action || '').toLowerCase().includes(search.toLowerCase())
   )
 
-  const stats = {
-    total: blocks.length,
-    verified: validationStatus === 'valid' ? blocks.length : 0,
-    issues: validationStatus === 'invalid' ? blocks.length : 0,
-    integrity: validationStatus === 'valid' ? '100%' : '0%',
-  }
+  const statusTheme = {
+    checking: { bg: '#F1F5F9', text: '#334155', dot: '#64748B', label: 'Checking' },
+    valid: { bg: '#D1FAE5', text: '#065F46', dot: '#10B981', label: 'Chain Valid' },
+    invalid: { bg: '#FEE2E2', text: '#991B1B', dot: '#EF4444', label: 'Chain Broken' },
+  }[validationStatus]
 
   return (
-    <div className="space-y-6 p-6" style={{ background: '#0A0F14', minHeight: 'calc(100vh - 72px)' }}>
-
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-[32px] font-bold tracking-tight" style={{ color: '#E5F5F0' }}>Tamper Detection</h1>
-          <p className="text-[13px] mt-1" style={{ color: '#8AA4A0' }}>
-            {loading ? 'Verifying blockchain integrity...' : `Cryptographic validation of ${blocks.length} blocks`}
-          </p>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <button onClick={loadBlocks}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-medium"
-            style={{ background: '#0F1419', color: '#E5F5F0', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
-            <RefreshCw size={14} /> Re-validate
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
+          <div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Tamper Detection
+            </div>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Tamper Detection
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Hash chain validation to detect any modification in the audit ledger.
+            </p>
+          </div>
+          <button
+            onClick={loadBlocks}
+            className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Revalidate
           </button>
-          <div className="flex items-center gap-1.5 px-4 py-2.5 rounded-full"
-            style={{ background: validationStatus === 'valid' ? '#E8F0E5' : '#F0DCD8' }}>
-            {validationStatus === 'checking' ? (
-              <><Loader2 size={12} className="animate-spin" style={{ color: '#3A7D8F' }} /><span className="text-[11px] font-bold" style={{ color: '#3A7D8F' }}>Checking</span></>
-            ) : validationStatus === 'valid' ? (
-              <><Shield size={12} style={{ color: '#2E7D4F' }} /><span className="text-[11px] font-bold" style={{ color: '#2E7D4F' }}>Chain Intact</span></>
-            ) : (
-              <><AlertCircle size={12} style={{ color: '#8B3A2E' }} /><span className="text-[11px] font-bold" style={{ color: '#8B3A2E' }}>Tampered</span></>
-            )}
-          </div>
         </div>
-      </div>
 
-      {error && (
-        <div className="p-4 rounded-2xl flex items-center gap-3" style={{ background: '#F0DCD8', border: '1px solid #E5BDB2' }}>
-          <AlertCircle size={18} style={{ color: '#8B3A2E' }} />
-          <div className="text-[13px]" style={{ color: '#8B3A2E' }}>{error}</div>
-        </div>
-      )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Blocks', value: stats.total, color: '#3A7D8F', icon: Hash },
-          { label: 'Verified', value: stats.verified, color: '#2E7D4F', icon: CheckCircle },
-          { label: 'Issues', value: stats.issues, color: '#8B3A2E', icon: XCircle },
-          { label: 'Integrity', value: stats.integrity, color: validationStatus === 'valid' ? '#2E7D4F' : '#8B3A2E', icon: Shield },
-        ].map((stat, i) => {
-          const Icon = stat.icon
-          return (
-            <div key={i} className="p-5 rounded-3xl" style={{ background: '#0F1419' }}>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: '#0A0F14' }}>
-                <Icon size={18} style={{ color: stat.color }} />
+        {/* Status banner */}
+        <div
+          className="rounded-2xl border p-5 shadow-sm"
+          style={{
+            borderColor: `${statusTheme.dot}30`,
+            background: `linear-gradient(145deg, ${statusTheme.bg}, white)`,
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-xl"
+                style={{ background: `${statusTheme.dot}20` }}
+              >
+                {validationStatus === 'valid' ? (
+                  <CheckCircle size={22} style={{ color: statusTheme.dot }} />
+                ) : validationStatus === 'invalid' ? (
+                  <XCircle size={22} style={{ color: statusTheme.dot }} />
+                ) : (
+                  <Loader2 size={22} className="animate-spin" style={{ color: statusTheme.dot }} />
+                )}
               </div>
-              <div className="text-[28px] font-bold tracking-tight leading-none mb-1" style={{ color: '#E5F5F0' }}>{stat.value}</div>
-              <div className="text-[12px]" style={{ color: '#8B8B80' }}>{stat.label}</div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Chain Integrity Visual */}
-      {!loading && blocks.length > 0 && (
-        <div className="p-5 rounded-3xl" style={{ background: '#0F1419' }}>
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-            <div>
-              <h3 className="font-bold text-[13px] tracking-wide" style={{ color: '#E5F5F0' }}>CHAIN INTEGRITY CHECK</h3>
-              <p className="text-[11px] mt-0.5" style={{ color: '#8B8B80' }}>Each block links to previous via SHA-256 hash</p>
-            </div>
-            {validationStatus === 'valid' ? (
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold"
-                style={{ background: '#E8F0E5', color: '#2E7D4F' }}>
-                <CheckCircle size={11} /> All links valid
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold"
-                style={{ background: '#F0DCD8', color: '#8B3A2E' }}>
-                <XCircle size={11} /> Broken link
-              </span>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            {blocks.slice(0, 6).map((block, i) => {
-              const isFirst = i === 0
-              const linked = !isFirst ? block.previous_hash === blocks[i - 1].hash : true
-              const linkColor = linked ? '#2E7D4F' : '#8B3A2E'
-              return (
-                <div key={block.index} className="flex items-center gap-3 p-3 rounded-2xl" style={{ background: '#0A0F14' }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#0F1419' }}>
-                    {linked ? <CheckCircle size={14} style={{ color: linkColor }} /> : <XCircle size={14} style={{ color: linkColor }} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[12px] font-bold" style={{ color: '#E5F5F0' }}>Block #{block.index}</span>
-                      <span className="text-[9px] py-0.5 px-2 rounded-full font-bold"
-                        style={{ background: '#E0EAEE', color: '#3A7D8F' }}>
-                        {block.data?.action || 'UNKNOWN'}
-                      </span>
-                    </div>
-                    <div className="text-[10px] font-mono truncate" style={{ color: '#8B8B80' }}>
-                      Hash: {block.hash.substring(0, 30)}...
-                    </div>
-                    <div className="text-[10px] font-mono truncate" style={{ color: '#8B8B80' }}>
-                      ← {block.previous_hash.substring(0, 30)}...
-                    </div>
-                  </div>
-                  <div className="text-[9px]" style={{ color: '#8B8B80' }}>
-                    {block.datetime?.split('T')[1]?.split('.')[0] || 'N/A'}
-                  </div>
+              <div>
+                <div className="text-[12px] font-medium text-slate-600">Chain Status</div>
+                <div className="mt-0.5 text-[22px] font-bold tracking-tight" style={{ color: statusTheme.text }}>
+                  {statusTheme.label}
                 </div>
-              )
-            })}
+                <div className="mt-0.5 text-[11px] text-slate-600">
+                  {validationStatus === 'valid'
+                    ? 'All blocks linked correctly — no tampering detected'
+                    : validationStatus === 'invalid'
+                    ? 'Hash chain integrity compromised'
+                    : 'Running validation...'}
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[11px] font-medium text-slate-500">Total Blocks</div>
+              <div className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+                {blocks.length}
+              </div>
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Search */}
-      <div className="relative">
-        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#8B8B80' }} />
-        <input placeholder="Search by block #, hash, or action..." value={search} onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-2xl text-[13px] outline-none"
-          style={{ background: '#0F1419', color: '#E5F5F0', border: '1px solid #EFEDE4' }} />
-      </div>
+        {/* Stat cards */}
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Total Blocks', value: blocks.length, color: '#0F172A', icon: Shield },
+            { label: 'Verified', value: validationStatus === 'valid' ? blocks.length : 0, color: '#10B981', icon: CheckCircle },
+            { label: 'Issues', value: validationStatus === 'invalid' ? 1 : 0, color: '#EF4444', icon: XCircle },
+            { label: 'Integrity', value: validationStatus === 'valid' ? '100%' : '0%', color: '#3B82F6', icon: Fingerprint },
+          ].map((s) => (
+            <motion.div
+              key={s.label}
+              whileHover={{ y: -3 }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${s.color}15` }}>
+                  <s.icon size={14} style={{ color: s.color }} />
+                </div>
+              </div>
+              <div className="mt-3 text-[28px] font-bold leading-none tracking-tight text-slate-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {s.value}
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
-      {/* Table */}
-      <div className="p-5 rounded-3xl" style={{ background: '#0F1419' }}>
-        <h3 className="font-bold text-[13px] tracking-wide mb-4" style={{ color: '#E5F5F0' }}>ALL BLOCKS — TAMPER STATUS</h3>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="animate-spin" size={28} style={{ color: '#8B8B80' }} />
-            <span className="ml-3 text-[13px]" style={{ color: '#8B8B80' }}>Verifying blockchain...</span>
+        {/* Search */}
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="relative">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by hash, index or action..."
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-[13px] text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20"
+            />
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr style={{ borderBottom: '1px solid #0F1419' }}>
-                  {['Block', 'Action', 'Hash', 'Nonce', 'Time', 'Integrity'].map((h, i) => (
-                    <th key={i}
-                      className={`text-[10px] font-bold tracking-wider uppercase pb-3 ${i < 3 ? 'text-left' : 'text-right'}`}
-                      style={{ color: '#8B8B80' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((block, i) => (
-                  <tr key={block.index} style={{ borderBottom: '1px solid #0F1419' }}>
-                    <td className="py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#E0EAEE' }}>
-                          <Fingerprint size={14} style={{ color: '#3A7D8F' }} />
-                        </div>
-                        <div className="text-[12px] font-bold" style={{ color: '#E5F5F0' }}>#{block.index}</div>
+        </div>
+
+        {/* Blocks list */}
+        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          {loading && blocks.length === 0 ? (
+            <div className="flex items-center justify-center gap-2 py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Validating chain...
+            </div>
+          ) : error ? (
+            <div className="py-20 text-center">
+              <AlertTriangle size={24} className="mx-auto text-red-500" />
+              <div className="mt-2 text-[13px] font-medium text-slate-700">Validation failed</div>
+              <div className="mt-1 text-[11px] text-slate-400">{error}</div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-20 text-center">
+              <Fingerprint size={32} className="mx-auto text-slate-400" />
+              <div className="mt-3 text-[14px] font-medium text-slate-700">No blocks found</div>
+              <div className="mt-1 text-[11px] text-slate-500">
+                {search ? 'Try a different search term' : 'No blocks in ledger yet'}
+              </div>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              <div className="grid grid-cols-12 gap-4 bg-slate-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                <div className="col-span-2">Block</div>
+                <div className="col-span-4">Hash</div>
+                <div className="col-span-4">Previous Hash</div>
+                <div className="col-span-2 text-right">Link</div>
+              </div>
+
+              {filtered.slice(0, 50).map((b, i) => {
+                const prevMatch = i === 0 || b.previous_hash === filtered[i - 1]?.hash
+                return (
+                  <motion.div
+                    key={b.index || i}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: Math.min(i * 0.02, 0.4) }}
+                    className="grid grid-cols-12 items-center gap-4 px-5 py-3.5 transition-colors hover:bg-slate-50"
+                  >
+                    <div className="col-span-2 flex items-center gap-2">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-50">
+                        <span className="font-mono text-[10px] font-bold text-emerald-700">
+                          #{b.index ?? i}
+                        </span>
                       </div>
-                    </td>
-                    <td className="py-3">
-                      <span className="text-[10px] py-1 px-2.5 rounded-full font-bold"
-                        style={{ background: '#EBE5F0', color: '#6B4B94' }}>
-                        {block.data?.action || 'UNKNOWN'}
+                    </div>
+
+                    <div className="col-span-4 flex items-center gap-2">
+                      <Hash size={11} className="text-slate-400" />
+                      <span className="truncate font-mono text-[10px] text-slate-700">
+                        {b.hash ? b.hash.slice(0, 28) + '...' : '—'}
                       </span>
-                    </td>
-                    <td className="py-3"><div className="text-[11px] font-mono" style={{ color: '#2E7D4F' }}>{block.hash.substring(0, 20)}...</div></td>
-                    <td className="py-3 text-right"><div className="text-[11px] font-mono" style={{ color: '#E5F5F0' }}>{block.data?.nonce || 'N/A'}</div></td>
-                    <td className="py-3 text-right">
-                      <div className="text-[11px] font-mono" style={{ color: '#8B8B80' }}>
-                        {block.datetime?.split('T')[1]?.split('.')[0] || 'N/A'}
-                      </div>
-                    </td>
-                    <td className="py-3 text-right">
-                      <span className="inline-flex items-center gap-1 text-[10px] py-1 px-2.5 rounded-full font-bold"
-                        style={{ background: '#E8F0E5', color: '#2E7D4F' }}>
-                        <CheckCircle size={9} /> Valid
+                    </div>
+
+                    <div className="col-span-4 flex items-center gap-2">
+                      <LinkIcon size={11} className="text-slate-400" />
+                      <span className="truncate font-mono text-[10px] text-slate-500">
+                        {b.previous_hash ? b.previous_hash.slice(0, 28) + '...' : 'Genesis'}
                       </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                    </div>
+
+                    <div className="col-span-2 flex justify-end">
+                      {validationStatus === 'valid' ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">
+                          <CheckCircle size={10} />
+                          Linked
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-1 text-[10px] font-semibold text-red-700">
+                          <XCircle size={10} />
+                          Broken
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
+
+          {blocks.length > 0 && (
+            <div className="border-t border-slate-100 bg-slate-50 px-5 py-3 text-[11px] text-slate-500">
+              Showing {Math.min(filtered.length, 50)} of {blocks.length} blocks · Chain {validationStatus === 'valid' ? 'valid' : 'invalid'}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
+
+export default TamperDetection

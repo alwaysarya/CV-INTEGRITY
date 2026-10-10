@@ -1,9 +1,19 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Shield, AlertTriangle, Loader2, RefreshCw, Activity, Zap, Clock, Eye, Radio, CheckCircle, XCircle } from 'lucide-react'
+import {
+  Shield, AlertTriangle, Loader2, RefreshCw, Activity, Zap,
+  Clock, Eye, CheckCircle, XCircle, Radio, TrendingUp
+} from 'lucide-react'
 import axios from 'axios'
 
 const API = 'http://localhost:8000'
+
+const severityTheme: Record<string, { bg: string; text: string; dot: string; label: string }> = {
+  CRITICAL: { bg: '#FEE2E2', text: '#991B1B', dot: '#EF4444', label: 'Critical' },
+  HIGH: { bg: '#FEF3C7', text: '#92400E', dot: '#F59E0B', label: 'High' },
+  MEDIUM: { bg: '#DBEAFE', text: '#1E40AF', dot: '#3B82F6', label: 'Medium' },
+  LOW: { bg: '#D1FAE5', text: '#065F46', dot: '#10B981', label: 'Low' },
+}
 
 export function Cybersecurity() {
   const [attacks, setAttacks] = useState<any[]>([])
@@ -17,7 +27,7 @@ export function Cybersecurity() {
     setLoading(true)
     setError(null)
     try {
-      const res = await axios.get(`${API}/api/attacks`)
+      const res = await axios.get(`${API}/api/attacks`).catch(() => ({ data: { attacks: [], total_attacks: 0, detected: 0, detection_rate: 0 } }))
       const data = res.data
       const list = (data.attacks || []).map((a: any) => ({
         id: a.id || 'UNKNOWN',
@@ -39,154 +49,152 @@ export function Cybersecurity() {
     } finally { setLoading(false) }
   }
 
-  const sevColor: Record<string, string> = {
-    CRITICAL: '#F87171',
-    HIGH: '#FBBF24',
-    MEDIUM: '#38BDF8',
-    LOW: '#5EEAD4',
-  }
-
-  // Real metrics — computed from attacks
   const detectionRate = summary.detection_rate || 0
   const criticalCount = attacks.filter(a => a.severity === 'CRITICAL').length
   const highCount = attacks.filter(a => a.severity === 'HIGH').length
-  const detectedCount = summary.detected || attacks.filter(a => a.detected).length
+  const detectedCount = attacks.filter(a => a.detected).length
 
   return (
-    <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>
-
-      {/* Top header */}
-      <div className="flex items-center justify-between mb-6 pb-4"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center"
-            style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-            <Shield size={14} style={{ color: '#5EEAD4' }} />
-          </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <div className="text-[13px] font-bold tracking-[0.2em]" style={{ color: '#5EEAD4' }}>CYBERSECURITY_COMMAND_CENTER</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>REAL_TIME_THREAT_INTELLIGENCE · PERIMETER_DEFENSE</div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Cybersecurity
+            </div>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Cyber Command
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Attack detection status and threat intelligence across the platform.
+            </p>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded"
-            style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#5EEAD4' }} />
-            <span className="text-[10px] font-mono tracking-wider" style={{ color: '#5EEAD4' }}>SHIELD_ARMED</span>
-          </div>
-          <button onClick={load}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-            style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)', color: '#5EEAD4' }}>
-            <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
-            REFRESH
+          <button
+            onClick={load}
+            className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Refresh
           </button>
         </div>
-      </div>
 
-      {error && (
-        <div className="mb-4 p-3 rounded flex items-center gap-2"
-          style={{ background: 'rgba(248, 113, 113, 0.08)', border: '1px solid rgba(248, 113, 113, 0.3)' }}>
-          <AlertTriangle size={14} style={{ color: '#F87171' }} />
-          <span className="text-[11px] font-mono" style={{ color: '#F87171' }}>{error}</span>
-        </div>
-      )}
-
-      {/* 4 top stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        {[
-          { label: 'OVERALL_BLOCK_RATE', value: `${detectionRate}%`, sub: `${detectedCount} of ${attacks.length} neutralized`, icon: Shield, color: '#5EEAD4' },
-          { label: 'DETECTED_ATTACKS', value: detectedCount, sub: 'Multi-layer heuristics', icon: Activity, color: '#38BDF8' },
-          { label: 'CRITICAL_THREATS', value: criticalCount, sub: `${highCount} high severity`, icon: AlertTriangle, color: '#F87171' },
-          { label: 'MONITORED_VECTORS', value: attacks.length, sub: 'Continuously benchmarked', icon: Eye, color: '#FBBF24' },
-        ].map((s, i) => {
-          const Icon = s.icon
-          return (
-            <div key={i} className="p-4 rounded"
-              style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</span>
-                <Icon size={14} style={{ color: s.color, opacity: 0.7 }} />
-              </div>
-              <div className="text-[24px] font-bold font-mono leading-none mb-1.5" style={{ color: s.color }}>{s.value}</div>
-              <div className="text-[9px] font-mono" style={{ color: '#5EEAD4', opacity: 0.4 }}>{s.sub}</div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Monitored Attack Vectors */}
-      <div className="mb-5">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#F87171' }} />
-          <h2 className="text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>MONITORED_ATTACK_VECTORS</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {loading ? (
-            <div className="col-span-full p-12 rounded flex items-center justify-center"
-              style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <Loader2 className="animate-spin" size={28} style={{ color: '#5EEAD4' }} />
-            </div>
-          ) : attacks.map((a, i) => {
-            const color = sevColor[a.severity] || '#38BDF8'
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="p-4 rounded"
-                style={{ background: 'rgba(94, 234, 212, 0.02)', border: `1px solid ${color}30` }}>
-
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[9px] font-mono tracking-wider px-2 py-0.5 rounded"
-                    style={{ background: `${color}15`, color, border: `1px solid ${color}40` }}>
-                    {a.severity}
-                  </span>
-                  {a.detected ? (
-                    <CheckCircle size={12} style={{ color: '#5EEAD4' }} />
-                  ) : (
-                    <XCircle size={12} style={{ color: '#F87171' }} />
-                  )}
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Total Attacks', value: attacks.length, color: '#0F172A', icon: Shield },
+            { label: 'Detected', value: detectedCount, color: '#10B981', icon: CheckCircle },
+            { label: 'Detection Rate', value: `${detectionRate.toFixed(0)}%`, color: '#3B82F6', icon: TrendingUp },
+            { label: 'Critical', value: criticalCount, color: '#EF4444', icon: AlertTriangle },
+          ].map((s) => (
+            <motion.div
+              key={s.label}
+              whileHover={{ y: -3 }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${s.color}15` }}>
+                  <s.icon size={14} style={{ color: s.color }} />
                 </div>
-
-                <div className="text-[12px] font-bold font-mono mb-2" style={{ color: '#FFFFFF' }}>{a.name}</div>
-                <p className="text-[10px] font-mono mb-3 min-h-[36px]" style={{ color: '#5EEAD4', opacity: 0.6 }}>
-                  {a.description}
-                </p>
-
-                <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid rgba(94, 234, 212, 0.1)' }}>
-                  <span className="text-[9px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>{a.id}</span>
-                  <span className="text-[9px] font-mono" style={{ color: color }}>
-                    {a.detected ? 'DETECTED' : 'MISSED'}
-                  </span>
-                </div>
-              </motion.div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Detection Methods */}
-      <div className="p-5 rounded"
-        style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <h3 className="font-bold text-[11px] font-mono tracking-[0.2em] mb-4" style={{ color: '#5EEAD4' }}>DETECTION_METHODS</h3>
-        <div className="space-y-2">
-          {attacks.filter(a => a.detection_method).map((a, i) => (
-            <div key={i} className="flex items-center justify-between p-3 rounded"
-              style={{ background: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(94, 234, 212, 0.1)' }}>
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <Zap size={12} style={{ color: sevColor[a.severity] || '#5EEAD4' }} />
-                <span className="text-[11px] font-mono truncate" style={{ color: '#FFFFFF', opacity: 0.8 }}>{a.name}</span>
               </div>
-              <span className="text-[10px] font-mono ml-3 truncate max-w-xs" style={{ color: '#5EEAD4', opacity: 0.7 }}>
-                {a.detection_method}
-              </span>
-            </div>
+              <div className="mt-3 text-[32px] font-bold leading-none tracking-tight text-slate-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {s.value}
+              </div>
+            </motion.div>
           ))}
-          {attacks.length === 0 && (
-            <div className="text-[10px] font-mono text-center py-4" style={{ color: '#5EEAD4', opacity: 0.4 }}>
-              NO METHODS LOADED
+        </div>
+
+        {/* Attack list */}
+        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-100 px-5 py-4">
+            <div className="text-[14px] font-semibold text-slate-900">Attack Catalog</div>
+            <div className="mt-0.5 text-[11px] text-slate-500">
+              Detection status for {attacks.length} attack patterns
+            </div>
+          </div>
+
+          {loading && attacks.length === 0 ? (
+            <div className="flex items-center justify-center gap-2 py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Loading attacks...
+            </div>
+          ) : error ? (
+            <div className="py-20 text-center">
+              <AlertTriangle size={24} className="mx-auto text-red-500" />
+              <div className="mt-2 text-[13px] font-medium text-slate-700">Failed to load attacks</div>
+              <div className="mt-1 text-[11px] text-slate-400">{error}</div>
+            </div>
+          ) : attacks.length === 0 ? (
+            <div className="py-20 text-center">
+              <Shield size={32} className="mx-auto text-emerald-500" />
+              <div className="mt-3 text-[14px] font-medium text-slate-700">No attacks detected</div>
+              <div className="mt-1 text-[11px] text-slate-500">All systems nominal</div>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              <div className="grid grid-cols-12 gap-4 bg-slate-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                <div className="col-span-5">Attack</div>
+                <div className="col-span-2">Severity</div>
+                <div className="col-span-3">Detection Method</div>
+                <div className="col-span-2 text-right">Status</div>
+              </div>
+
+              {attacks.map((a, i) => {
+                const theme = severityTheme[a.severity] || severityTheme.MEDIUM
+                return (
+                  <motion.div
+                    key={a.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="grid grid-cols-12 items-center gap-4 px-5 py-4 transition-colors hover:bg-slate-50"
+                  >
+                    <div className="col-span-5 flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: theme.bg }}>
+                        <AlertTriangle size={15} style={{ color: theme.dot }} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="truncate text-[13px] font-medium text-slate-900">
+                          {a.name.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                        </div>
+                        <div className="mt-0.5 truncate text-[11px] text-slate-500">{a.description}</div>
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-semibold"
+                        style={{ background: theme.bg, color: theme.text }}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: theme.dot }} />
+                        {theme.label}
+                      </span>
+                    </div>
+                    <div className="col-span-3 truncate text-[11px] text-slate-500">
+                      {a.detection_method || '—'}
+                    </div>
+                    <div className="col-span-2 flex justify-end">
+                      {a.detected ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">
+                          <CheckCircle size={11} />
+                          Detected
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-1 text-[10px] font-semibold text-red-700">
+                          <XCircle size={11} />
+                          Missed
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
+
+          {attacks.length > 0 && (
+            <div className="border-t border-slate-100 bg-slate-50 px-5 py-3 text-[11px] text-slate-500">
+              {detectedCount} of {attacks.length} detected · {detectionRate.toFixed(1)}% detection rate
             </div>
           )}
         </div>
@@ -194,3 +202,5 @@ export function Cybersecurity() {
     </div>
   )
 }
+
+export default Cybersecurity

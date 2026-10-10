@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Loader2, RefreshCw, Database, Image as ImageIcon, Layers, Target, Search, Upload as UploadIcon } from 'lucide-react'
+import {
+  Loader2, RefreshCw, Database, Image as ImageIcon, Layers, Target,
+  Search, Scan, ShieldCheck, AlertTriangle, CheckCircle2, TrendingUp
+} from 'lucide-react'
 import apiClient from '@/lib/api'
 
 const API = 'http://localhost:8000'
@@ -48,341 +49,245 @@ export function DatasetAnalysis() {
   const [searchParams] = useSearchParams()
   const uploadedFile = searchParams.get('file')
 
-  // Deep Analysis state
   const [selectedDataset, setSelectedDataset] = useState<'good' | 'bad' | 'worst'>('good')
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisResults, setAnalysisResults] = useState<AnalysisScore | null>(null)
 
   useEffect(() => {
     loadDatasets()
-    runAnalysis('good')  // default load
+    runAnalysis('good')
   }, [])
 
   const loadDatasets = async () => {
     setLoading(true)
     try {
-      const res = await apiClient.getAvailableDatasets()
-      // API different formats return kar sakta hai
-      const raw = res.data
-      const list: Dataset[] = Array.isArray(raw) ? raw
-        : Array.isArray(raw.datasets) ? raw.datasets
-        : raw.data && Array.isArray(raw.data) ? raw.data
-        : []
-      setDatasets(list)
-      if (list.length > 0) {
-        setSelected(list[0])
-        loadDetails(list[0])
+      const res = await apiClient.getDatasets()
+      const data = res.data
+      const list: Dataset[] = []
+      if (data.datasets && typeof data.datasets === 'object') {
+        Object.entries(data.datasets).forEach(([key, val]: [string, any]) => {
+          list.push({
+            name: key,
+            path: val.path || `datasets/${key}`,
+            format: val.format || 'yolo',
+            exists: true,
+          })
+        })
       }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+      setDatasets(list)
+      if (list.length > 0 && !selected) setSelected(list[0])
+    } catch (err) { console.error(err) } finally { setLoading(false) }
   }
 
   const loadDetails = async (ds: Dataset) => {
     setLoadingDetails(true)
-    try {
-      const res = await apiClient.loadDataset(ds.path)
-      setDetails(res.data)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoadingDetails(false)
-    }
-  }
-
-  const handleSelect = (ds: Dataset) => {
     setSelected(ds)
-    loadDetails(ds)
-  }
-
-  // REAL API call — fetch live analysis
-  const runAnalysis = async (dsName: 'good' | 'bad' | 'worst') => {
-    setAnalyzing(true)
-    setSelectedDataset(dsName)
     try {
-      const res = await fetch(`${API}/api/datasets/${dsName}`)
-      const data = await res.json()
-      setAnalysisResults(data)
-    } catch (err) {
-      console.error('Analysis failed:', err)
-    } finally {
-      setAnalyzing(false)
-    }
+      const res = await fetch(`${API}/api/datasets/${ds.name}/details`).then(r => r.json()).catch(() => null)
+      setDetails(res)
+    } finally { setLoadingDetails(false) }
   }
 
-  const getGrade = (score: number): string => {
-    if (score >= 90) return 'A'
-    if (score >= 75) return 'B'
-    if (score >= 60) return 'C'
-    if (score >= 45) return 'D'
-    return 'F'
+  const runAnalysis = async (key: 'good' | 'bad' | 'worst') => {
+    setSelectedDataset(key)
+    setAnalyzing(true)
+    setAnalysisResults(null)
+    try {
+      const res = await fetch(`${API}/api/datasets`).then(r => r.json()).catch(() => null)
+      const dataset = res?.datasets?.[key]
+      if (dataset) {
+        setAnalysisResults({
+          dataset_name: dataset.name || key.toUpperCase(),
+          total_images: dataset.total_images || 0,
+          scores: {
+            blur_score: dataset.blur_score || 0,
+            duplicate_score: dataset.duplicate_score || 0,
+            noise_score: dataset.noise_score || 0,
+            overall_score: dataset.overall_score || 0,
+          },
+          details: dataset,
+        })
+      }
+    } finally { setAnalyzing(false) }
   }
 
-  const getGradeColor = (grade: string): string => {
-    if (grade === 'A') return 'text-green-400'
-    if (grade === 'B') return 'text-cyan-400'
-    if (grade === 'C') return 'text-yellow-400'
-    return 'text-red-400'
+  const getTheme = (score: number) => {
+    if (score >= 75) return { bg: '#D1FAE5', text: '#065F46', dot: '#10B981', label: 'Good' }
+    if (score >= 50) return { bg: '#FEF3C7', text: '#92400E', dot: '#F59E0B', label: 'Review' }
+    return { bg: '#FEE2E2', text: '#991B1B', dot: '#EF4444', label: 'Critical' }
   }
+
+  const filtered = datasets.filter(d => d.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div className="space-y-6 p-6" style={{ background: '#0A0F14', minHeight: 'calc(100vh - 72px)' }}>
-
-      {/* ============= HEADER ============= */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <h1 className="text-4xl font-bold text-[#E5F5F0] mb-1">Dataset Analysis</h1>
-            <p className="text-[#8AA4A0] text-sm">
-              COCO + YOLO format loaders · Real-time analysis · Cryptographic fingerprints
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Dataset Analysis
+            </div>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Deep Dataset Analysis
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Blur, noise, duplicate and quality analysis across dataset variants.
             </p>
           </div>
           <button
             onClick={loadDatasets}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs hover:bg-cyan-500/20 transition"
+            className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
           >
-            <RefreshCw size={14} /> Refresh
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Refresh
           </button>
         </div>
 
-        {/* ============= DATASET SELECTOR ============= */}
-        <Card className="rounded-3xl p-5 mb-6 bg-[#0F1419] border border-cyan-500/20">
-          <div className="mb-3">
-            <label className="text-[#5EEAD4] text-[10px] uppercase tracking-wider font-bold">SELECT DATASET</label>
+        {/* Dataset variant selector */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <div className="text-[14px] font-semibold text-slate-900">Select Dataset Variant</div>
+              <div className="mt-0.5 text-[11px] text-slate-500">Run deep analysis on a specific dataset</div>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            {(['good', 'bad', 'worst'] as const).map((ds) => (
+          <div className="flex gap-2">
+            {(['good', 'bad', 'worst'] as const).map(key => (
               <button
-                key={ds}
-                onClick={() => runAnalysis(ds)}
-                disabled={analyzing}
-                className={`px-4 py-3 rounded-lg text-xs font-medium border transition-all disabled:opacity-50 ${
-                  selectedDataset === ds
-                    ? 'bg-[rgba(94,234,212,0.15)] text-[#FFFFFF] border-[rgba(94,234,212,0.5)]'
-                    : 'bg-[rgba(94,234,212,0.05)] text-[#5EEAD4] border-[rgba(94,234,212,0.2)] hover:border-[rgba(94,234,212,0.4)]'
+                key={key}
+                onClick={() => runAnalysis(key)}
+                className={`flex-1 rounded-xl border px-4 py-3 text-left transition-all ${
+                  selectedDataset === key
+                    ? 'border-emerald-600 bg-emerald-50'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                 }`}
               >
-                {ds.charAt(0).toUpperCase() + ds.slice(1)}
+                <div className={`text-[13px] font-semibold uppercase ${selectedDataset === key ? 'text-emerald-900' : 'text-slate-800'}`}>
+                  {key}
+                </div>
+                <div className="mt-0.5 text-[10px] text-slate-500">Dataset variant</div>
               </button>
             ))}
-            <button
-              onClick={() => runAnalysis(selectedDataset)}
-              disabled={analyzing}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-xs font-medium bg-gradient-to-r from-[#5EEAD4] to-[#38BDF8] text-[#0A0F14] hover:opacity-90 transition-all disabled:opacity-50 font-bold"
-            >
-              {analyzing ? (
-                <>
-                  <Loader2 className="animate-spin" size={12} /> Analyzing...
-                </>
-              ) : (
-                <>▶ Run Analysis</>
-              )}
-            </button>
           </div>
-        </Card>
+        </div>
 
-        {/* ============= ANALYSIS RESULTS ============= */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          {/* Composite Scores */}
-          <Card className="rounded-3xl p-5 bg-[#0F1419] border border-cyan-500/20">
-            <div className="mb-4">
-              <h3 className="text-[#E5F5F0] font-bold text-sm">Composite Quality Scores</h3>
-              <p className="text-[#8AA4A0] text-xs mt-0.5">
-                {analysisResults ? `${analysisResults.total_images} images analyzed` : 'Select dataset'}
-              </p>
+        {/* Analysis results */}
+        <div className="mt-6">
+          {analyzing ? (
+            <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Analyzing {selectedDataset} dataset...
             </div>
-            {analysisResults ? (
-              <div className="space-y-4">
-                {[
-                  { label: 'Overall Score', value: analysisResults.scores.overall_score, color: '#5EEAD4' },
-                  { label: 'Blur Score', value: analysisResults.scores.blur_score, color: '#38BDF8' },
-                  { label: 'Duplicate Score', value: analysisResults.scores.duplicate_score, color: '#F59E0B' },
-                  { label: 'Noise Score', value: analysisResults.scores.noise_score, color: '#8B5CF6' },
-                ].map((s, i) => (
-                  <div key={i}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[#8AA4A0] text-xs">{s.label}</span>
-                      <span className="text-xs font-bold" style={{ color: s.color }}>{s.value}%</span>
+          ) : analysisResults ? (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              {/* Overall */}
+              {(() => {
+                const score = analysisResults.scores.overall_score
+                const theme = getTheme(score)
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: theme.bg }}>
+                        <TrendingUp size={18} style={{ color: theme.text }} />
+                      </div>
+                      <div>
+                        <div className="text-[12px] font-medium text-slate-500">Overall Quality</div>
+                        <div className="text-[11px] font-mono text-slate-400">
+                          {analysisResults.dataset_name.toUpperCase()}
+                        </div>
+                      </div>
                     </div>
-                    <div className="h-2 bg-[#0A0F14] rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${s.value}%`, background: `linear-gradient(90deg, ${s.color}, ${s.color}aa)` }}
+                    <div className="mt-5 text-[44px] font-bold leading-none tracking-tight" style={{ color: theme.dot }}>
+                      {score.toFixed(1)}
+                      <span className="text-[20px]">%</span>
+                    </div>
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(score, 100)}%` }}
+                        transition={{ duration: 0.9 }}
+                        className="h-full rounded-full"
+                        style={{ background: theme.dot }}
                       />
                     </div>
-                  </div>
-                ))}
-                <div className="pt-3 border-t border-cyan-500/10 flex justify-between items-center">
-                  <span className="text-[#8AA4A0] text-xs">Grade</span>
-                  <span className={`text-lg font-bold ${getGradeColor(getGrade(analysisResults.scores.overall_score))}`}>
-                    {getGrade(analysisResults.scores.overall_score)}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-12 text-[#8AA4A0] text-xs">Run analysis to see scores</div>
-            )}
-          </Card>
-
-          {/* Detector Details */}
-          <Card className="rounded-3xl p-5 bg-[#0F1419] border border-cyan-500/20">
-            <div className="mb-4">
-              <h3 className="text-[#E5F5F0] font-bold text-sm">Detector Analysis Results</h3>
-              <p className="text-[#8AA4A0] text-xs mt-0.5">Real CV detector outputs</p>
-            </div>
-            {analysisResults ? (
-              <div className="space-y-3">
-                {[
-                  { name: 'Blur Detection', value: analysisResults.scores.blur_score, color: '#38BDF8' },
-                  { name: 'Duplicate Detection', value: analysisResults.scores.duplicate_score, color: '#F59E0B' },
-                  { name: 'Noise Detection', value: analysisResults.scores.noise_score, color: '#8B5CF6' },
-                  { name: 'Overall Quality', value: analysisResults.scores.overall_score, color: '#5EEAD4' },
-                ].map((det, i) => (
-                  <div key={i}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[#8AA4A0] text-xs">{det.name}</span>
-                      <span className="text-xs font-bold" style={{ color: det.color }}>{det.value}%</span>
-                    </div>
-                    <div className="h-1.5 bg-[#0A0F14] rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${det.value}%`, background: det.color }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-[#8AA4A0] text-xs">Run analysis to see detector results</div>
-            )}
-          </Card>
-        </div>
-
-        {/* ============= DATASETS EXPLORER — real from API ============= */}
-        <div className="flex items-start justify-between mb-6 flex-wrap gap-4 mt-8">
-          <div>
-            <h2 className="text-2xl font-bold text-[#E5F5F0] mb-1">Datasets Explorer</h2>
-            <p className="text-[#8AA4A0] text-sm">Cryptographically fingerprinted & audited CV datasets</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5EEAD4]" />
-              <input
-                type="text"
-                placeholder="Filter datasets..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 pr-4 py-2 rounded-lg bg-[rgba(94,234,212,0.05)] border border-[rgba(94,234,212,0.2)] text-[#E5F5F0] text-xs focus:border-cyan-500/60 outline-none w-64"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {loading ? (
-            <div className="lg:col-span-3 flex items-center justify-center py-12">
-              <Loader2 className="animate-spin text-cyan-400" size={28} />
-              <span className="ml-3 text-[#8AA4A0]">Loading datasets...</span>
-            </div>
-          ) : datasets.length === 0 ? (
-            <div className="lg:col-span-3 text-center py-12 text-[#8AA4A0]">
-              <Database size={32} className="mx-auto mb-3 opacity-40" />
-              <p className="text-sm">No datasets found</p>
-            </div>
-          ) : (
-            datasets
-              .filter((d) => !search || d.name.toLowerCase().includes(search.toLowerCase()))
-              .map((ds, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08 }}
-                >
-                  <Card className="rounded-3xl p-5 bg-[#0F1419] border border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer"
-                    onClick={() => handleSelect(ds)}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/40 text-[9px] py-0.5 px-2">
-                        {ds.format.toUpperCase()}
-                      </Badge>
-                      <span className="text-[#5EEAD4] text-[10px]">
-                        {ds.exists ? '✅ Available' : '⚠️ Missing'}
+                    <div className="mt-4 flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500">{analysisResults.total_images} images</span>
+                      <span
+                        className="rounded-md px-2 py-0.5 text-[10px] font-semibold"
+                        style={{ background: theme.bg, color: theme.text }}
+                      >
+                        {theme.label}
                       </span>
                     </div>
-                    <h3 className="text-[#E5F5F0] font-bold text-sm mb-1">{ds.name}</h3>
-                    <p className="text-[#8AA4A0] text-[10px] font-mono mb-4 truncate">{ds.path}</p>
-                    <div className="flex items-center justify-between text-[10px] pt-3 border-t border-cyan-500/10">
-                      <span className="text-[#5EEAD4]">Click to view details</span>
-                      <span className="text-[#5EEAD4]">→</span>
+                  </motion.div>
+                )
+              })()}
+
+              {/* Sub-scores */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
+                <div className="mb-4">
+                  <div className="text-[14px] font-semibold text-slate-900">Quality Breakdown</div>
+                  <div className="mt-0.5 text-[11px] text-slate-500">Blur, duplicate and noise scores</div>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { label: 'Blur Score', value: analysisResults.scores.blur_score, color: '#3B82F6', icon: Scan, desc: 'Sharpness of images' },
+                    { label: 'Duplicate Score', value: analysisResults.scores.duplicate_score, color: '#8B5CF6', icon: Layers, desc: 'Unique content ratio' },
+                    { label: 'Noise Score', value: analysisResults.scores.noise_score, color: '#F59E0B', icon: Target, desc: 'Signal-to-noise quality' },
+                  ].map((metric) => (
+                    <div key={metric.label}>
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <metric.icon size={13} style={{ color: metric.color }} />
+                          <span className="text-[12px] font-medium text-slate-700">{metric.label}</span>
+                          <span className="text-[10px] text-slate-400">· {metric.desc}</span>
+                        </div>
+                        <span className="font-mono text-[13px] font-bold" style={{ color: metric.color }}>
+                          {metric.value.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(metric.value, 100)}%` }}
+                          transition={{ duration: 0.8 }}
+                          className="h-full rounded-full"
+                          style={{ background: metric.color }}
+                        />
+                      </div>
                     </div>
-                  </Card>
-                </motion.div>
-              ))
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-slate-200 bg-white py-20 text-center">
+              <Database size={32} className="mx-auto text-slate-400" />
+              <div className="mt-3 text-[14px] font-medium text-slate-700">No analysis data</div>
+              <div className="mt-1 text-[11px] text-slate-500">Select a variant above to run analysis</div>
+            </div>
           )}
         </div>
-      </motion.div>
 
-      {/* ============= BOTTOM: Dataset Details ============= */}
-      {details && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            {details.num_images !== undefined && (
-              <Card className="rounded-3xl p-4 bg-[#0F1419] border border-cyan-500/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-[rgba(94,234,212,0.4)] flex items-center justify-center">
-                    <ImageIcon size={18} className="text-[#5EEAD4]" />
-                  </div>
-                  <div>
-                    <div className="text-[#E5F5F0] text-2xl font-bold">{details.num_images.toLocaleString()}</div>
-                    <div className="text-[#8AA4A0] text-xs">Images</div>
-                  </div>
-                </div>
-              </Card>
-            )}
-            {details.num_annotations !== undefined && (
-              <Card className="rounded-3xl p-4 bg-[#0F1419] border border-cyan-500/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
-                    <Target size={18} className="text-purple-400" />
-                  </div>
-                  <div>
-                    <div className="text-[#E5F5F0] text-2xl font-bold">{details.num_annotations.toLocaleString()}</div>
-                    <div className="text-[#8AA4A0] text-xs">Annotations</div>
-                  </div>
-                </div>
-              </Card>
-            )}
-            {details.num_categories !== undefined && (
-              <Card className="rounded-3xl p-4 bg-[#0F1419] border border-cyan-500/20">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-green-500/20 border border-green-500/40 flex items-center justify-center">
-                    <Layers size={18} className="text-green-400" />
-                  </div>
-                  <div>
-                    <div className="text-[#E5F5F0] text-2xl font-bold">{details.num_categories}</div>
-                    <div className="text-[#8AA4A0] text-xs">Categories</div>
-                  </div>
-                </div>
-              </Card>
-            )}
+        {/* Dataset details (if uploaded) */}
+        {uploadedFile && (
+          <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-5">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={14} className="text-blue-600" />
+              <span className="text-[12px] font-medium text-blue-800">
+                Uploaded file: {uploadedFile}
+              </span>
+            </div>
           </div>
-
-          {details.categories && details.categories.length > 0 && (
-            <Card className="rounded-3xl p-5 bg-[#0F1419] border border-cyan-500/20">
-              <div className="mb-4">
-                <h3 className="text-[#E5F5F0] font-bold text-sm">CATEGORIES ({details.categories.length})</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {details.categories.slice(0, 30).map((cat, i) => (
-                  <Badge key={i} className="text-[10px] py-1 px-2.5 bg-cyan-500/10 text-[#5EEAD4] border border-cyan-500/30">
-                    {cat}
-                  </Badge>
-                ))}
-              </div>
-            </Card>
-          )}
-        </motion.div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
+
+export default DatasetAnalysis

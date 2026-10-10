@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import { Shield, Search, Loader2, RefreshCw, AlertCircle, Zap, Target, CheckCircle, AlertTriangle } from 'lucide-react'
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
+import {
+  Shield, Search, Loader2, RefreshCw, Zap, Target, CheckCircle,
+  AlertTriangle, XCircle, BarChart3
+} from 'lucide-react'
+import {
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis,
+  CartesianGrid, Legend
+} from 'recharts'
 import apiClient from '@/lib/api'
 
-const statusColors: Record<string, string> = {
-  Pass: '#5EEAD4',
-  Warning: '#FBBF24',
-  Fail: '#F87171',
+const statusTheme: Record<string, { bg: string; text: string; dot: string; label: string }> = {
+  Pass: { bg: '#D1FAE5', text: '#065F46', dot: '#10B981', label: 'Pass' },
+  Warning: { bg: '#FEF3C7', text: '#92400E', dot: '#F59E0B', label: 'Warning' },
+  Fail: { bg: '#FEE2E2', text: '#991B1B', dot: '#EF4444', label: 'Fail' },
 }
 
 export function Robustness() {
@@ -22,21 +28,27 @@ export function Robustness() {
     setLoading(true)
     setError(null)
     try {
-      const [dRes, mRes] = await Promise.all([apiClient.getDatasets(), apiClient.getModels()])
+      const [dRes, mRes] = await Promise.all([
+        apiClient.getDatasets().catch(() => ({ data: { datasets: {} } })),
+        apiClient.getModels().catch(() => ({ data: { models: {} } })),
+      ])
       const datasets = dRes.data.datasets || {}
       const models = mRes.data.models || {}
       const list: any[] = []
       let id = 1
 
       Object.entries(datasets).forEach(([key, val]: [string, any]) => {
-        list.push({ id: id++, test: `${key.toUpperCase()} Blur Robustness`, category: 'Blur', score: val.blur_score || 0, status: (val.blur_score || 0) >= 90 ? 'Pass' : (val.blur_score || 0) >= 75 ? 'Warning' : 'Fail' })
-        list.push({ id: id++, test: `${key.toUpperCase()} Duplicate Resistance`, category: 'Duplicate', score: val.duplicate_score || 0, status: (val.duplicate_score || 0) >= 90 ? 'Pass' : (val.duplicate_score || 0) >= 75 ? 'Warning' : 'Fail' })
-        list.push({ id: id++, test: `${key.toUpperCase()} Noise Robustness`, category: 'Noise', score: val.noise_score || 0, status: (val.noise_score || 0) >= 90 ? 'Pass' : (val.noise_score || 0) >= 75 ? 'Warning' : 'Fail' })
+        const blur = val.blur_score || 0
+        const dup = val.duplicate_score || 0
+        const noise = val.noise_score || 0
+        list.push({ id: id++, test: `${key.toUpperCase()} Blur`, category: 'Blur', score: blur, status: blur >= 90 ? 'Pass' : blur >= 75 ? 'Warning' : 'Fail' })
+        list.push({ id: id++, test: `${key.toUpperCase()} Duplicate`, category: 'Duplicate', score: dup, status: dup >= 90 ? 'Pass' : dup >= 75 ? 'Warning' : 'Fail' })
+        list.push({ id: id++, test: `${key.toUpperCase()} Noise`, category: 'Noise', score: noise, status: noise >= 90 ? 'Pass' : noise >= 75 ? 'Warning' : 'Fail' })
       })
 
       Object.entries(models).forEach(([key, val]: [string, any]) => {
-        const mAP = (val.mAP50 || 0) * 5
-        list.push({ id: id++, test: `${key.toUpperCase()} Adversarial`, category: 'Adversarial', score: Math.min(mAP, 100), status: mAP >= 90 ? 'Pass' : mAP >= 75 ? 'Warning' : 'Fail' })
+        const mAP = Math.min((val.mAP50 || 0) * 5, 100)
+        list.push({ id: id++, test: `${key.toUpperCase()} Adversarial`, category: 'Adversarial', score: mAP, status: mAP >= 90 ? 'Pass' : mAP >= 75 ? 'Warning' : 'Fail' })
       })
 
       setResults(list)
@@ -46,247 +58,236 @@ export function Robustness() {
   }
 
   const filtered = results.filter((r) => r.test.toLowerCase().includes(search.toLowerCase()))
-  const stats = {
-    total: results.length,
-    pass: results.filter((r) => r.status === 'Pass').length,
-    warning: results.filter((r) => r.status === 'Warning').length,
-    fail: results.filter((r) => r.status === 'Fail').length,
-  }
-  const avgScore = results.length ? Math.round(results.reduce((s, r) => s + r.score, 0) / results.length) : 0
 
-  const categoryScores: Record<string, { total: number; count: number }> = {}
-  results.forEach((r) => {
-    if (!categoryScores[r.category]) categoryScores[r.category] = { total: 0, count: 0 }
-    categoryScores[r.category].total += r.score
-    categoryScores[r.category].count += 1
+  const passCount = results.filter(r => r.status === 'Pass').length
+  const warnCount = results.filter(r => r.status === 'Warning').length
+  const failCount = results.filter(r => r.status === 'Fail').length
+  const avgScore = results.length
+    ? results.reduce((s, r) => s + r.score, 0) / results.length
+    : 0
+
+  // Radar data — average score per category
+  const categories = ['Blur', 'Duplicate', 'Noise', 'Adversarial']
+  const radarData = categories.map(cat => {
+    const items = results.filter(r => r.category === cat)
+    const avg = items.length ? items.reduce((s, r) => s + r.score, 0) / items.length : 0
+    return { category: cat, score: Number(avg.toFixed(1)) }
   })
-  const radarData = Object.entries(categoryScores).map(([category, { total, count }]) => ({
-    category, score: Math.round(total / count),
+
+  // Bar data — score per test
+  const barData = results.slice(0, 10).map(r => ({
+    name: r.test.split(' ')[0] + ' ' + r.category,
+    score: Number(r.score.toFixed(1)),
   }))
 
-  const epsilonValues = [0, 0.02, 0.04, 0.06, 0.08, 0.1]
-  const adversarialDecayData = epsilonValues.map((e) => ({
-    epsilon: e,
-    good: Math.max(0, 100 - e * 250),
-    bad: Math.max(0, 68 - e * 500),
-    worst: Math.max(0, 42 - e * 400),
-  }))
+  const getTheme = (status: string) => statusTheme[status] || statusTheme.Warning
 
   return (
-    <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 pb-4 flex-wrap gap-3"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center"
-            style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-            <Shield size={14} style={{ color: '#5EEAD4' }} />
-          </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <div className="text-[13px] font-bold tracking-[0.2em]" style={{ color: '#5EEAD4' }}>ROBUSTNESS_TESTING</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>
-              {loading ? 'LOADING...' : `${results.length}_TESTS_FROM_REAL_DATA`}
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Robustness
             </div>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={loadRobustness}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-            style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)', color: '#5EEAD4' }}>
-            <RefreshCw size={11} className={loading ? 'animate-spin' : ''} /> REFRESH
-          </button>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded"
-            style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-            <Shield size={11} style={{ color: '#5EEAD4' }} />
-            <span className="text-[10px] font-mono tracking-wider" style={{ color: '#5EEAD4' }}>AVG: {avgScore}%</span>
-          </div>
-        </div>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-3 rounded flex items-center gap-2"
-          style={{ background: 'rgba(248, 113, 113, 0.08)', border: '1px solid rgba(248, 113, 113, 0.3)' }}>
-          <AlertCircle size={14} style={{ color: '#F87171' }} />
-          <span className="text-[11px] font-mono" style={{ color: '#F87171' }}>{error}</span>
-        </div>
-      )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        {[
-          { label: 'TOTAL_TESTS', value: stats.total, color: '#3A7D8F', icon: Shield },
-          { label: 'PASSED', value: stats.pass, color: '#5EEAD4', icon: CheckCircle },
-          { label: 'WARNINGS', value: stats.warning, color: '#FBBF24', icon: AlertTriangle },
-          { label: 'FAILED', value: stats.fail, color: '#F87171', icon: Zap },
-        ].map((stat, i) => {
-          const Icon = stat.icon
-          return (
-            <div key={i} className="p-4 rounded"
-              style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>{stat.label}</span>
-                <Icon size={14} style={{ color: stat.color, opacity: 0.7 }} />
-              </div>
-              <div className="text-[24px] font-bold font-mono leading-none" style={{ color: stat.color }}>{stat.value}</div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Radar + Overall */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
-        <div className="lg:col-span-2 p-5 rounded"
-          style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-          <div className="mb-4">
-            <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>ROBUSTNESS_RADAR</h3>
-            <p className="text-[10px] font-mono mt-0.5" style={{ color: '#5EEAD4', opacity: 0.4 }}>Performance across categories</p>
-          </div>
-          <div className="w-full h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={radarData}>
-                <PolarGrid stroke="rgba(94, 234, 212, 0.15)" />
-                <PolarAngleAxis dataKey="category" tick={{ fill: '#5EEAD4', fontSize: 10, fontFamily: 'monospace' }} />
-                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#5EEAD4', fontSize: 9 }} />
-                <Radar name="Score" dataKey="score" stroke="#5EEAD4" fill="#5EEAD4" fillOpacity={0.2} strokeWidth={2} />
-                <Tooltip contentStyle={{ backgroundColor: '#0A0F14', border: '1px solid rgba(94, 234, 212, 0.3)', borderRadius: '4px', fontSize: '11px', color: '#FFFFFF' }} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="p-5 rounded"
-          style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-          <div className="mb-4">
-            <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>OVERALL</h3>
-            <p className="text-[10px] font-mono mt-0.5" style={{ color: '#5EEAD4', opacity: 0.4 }}>Aggregate robustness</p>
-          </div>
-          <div className="flex flex-col items-center justify-center" style={{ height: '320px' }}>
-            <div className="relative w-40 h-40">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(94, 234, 212, 0.1)" strokeWidth="8" />
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#5EEAD4" strokeWidth="8" strokeLinecap="round"
-                  strokeDasharray={251.2} strokeDashoffset={251.2 - (avgScore / 100) * 251.2}
-                  style={{ filter: 'drop-shadow(0 0 6px #5EEAD4)' }} />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <Target size={24} style={{ color: '#5EEAD4' }} className="mb-1" />
-                <span className="font-bold text-[28px] font-mono" style={{ color: '#5EEAD4' }}>{avgScore}%</span>
-                <span className="text-[9px] font-mono uppercase mt-0.5" style={{ color: '#5EEAD4', opacity: 0.5 }}>ROBUSTNESS</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search */}
-      <div className="relative mb-5">
-        <Search size={13} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#5EEAD4', opacity: 0.5 }} />
-        <input placeholder="Search tests..." value={search} onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-2.5 rounded text-[11px] font-mono outline-none"
-          style={{ background: 'rgba(94, 234, 212, 0.05)', color: '#FFFFFF', border: '1px solid rgba(94, 234, 212, 0.2)' }} />
-      </div>
-
-      {/* Table */}
-      <div className="p-5 rounded mb-5"
-        style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="animate-spin" size={28} style={{ color: '#5EEAD4' }} />
-            <span className="ml-3 text-[11px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>LOADING_TESTS...</span>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-                  {['TEST', 'CATEGORY', 'SCORE', 'STATUS'].map((h, i) => (
-                    <th key={i}
-                      className={`text-[10px] font-mono tracking-[0.15em] uppercase pb-3 ${i < 3 ? 'text-left' : 'text-right'}`}
-                      style={{ color: '#5EEAD4', opacity: 0.5 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((r) => {
-                  const color = statusColors[r.status]
-                  return (
-                    <tr key={r.id} style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.06)' }}>
-                      <td className="py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded flex items-center justify-center"
-                            style={{ background: `${color}15`, border: `1px solid ${color}40` }}>
-                            <Shield size={14} style={{ color }} />
-                          </div>
-                          <div className="text-[11px] font-mono" style={{ color: '#FFFFFF' }}>{r.test}</div>
-                        </div>
-                      </td>
-                      <td className="py-3">
-                        <span className="text-[9px] font-mono tracking-wider py-0.5 px-2 rounded"
-                          style={{ background: 'rgba(94, 234, 212, 0.08)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.2)' }}>
-                          {r.category.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="py-3">
-                        <div className="flex items-center gap-3 max-w-md">
-                          <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(94, 234, 212, 0.1)' }}>
-                            <div className="h-full rounded-full" style={{ width: `${r.score}%`, background: color, boxShadow: `0 0 6px ${color}` }} />
-                          </div>
-                          <span className="text-[11px] font-bold w-10 text-right font-mono" style={{ color }}>{r.score.toFixed(0)}%</span>
-                        </div>
-                      </td>
-                      <td className="py-3 text-right">
-                        <span className="text-[9px] font-mono tracking-wider py-0.5 px-2 rounded"
-                          style={{ background: `${color}15`, color, border: `1px solid ${color}40` }}>
-                          {r.status.toUpperCase()}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* Adversarial Decay Curves */}
-      <div className="pt-5" style={{ borderTop: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="mb-5">
-          <h2 className="text-[14px] font-bold font-mono tracking-[0.15em] mb-1" style={{ color: '#5EEAD4' }}>
-            ADVERSARIAL_ROBUSTNESS_TESTING
-          </h2>
-          <p className="text-[11px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>
-            Stress-testing computer vision models against gradient-directed perturbations
-          </p>
-        </div>
-
-        <div className="p-5 rounded"
-          style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-          <div className="mb-4">
-            <h3 className="font-bold text-[11px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4' }}>
-              ADVERSARIAL_DECAY_CURVES
-            </h3>
-            <p className="text-[10px] font-mono mt-0.5" style={{ color: '#5EEAD4', opacity: 0.4 }}>
-              Accuracy vs ε — Good vs Bad vs Worst model resilience
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Adversarial Robustness
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Blur, noise, duplicate and adversarial robustness assessment across models and datasets.
             </p>
           </div>
-          <div className="w-full h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={adversarialDecayData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(94, 234, 212, 0.08)" />
-                <XAxis dataKey="epsilon" tick={{ fontSize: 10, fill: '#5EEAD4', opacity: 0.6 }} tickLine={false} axisLine={{ stroke: 'rgba(94, 234, 212, 0.2)' }} />
-                <YAxis tick={{ fontSize: 10, fill: '#5EEAD4', opacity: 0.6 }} tickLine={false} axisLine={false} domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={(v) => `${v}%`} />
-                <Tooltip contentStyle={{ backgroundColor: '#0A0F14', border: '1px solid rgba(94, 234, 212, 0.3)', borderRadius: '4px', fontSize: '11px', color: '#FFFFFF' }} />
-                <Legend wrapperStyle={{ fontSize: '10px', paddingTop: '10px', color: '#5EEAD4', fontFamily: 'monospace' }} iconType="circle" />
-                <Line type="monotone" dataKey="good" stroke="#5EEAD4" strokeWidth={2} dot={{ r: 3, fill: '#5EEAD4' }} name="GOOD (Certified)" />
-                <Line type="monotone" dataKey="bad" stroke="#FBBF24" strokeWidth={2} dot={{ r: 3, fill: '#FBBF24' }} name="BAD (Drifted)" />
-                <Line type="monotone" dataKey="worst" stroke="#F87171" strokeWidth={2} dot={{ r: 3, fill: '#F87171' }} name="WORST (Backdoor)" />
-              </LineChart>
-            </ResponsiveContainer>
+          <button
+            onClick={loadRobustness}
+            className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Rerun Tests
+          </button>
+        </div>
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Total Tests', value: results.length, color: '#0F172A', icon: Shield },
+            { label: 'Passed', value: passCount, color: '#10B981', icon: CheckCircle },
+            { label: 'Warnings', value: warnCount, color: '#F59E0B', icon: AlertTriangle },
+            { label: 'Avg Score', value: `${avgScore.toFixed(1)}%`, color: '#3B82F6', icon: Target },
+          ].map((s) => {
+            const Icon = s.icon
+            return (
+              <div key={s.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+                <div className="flex items-center justify-between">
+                  <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${s.color}15` }}>
+                    <Icon size={14} style={{ color: s.color }} />
+                  </div>
+                </div>
+                <div className="mt-3 text-[28px] font-bold leading-none tracking-tight text-slate-900">{s.value}</div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Charts */}
+        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {/* Radar */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
+                <Shield size={14} className="text-blue-600" />
+              </div>
+              <div>
+                <div className="text-[14px] font-semibold text-slate-900">Robustness Profile</div>
+                <div className="mt-0.5 text-[11px] text-slate-500">Average score per category</div>
+              </div>
+            </div>
+            <div className="h-[280px]">
+              {radarData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart data={radarData}>
+                    <PolarGrid stroke="#E2E8F0" />
+                    <PolarAngleAxis dataKey="category" stroke="#94A3B8" style={{ fontSize: 11 }} />
+                    <PolarRadiusAxis stroke="#94A3B8" style={{ fontSize: 10 }} domain={[0, 100]} />
+                    <Radar name="Score" dataKey="score" stroke="#10B981" fill="#10B981" fillOpacity={0.35} />
+                    <Tooltip contentStyle={{ background: '#FFF', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 11 }} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full items-center justify-center text-[12px] text-slate-400">
+                  No data available
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Bar */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
+                <BarChart3 size={14} className="text-emerald-600" />
+              </div>
+              <div>
+                <div className="text-[14px] font-semibold text-slate-900">Test Scores</div>
+                <div className="mt-0.5 text-[11px] text-slate-500">Score per robustness test</div>
+              </div>
+            </div>
+            <div className="h-[280px]">
+              {barData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={barData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+                    <XAxis dataKey="name" stroke="#94A3B8" style={{ fontSize: 10 }} angle={-20} textAnchor="end" height={60} />
+                    <YAxis stroke="#94A3B8" style={{ fontSize: 11 }} />
+                    <Tooltip contentStyle={{ background: '#FFF', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 11 }} />
+                    <Bar dataKey="score" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full items-center justify-center text-[12px] text-slate-400">
+                  No data available
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="relative">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search tests..."
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-[13px] text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+        </div>
+
+        {/* Test results table */}
+        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-100 px-5 py-4">
+            <div className="text-[14px] font-semibold text-slate-900">Robustness Tests</div>
+            <div className="mt-0.5 text-[11px] text-slate-500">
+              {filtered.length} of {results.length} tests
+            </div>
+          </div>
+
+          {loading && results.length === 0 ? (
+            <div className="flex items-center justify-center gap-2 py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Running robustness tests...
+            </div>
+          ) : error ? (
+            <div className="py-20 text-center">
+              <AlertTriangle size={24} className="mx-auto text-red-500" />
+              <div className="mt-2 text-[13px] font-medium text-slate-700">Failed to load tests</div>
+              <div className="mt-1 text-[11px] text-slate-400">{error}</div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-20 text-center">
+              <Shield size={32} className="mx-auto text-slate-400" />
+              <div className="mt-3 text-[14px] font-medium text-slate-700">No tests found</div>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              <div className="grid grid-cols-12 gap-4 bg-slate-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                <div className="col-span-6">Test</div>
+                <div className="col-span-2">Category</div>
+                <div className="col-span-2">Score</div>
+                <div className="col-span-2 text-right">Status</div>
+              </div>
+
+              {filtered.map((r, i) => {
+                const theme = getTheme(r.status)
+                return (
+                  <div
+                    key={r.id}
+                    className="grid grid-cols-12 items-center gap-4 px-5 py-3.5 transition-colors hover:bg-slate-50"
+                  >
+                    <div className="col-span-6 flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: theme.bg }}>
+                        <Shield size={13} style={{ color: theme.dot }} />
+                      </div>
+                      <span className="truncate text-[12px] font-medium text-slate-800">{r.test}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                        {r.category}
+                      </span>
+                    </div>
+                    <div className="col-span-2 flex items-center gap-2">
+                      <span className="font-mono text-[12px] font-semibold text-slate-900">
+                        {r.score.toFixed(1)}
+                      </span>
+                      <div className="h-1 flex-1 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${Math.min(r.score, 100)}%`, background: theme.dot }}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-span-2 flex justify-end">
+                      <span
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold"
+                        style={{ background: theme.bg, color: theme.text }}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: theme.dot }} />
+                        {theme.label}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
 }
+
+export default Robustness

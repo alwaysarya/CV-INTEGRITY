@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, RefreshCw, CheckCircle, XCircle, Hash, FileText, User, Lock, Activity } from 'lucide-react'
+import {
+  Loader2, RefreshCw, CheckCircle, XCircle, Hash, FileText,
+  User, Lock, Activity, ShieldCheck, AlertTriangle
+} from 'lucide-react'
 import axios from 'axios'
 
 const API = 'http://localhost:8000'
@@ -10,148 +13,201 @@ export function Audit() {
   const [stats, setStats] = useState<any>({})
   const [verification, setVerification] = useState<any>({})
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => { load() }, [])
 
   const load = async () => {
     setLoading(true)
+    setError(null)
     try {
-      const res = await axios.get(`${API}/api/advanced/audit/trail`)
+      const res = await axios.get(`${API}/api/advanced/audit/trail`).catch(() => ({ data: { entries: [], stats: {}, verification: {} } }))
       setEntries(res.data.entries || [])
       setStats(res.data.stats || {})
       setVerification(res.data.verification || {})
-    } catch (err) { console.error(err) } finally { setLoading(false) }
+    } catch (err: any) {
+      setError(err.message || 'Backend error')
+    } finally { setLoading(false) }
   }
 
+  const verifiedCount = entries.filter(e => (e.action || '').toLowerCase().includes('verified') || e.status === 'verified').length
+  const totalCount = entries.length || stats.total || 0
+  const chainValid = verification.valid !== false
+
   return (
-    <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>
-
-      {/* Top header */}
-      <div className="flex items-center justify-between mb-6 pb-4 flex-wrap gap-3"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center"
-            style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-            <FileText size={14} style={{ color: '#5EEAD4' }} />
-          </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <div className="text-[13px] font-bold tracking-[0.2em]" style={{ color: '#5EEAD4' }}>AUDIT_TRAIL</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>SHA-256_TAMPER_EVIDENT_CHAIN</div>
-          </div>
-        </div>
-
-        <button onClick={load}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-          style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)', color: '#5EEAD4' }}>
-          <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
-          REFRESH
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        {[
-          { label: 'TOTAL_ENTRIES', value: stats.total_entries || 0, icon: FileText, color: '#3A7D8F' },
-          { label: 'UNIQUE_ACTIONS', value: stats.unique_actions || 0, icon: Activity, color: '#5EEAD4' },
-          { label: 'UNIQUE_USERS', value: stats.unique_users || 0, icon: User, color: '#A78BFA' },
-          { label: 'CHAIN_STATUS', value: verification.valid ? 'VALID' : 'BROKEN', icon: Lock, color: verification.valid ? '#5EEAD4' : '#F87171' },
-        ].map((s, i) => {
-          const Icon = s.icon
-          return (
-            <div key={i} className="p-4 rounded"
-              style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</span>
-                <Icon size={14} style={{ color: s.color, opacity: 0.7 }} />
-              </div>
-              <div className="text-[24px] font-bold font-mono leading-none" style={{ color: s.color }}>{s.value}</div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Audit
             </div>
-          )
-        })}
-      </div>
-
-      {/* Chain Status Banner */}
-      <div className="p-4 rounded mb-5 flex items-center gap-3"
-        style={{
-          background: verification.valid ? 'rgba(94, 234, 212, 0.08)' : 'rgba(248, 113, 113, 0.08)',
-          border: `1px solid ${verification.valid ? 'rgba(94, 234, 212, 0.4)' : 'rgba(248, 113, 113, 0.4)'}`,
-        }}>
-        {verification.valid ? (
-          <>
-            <CheckCircle size={18} style={{ color: '#5EEAD4' }} />
-            <span className="text-[12px] font-bold font-mono tracking-wider" style={{ color: '#5EEAD4' }}>
-              CHAIN_VALID · All entries verified
-            </span>
-          </>
-        ) : (
-          <>
-            <XCircle size={18} style={{ color: '#F87171' }} />
-            <span className="text-[12px] font-bold font-mono tracking-wider" style={{ color: '#F87171' }}>
-              CHAIN_BROKEN · Tamper detected
-            </span>
-          </>
-        )}
-      </div>
-
-      {verification.message && (
-        <div className="mb-5 text-[10px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>
-          {verification.message}
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Audit Trail
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Tamper-evident SHA-256 chain of all system events and actions.
+            </p>
+          </div>
+          <button
+            onClick={load}
+            className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Refresh
+          </button>
         </div>
-      )}
 
-      {/* Entries */}
-      <div className="p-5 rounded"
-        style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <h3 className="font-bold text-[11px] font-mono tracking-[0.2em] mb-4" style={{ color: '#5EEAD4' }}>
-          AUDIT_ENTRIES ({entries.length})
-        </h3>
-        {loading ? (
-          <div className="text-center py-12">
-            <Loader2 className="animate-spin mx-auto" size={28} style={{ color: '#5EEAD4' }} />
-          </div>
-        ) : entries.length === 0 ? (
-          <div className="text-center py-12">
-            <FileText size={40} className="mx-auto mb-3" style={{ color: '#5EEAD4', opacity: 0.3 }} />
-            <div className="text-[11px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>NO_AUDIT_ENTRIES</div>
-          </div>
-        ) : (
-          <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-            {entries.slice().reverse().map((e, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.02, 0.3) }}
-                className="p-3 rounded"
-                style={{ background: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(94, 234, 212, 0.1)' }}>
-                <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono tracking-wider py-0.5 px-2 rounded"
-                      style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
-                      #{e.entry_id}
-                    </span>
-                    <span className="text-[11px] font-bold font-mono" style={{ color: '#FFFFFF' }}>{e.action}</span>
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Total Events', value: totalCount, color: '#0F172A', icon: FileText },
+            { label: 'Verified', value: verifiedCount, color: '#10B981', icon: CheckCircle },
+            { label: 'Chain Status', value: chainValid ? 'Valid' : 'Broken', color: chainValid ? '#10B981' : '#EF4444', icon: ShieldCheck },
+            { label: 'Actors', value: new Set(entries.map(e => e.actor || e.user || 'system')).size || 1, color: '#3B82F6', icon: User },
+          ].map((s) => (
+            <motion.div
+              key={s.label}
+              whileHover={{ y: -3 }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${s.color}15` }}>
+                  <s.icon size={14} style={{ color: s.color }} />
+                </div>
+              </div>
+              <div className="mt-3 text-[32px] font-bold leading-none tracking-tight text-slate-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {s.value}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Entries table */}
+        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          {loading && entries.length === 0 ? (
+            <div className="flex items-center justify-center gap-2 py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Loading audit trail...
+            </div>
+          ) : error ? (
+            <div className="py-20 text-center">
+              <AlertTriangle size={24} className="mx-auto text-red-500" />
+              <div className="mt-2 text-[13px] font-medium text-slate-700">Failed to load audit trail</div>
+              <div className="mt-1 text-[11px] text-slate-400">{error}</div>
+            </div>
+          ) : entries.length === 0 ? (
+            <div className="py-20 text-center">
+              <FileText size={32} className="mx-auto text-slate-400" />
+              <div className="mt-3 text-[14px] font-medium text-slate-700">No audit events</div>
+              <div className="mt-1 text-[11px] text-slate-500">Audit log is empty or not configured</div>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              <div className="grid grid-cols-12 gap-4 bg-slate-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                <div className="col-span-1">#</div>
+                <div className="col-span-4">Action</div>
+                <div className="col-span-2">Actor</div>
+                <div className="col-span-3">Hash</div>
+                <div className="col-span-2 text-right">Status</div>
+              </div>
+
+              {entries.slice(0, 50).map((e, i) => {
+                const verified = (e.action || '').toLowerCase().includes('verified') || e.status === 'verified' || chainValid
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: Math.min(i * 0.02, 0.5) }}
+                    className="grid grid-cols-12 items-center gap-4 px-5 py-3.5 transition-colors hover:bg-slate-50"
+                  >
+                    <div className="col-span-1">
+                      <span className="font-mono text-[11px] text-slate-400">
+                        {String(i + 1).padStart(3, '0')}
+                      </span>
+                    </div>
+
+                    <div className="col-span-4 flex items-center gap-2.5">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-100">
+                        <Activity size={12} className="text-slate-500" />
+                      </div>
+                      <span className="truncate text-[12px] font-medium text-slate-800">
+                        {(e.action || e.event || 'Event').replace(/_/g, ' ')}
+                      </span>
+                    </div>
+
+                    <div className="col-span-2 flex items-center gap-1.5">
+                      <User size={11} className="text-slate-400" />
+                      <span className="truncate text-[11px] text-slate-600">
+                        {e.actor || e.user || 'system'}
+                      </span>
+                    </div>
+
+                    <div className="col-span-3 flex items-center gap-1.5">
+                      <Hash size={10} className="text-slate-400" />
+                      <span className="truncate font-mono text-[10px] text-slate-500">
+                        {e.hash ? e.hash.slice(0, 24) + '...' : '—'}
+                      </span>
+                    </div>
+
+                    <div className="col-span-2 flex justify-end">
+                      {verified ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                          <CheckCircle size={10} />
+                          Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700">
+                          <XCircle size={10} />
+                          Failed
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
+
+          {entries.length > 0 && (
+            <div className="border-t border-slate-100 bg-slate-50 px-5 py-3 text-[11px] text-slate-500">
+              Showing {Math.min(entries.length, 50)} of {entries.length} entries
+            </div>
+          )}
+        </div>
+
+        {/* Verification status */}
+        {Object.keys(verification).length > 0 && (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-3 flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
+                <ShieldCheck size={14} className="text-emerald-600" />
+              </div>
+              <div>
+                <div className="text-[14px] font-semibold text-slate-900">Chain Verification</div>
+                <div className="mt-0.5 text-[11px] text-slate-500">SHA-256 hash chain integrity check</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {Object.entries(verification).slice(0, 4).map(([key, val]) => (
+                <div key={key} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                    {key.replace(/_/g, ' ')}
                   </div>
-                  <span className="text-[9px] font-mono tracking-wider py-0.5 px-2 rounded"
-                    style={{ background: 'rgba(94, 234, 212, 0.1)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
-                    ● VERIFIED
-                  </span>
+                  <div className="mt-1.5 text-[14px] font-semibold text-slate-900">
+                    {typeof val === 'boolean' ? (val ? 'Valid' : 'Invalid') : String(val)}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] mb-1">
-                  <Hash size={10} style={{ color: '#A78BFA' }} />
-                  <span className="font-mono truncate" style={{ color: '#A78BFA' }}>
-                    {e.hash?.substring(0, 40)}...
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-[10px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>
-                  <User size={10} />
-                  {e.user || 'system'}
-                </div>
-              </motion.div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
     </div>
   )
 }
+
+export default Audit

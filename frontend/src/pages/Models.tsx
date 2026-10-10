@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Brain, Search, Upload, Loader2, AlertCircle, RefreshCw,
-  CheckCircle2, Clock, TrendingUp, Scan, Hash, Radio
+  Brain, Search, Loader2, RefreshCw, Hash, Cpu, TrendingUp,
+  Target, Gauge, Activity, ChevronRight, FileCode
 } from 'lucide-react'
 import apiClient from '@/lib/api'
 
@@ -33,7 +33,7 @@ export function Models() {
     setError(null)
     try {
       const [modelsRes, fingerprintsRes] = await Promise.all([
-        apiClient.getModels(),
+        apiClient.getModels().catch(() => ({ data: { models: {} } })),
         fetch(`${API}/api/premium/model/fingerprints`).then(r => r.json()).catch(() => ({ fingerprints: [] })),
       ])
       const data = modelsRes.data
@@ -58,181 +58,189 @@ export function Models() {
     } finally { setLoading(false) }
   }
 
-  const filtered = models.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()))
+  const filtered = models.filter(m =>
+    !search || m.name.toLowerCase().includes(search.toLowerCase())
+  )
 
-  const stats = {
-    total: models.length,
-    bestMAP: models.length ? Math.max(...models.map((m) => m.mAP50)).toFixed(2) : '0',
-    avgPrecision: models.length ? (models.reduce((s, m) => s + m.precision, 0) / models.length).toFixed(2) : '0',
-    avgRecall: models.length ? (models.reduce((s, m) => s + m.recall, 0) / models.length).toFixed(2) : '0',
-  }
+  const avgPrecision = models.length ? models.reduce((s, m) => s + (m.precision || 0), 0) / models.length : 0
+  const avgRecall = models.length ? models.reduce((s, m) => s + (m.recall || 0), 0) / models.length : 0
+  const avgMAP50 = models.length ? models.reduce((s, m) => s + (m.mAP50 || 0), 0) / models.length : 0
+  const avgMAP5095 = models.length ? models.reduce((s, m) => s + (m.mAP50_95 || 0), 0) / models.length : 0
 
-  const getStatus = (map: number) => {
-    if (map >= 18) return { label: 'DEPLOYED', color: '#5EEAD4' }
-    if (map >= 16) return { label: 'TESTING', color: '#FBBF24' }
-    return { label: 'TRAINING', color: '#F87171' }
-  }
+  const getStatus = (v: number) => v >= 50 ? 'GOOD' : v >= 30 ? 'REVIEW' : 'CRITICAL'
+  const statusTheme = (v: number) =>
+    v >= 50 ? { bg: '#D1FAE5', text: '#065F46', dot: '#10B981', label: 'Healthy' }
+    : v >= 30 ? { bg: '#FEF3C7', text: '#92400E', dot: '#F59E0B', label: 'Review' }
+    : { bg: '#FEE2E2', text: '#991B1B', dot: '#EF4444', label: 'Critical' }
 
   return (
-    <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>
-
-      {/* Top header */}
-      <div className="flex items-center justify-between mb-6 pb-4"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center"
-            style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-            <Brain size={14} style={{ color: '#5EEAD4' }} />
-          </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <div className="text-[13px] font-bold tracking-[0.2em]" style={{ color: '#5EEAD4' }}>MODELS</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>MODEL_REGISTRY · INTEGRITY_VIEW</div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Models
+            </div>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Model Registry
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Registered computer vision models with performance metrics and integrity fingerprints.
+            </p>
           </div>
+          <button
+            onClick={loadModels}
+            className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Refresh
+          </button>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Total Models', value: models.length, color: '#0F172A', icon: Brain },
+            { label: 'Avg Precision', value: `${avgPrecision.toFixed(1)}%`, color: '#3B82F6', icon: Target },
+            { label: 'Avg Recall', value: `${avgRecall.toFixed(1)}%`, color: '#8B5CF6', icon: Activity },
+            { label: 'Avg mAP50', value: `${avgMAP50.toFixed(1)}%`, color: '#10B981', icon: TrendingUp },
+          ].map((s) => (
+            <motion.div
+              key={s.label}
+              whileHover={{ y: -3 }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${s.color}15` }}>
+                  <s.icon size={14} style={{ color: s.color }} />
+                </div>
+              </div>
+              <div className="mt-3 text-[32px] font-bold leading-none tracking-tight text-slate-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {s.value}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="relative">
-            <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5EEAD4', opacity: 0.5 }} />
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              placeholder="Search models..."
+              type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 pr-3 py-1.5 rounded text-[11px] font-mono outline-none w-52"
-              style={{ background: 'rgba(94, 234, 212, 0.05)', border: '1px solid rgba(94, 234, 212, 0.2)', color: '#FFFFFF' }}
+              placeholder="Search models..."
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-[13px] text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
-          <button onClick={loadModels}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-            style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)', color: '#5EEAD4' }}>
-            <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
-            REFRESH
-          </button>
-          <button
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-            style={{ background: 'rgba(94, 234, 212, 0.15)', border: '1px solid rgba(94, 234, 212, 0.5)', color: '#5EEAD4' }}>
-            <Upload size={11} />
-            DEPLOY
-          </button>
         </div>
-      </div>
 
-      {error && (
-        <div className="mb-4 p-3 rounded flex items-center gap-2"
-          style={{ background: 'rgba(248, 113, 113, 0.08)', border: '1px solid rgba(248, 113, 113, 0.3)' }}>
-          <AlertCircle size={14} style={{ color: '#F87171' }} />
-          <span className="text-[11px] font-mono" style={{ color: '#F87171' }}>{error}</span>
-        </div>
-      )}
-
-      {/* Stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        {[
-          { label: 'TOTAL_MODELS', value: stats.total, color: '#3A7D8F' },
-          { label: 'BEST_MAP50', value: stats.bestMAP, color: '#5EEAD4' },
-          { label: 'AVG_PRECISION', value: stats.avgPrecision, color: '#A78BFA' },
-          { label: 'AVG_RECALL', value: stats.avgRecall, color: '#FBBF24' },
-        ].map((s, i) => (
-          <div key={i} className="p-4 rounded"
-            style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-            <div className="text-[10px] font-mono tracking-[0.2em] mb-2" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</div>
-            <div className="text-[28px] font-bold font-mono leading-none" style={{ color: s.color }}>{s.value}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Models Table */}
-      <div className="p-5 rounded" style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="animate-spin" size={28} style={{ color: '#5EEAD4' }} />
-            <span className="ml-3 text-[12px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>LOADING MODELS...</span>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-                  {['MODEL', 'PRECISION', 'RECALL', 'MAP50', 'MAP50-95', 'PARAMS', 'SHA-256', 'SIZE', 'STATUS'].map((h, i) => (
-                    <th key={h}
-                      className={`text-[10px] font-mono tracking-[0.15em] uppercase pb-3 ${i === 0 ? 'text-left' : 'text-right'}`}
-                      style={{ color: '#5EEAD4', opacity: 0.5 }}>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((model, i) => {
-                  const st = getStatus(model.mAP50)
-                  return (
-                    <motion.tr key={i}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: i * 0.05 }}
-                      style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.06)' }}>
-                      <td className="py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded flex items-center justify-center"
-                            style={{ background: `${st.color}15`, border: `1px solid ${st.color}40` }}>
-                            <Brain size={16} style={{ color: st.color }} />
-                          </div>
-                          <div>
-                            <div className="text-[13px] font-bold font-mono" style={{ color: '#FFFFFF' }}>{model.name.toUpperCase()}</div>
-                            <div className="text-[10px] font-mono truncate max-w-[200px]" style={{ color: '#5EEAD4', opacity: 0.4 }}>
-                              {model.model_hash ? model.model_hash.substring(0, 20) + '...' : 'No hash'}
-                            </div>
+        {/* Models grid */}
+        <div className="mt-6">
+          {loading && models.length === 0 ? (
+            <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Loading models...
+            </div>
+          ) : error ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+              <div className="text-[13px] font-medium text-red-700">Failed to load models</div>
+              <div className="mt-1 text-[11px] text-red-600">{error}</div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white py-20 text-center">
+              <Brain size={32} className="mx-auto text-slate-400" />
+              <div className="mt-3 text-[14px] font-medium text-slate-700">No models found</div>
+              <div className="mt-1 text-[11px] text-slate-500">
+                {search ? 'Try a different search term' : 'Register a model to get started'}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((m, i) => {
+                const theme = statusTheme(m.mAP50 || 0)
+                return (
+                  <motion.div
+                    key={m.name}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    whileHover={{ y: -3 }}
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                  >
+                    {/* Header */}
+                    <div className="flex items-start justify-between border-b border-slate-100 p-5">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700">
+                          <Brain size={18} className="text-white" />
+                        </div>
+                        <div>
+                          <div className="text-[14px] font-semibold text-slate-900">{m.name}</div>
+                          <div className="mt-0.5 text-[10px] font-mono text-slate-500">
+                            {m.framework || 'YOLOv8'}
                           </div>
                         </div>
-                      </td>
-                      <td className="py-4 text-right">
-                        <span className="text-[12px] font-mono" style={{ color: '#FFFFFF' }}>{model.precision.toFixed(2)}</span>
-                      </td>
-                      <td className="py-4 text-right">
-                        <span className="text-[12px] font-mono" style={{ color: '#FFFFFF' }}>{model.recall.toFixed(2)}</span>
-                      </td>
-                      <td className="py-4 text-right">
-                        <span className="text-[12px] font-bold font-mono" style={{ color: st.color }}>{model.mAP50.toFixed(2)}</span>
-                      </td>
-                      <td className="py-4 text-right">
-                        <span className="text-[12px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>{model.mAP50_95.toFixed(2)}</span>
-                      </td>
-                      <td className="py-4 text-right">
-                        <span className="text-[11px] font-mono" style={{ color: '#FFFFFF' }}>
-                          {model.parameter_count ? `${(model.parameter_count / 1e6).toFixed(2)}M` : '3.01M'}
-                        </span>
-                      </td>
-                      <td className="py-4 text-right">
-                        <span className="text-[10px] font-mono cursor-help" style={{ color: '#5EEAD4' }} title={model.model_hash || ''}>
-                          {model.model_hash ? model.model_hash.substring(0, 12) + '...' : '—'}
-                        </span>
-                      </td>
-                      <td className="py-4 text-right">
-                        <span className="text-[11px] font-mono" style={{ color: '#FFFFFF' }}>
-                          {model.model_size_bytes ? `${(model.model_size_bytes / 1024 / 1024).toFixed(2)} MB` : '—'}
-                        </span>
-                      </td>
-                      <td className="py-4 text-right">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono"
-                          style={{ background: `${st.color}15`, color: st.color, border: `1px solid ${st.color}40` }}>
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.color, boxShadow: `0 0 6px ${st.color}` }} />
-                          {st.label}
-                        </span>
-                      </td>
-                    </motion.tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                      </div>
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-semibold"
+                        style={{ background: theme.bg, color: theme.text }}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: theme.dot }} />
+                        {theme.label}
+                      </span>
+                    </div>
 
-            {filtered.length === 0 && !loading && (
-              <div className="text-center py-16">
-                <Brain size={40} className="mx-auto mb-3" style={{ color: '#5EEAD4', opacity: 0.3 }} />
-                <div className="text-[12px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>NO MODELS FOUND</div>
-              </div>
-            )}
-          </div>
-        )}
+                    {/* Metrics */}
+                    <div className="grid grid-cols-2 gap-4 p-5">
+                      {[
+                        { label: 'Precision', value: m.precision || 0, color: '#3B82F6' },
+                        { label: 'Recall', value: m.recall || 0, color: '#8B5CF6' },
+                        { label: 'mAP50', value: m.mAP50 || 0, color: '#10B981' },
+                        { label: 'mAP50-95', value: m.mAP50_95 || 0, color: '#F59E0B' },
+                      ].map((metric) => (
+                        <div key={metric.label}>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-medium text-slate-500">{metric.label}</span>
+                            <span className="font-mono text-[11px] font-bold" style={{ color: metric.color }}>
+                              {metric.value.toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-slate-100">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(metric.value, 100)}%` }}
+                              transition={{ duration: 0.6 }}
+                              className="h-full rounded-full"
+                              style={{ background: metric.color }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Footer */}
+                    {m.model_hash && (
+                      <div className="border-t border-slate-100 bg-slate-50 px-5 py-3">
+                        <div className="flex items-center gap-2">
+                          <Hash size={11} className="text-slate-400" />
+                          <span className="truncate font-mono text-[10px] text-slate-500">
+                            {m.model_hash.slice(0, 24)}...
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
+
+export default Models

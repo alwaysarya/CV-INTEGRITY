@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import { Brain, Loader2, RefreshCw, Target, Zap, Image as ImageIcon } from 'lucide-react'
+import {
+  Brain, Loader2, RefreshCw, Target, Zap, Image as ImageIcon,
+  Eye, Sparkles, AlertTriangle, CheckCircle
+} from 'lucide-react'
 import axios from 'axios'
-import { notify } from '@/lib/toast'
 
 const API = 'http://localhost:8000'
 
@@ -19,17 +20,15 @@ interface XAIResult {
   heatmap_raw: string
   image_size: number[]
   timestamp: string
-  overlay?: string
-  image?: string
 }
-
-
 
 export function XAI() {
   const [result, setResult] = useState<XAIResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [selectedMethod, setSelectedMethod] = useState('occlusion')
-  const [methods, setMethods] = useState<{id: string; label: string}[]>([])
+  const [methods, setMethods] = useState<{ id: string; label: string }[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [view, setView] = useState<'overlay' | 'raw'>('overlay')
 
   useEffect(() => {
     fetch(`${API}/api/xai/methods`)
@@ -39,488 +38,245 @@ export function XAI() {
           setMethods(d.methods || [])
         }
       })
-      .catch(console.error)
+      .catch(() => {
+        setMethods([
+          { id: 'occlusion', label: 'Occlusion Sensitivity' },
+          { id: 'gradcam', label: 'Grad-CAM' },
+          { id: 'saliency', label: 'Saliency Map' },
+        ])
+      })
   }, [])
-
-  useEffect(() => { runExplanation() }, [selectedMethod])
 
   const runExplanation = async () => {
     setLoading(true)
+    setError(null)
     try {
-      notify.info(`Running ${selectedMethod}...`, 'Generating explanation')
       const res = await axios.post(`${API}/api/xai/explain`, {
         method: selectedMethod,
-        model_name: 'yolov8n',
-      })
-      if (res.data.status === 'success') {
+        model_name: 'good',
+      }).catch(() => ({ data: null }))
+      if (res.data && res.data.status === 'success') {
         setResult(res.data)
-        notify.success('Explanation generated!', `Method: ${selectedMethod}`)
+      } else if (res.data) {
+        setResult(res.data)
       } else {
-        notify.error('Failed', res.data.error)
+        setError('XAI service unavailable')
       }
     } catch (err: any) {
-      notify.error('Error', err.message)
-    } finally {
-      setLoading(false)
-    }
+      setError(err.message)
+    } finally { setLoading(false) }
   }
 
-  const confidence = result?.confidence ?? 0
-  const confidencePct = (confidence * 100).toFixed(1)
-  const confidenceLabel =
-    confidence >= 0.7 ? 'HIGH' : confidence >= 0.4 ? 'MEDIUM' : 'LOW'
+  useEffect(() => { runExplanation() }, [selectedMethod])
 
   return (
-    <div
-      className="min-h-screen p-6"
-      style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}
-    >
-      {/* Header */}
-      <div
-        className="flex items-center justify-between mb-6 pb-4 flex-wrap gap-3"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded flex items-center justify-center"
-            style={{
-              background: 'rgba(94, 234, 212, 0.1)',
-              border: '1px solid rgba(94, 234, 212, 0.4)',
-            }}
-          >
-            <Brain size={14} style={{ color: '#5EEAD4' }} />
-          </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <div
-              className="text-[13px] font-bold tracking-[0.2em]"
-              style={{ color: '#5EEAD4' }}
-            >
-              EXPLAINABLE_AI
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Explainable AI
             </div>
-            <div
-              className="text-[9px] tracking-[0.2em]"
-              style={{ color: '#5EEAD4', opacity: 0.5 }}
-            >
-              VISUAL_ATTRIBUTION_HEATMAPS · SALIENCY_MAPS
-            </div>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Explainable AI
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Visual explanations of model decisions through occlusion and gradient-based methods.
+            </p>
           </div>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-            style={{
-              background: 'rgba(167, 139, 250, 0.15)',
-              border: '1px solid rgba(167, 139, 250, 0.5)',
-              color: '#A78BFA',
-            }}
-          >
-            ⚡ XAI_ACTIVE
-          </button>
           <button
             onClick={runExplanation}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider disabled:opacity-40"
-            style={{
-              background: 'rgba(94, 234, 212, 0.08)',
-              border: '1px solid rgba(94, 234, 212, 0.3)',
-              color: '#5EEAD4',
-            }}
+            className="flex h-9 items-center gap-2 rounded-lg bg-emerald-600 px-3 text-[11px] font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
           >
-            <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
-            REGENERATE
+            {loading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+            {loading ? 'Generating...' : 'Regenerate'}
           </button>
         </div>
-      </div>
 
-      {/* Method switcher */}
-      <div
-        className="flex items-center gap-2 mb-5 p-3 rounded flex-wrap"
-        style={{
-          background: 'rgba(94, 234, 212, 0.02)',
-          border: '1px solid rgba(94, 234, 212, 0.15)',
-        }}
-      >
-        <span
-          className="text-[10px] font-mono tracking-wider mr-2"
-          style={{ color: '#5EEAD4', opacity: 0.6 }}
-        >
-          METHODS:
-        </span>
-        {methods.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => setSelectedMethod(m.id)}
-            disabled={loading}
-            className="px-3 py-1.5 rounded text-[10px] font-mono tracking-wider transition-all disabled:opacity-40"
-            style={{
-              background:
-                selectedMethod === m.id
-                  ? 'rgba(94, 234, 212, 0.15)'
-                  : 'rgba(94, 234, 212, 0.03)',
-              border: `1px solid ${
-                selectedMethod === m.id
-                  ? 'rgba(94, 234, 212, 0.5)'
-                  : 'rgba(94, 234, 212, 0.15)'
-              }`,
-              color: selectedMethod === m.id ? '#FFFFFF' : '#5EEAD4',
-            }}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <div
-          className="flex flex-col items-center justify-center py-20 rounded"
-          style={{
-            background: 'rgba(94, 234, 212, 0.02)',
-            border: '1px solid rgba(94, 234, 212, 0.15)',
-          }}
-        >
-          <Loader2
-            className="animate-spin mb-4"
-            size={32}
-            style={{ color: '#5EEAD4' }}
-          />
-          <span
-            className="text-[11px] font-mono"
-            style={{ color: '#5EEAD4', opacity: 0.6 }}
-          >
-            RUNNING {selectedMethod.toUpperCase()}...
-          </span>
-        </div>
-      ) : result ? (
-        <>
-          {/* Image comparison */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
-            {/* Original Image */}
-            <div
-              className="p-4 rounded"
-              style={{
-                background: 'rgba(94, 234, 212, 0.02)',
-                border: '1px solid rgba(94, 234, 212, 0.15)',
-              }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <ImageIcon size={12} style={{ color: '#5EEAD4' }} />
-                  <span
-                    className="text-[10px] font-mono tracking-wider"
-                    style={{ color: '#5EEAD4' }}
-                  >
-                    ORIGINAL_IMAGE
-                  </span>
-                </div>
-                <span
-                  className="text-[9px] font-mono py-0.5 px-2 rounded"
-                  style={{
-                    background: 'rgba(94, 234, 212, 0.1)',
-                    color: '#5EEAD4',
-                    border: '1px solid rgba(94, 234, 212, 0.3)',
-                  }}
-                >
-                  INPUT
-                </span>
-              </div>
-              <div
-                className="rounded overflow-hidden flex items-center justify-center"
-                style={{
-                  background: '#050810',
-                  border: '1px solid rgba(94, 234, 212, 0.3)',
-                  minHeight: 280,
-                }}
-              >
-                <img
-                  src={`data:image/jpeg;base64,${result.original_image}`}
-                  alt="Original"
-                  style={{ width: '100%', display: 'block' }}
-                />
-              </div>
-              <div
-                className="text-[9px] font-mono mt-2 truncate"
-                style={{ color: '#5EEAD4', opacity: 0.5 }}
-              >
-                {result.image_source || 'input_image'}
-              </div>
-            </div>
-
-            {/* Heatmap Overlay */}
-            <div
-              className="p-4 rounded"
-              style={{
-                background: 'rgba(94, 234, 212, 0.02)',
-                border: '1px solid rgba(94, 234, 212, 0.15)',
-              }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Target size={12} style={{ color: '#F87171' }} />
-                  <span
-                    className="text-[10px] font-mono tracking-wider"
-                    style={{ color: '#F87171' }}
-                  >
-                    HEATMAP_OVERLAY
-                  </span>
-                </div>
-                <span
-                  className="text-[9px] font-mono py-0.5 px-2 rounded"
-                  style={{
-                    background: 'rgba(248, 113, 113, 0.1)',
-                    color: '#F87171',
-                    border: '1px solid rgba(248, 113, 113, 0.3)',
-                  }}
-                >
-                  {result.method?.toUpperCase()}
-                </span>
-              </div>
-              <div
-                className="rounded overflow-hidden flex items-center justify-center"
-                style={{
-                  background: '#050810',
-                  border: '1px solid rgba(94, 234, 212, 0.3)',
-                  minHeight: 280,
-                }}
-              >
-                <img
-                  src={`data:image/png;base64,${result.heatmap_overlay}`}
-                  alt="Heatmap Overlay"
-                  style={{ width: '100%', display: 'block' }}
-                />
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <span
-                  className="text-[9px] font-mono"
-                  style={{ color: '#F87171', opacity: 0.7 }}
-                >
-                  RED = HIGH ATTENTION
-                </span>
-                <span
-                  className="text-[9px] font-mono"
-                  style={{ color: '#5EEAD4', opacity: 0.7 }}
-                >
-                  CONFIDENCE: {confidencePct}%
-                </span>
-              </div>
+        {/* Method selector */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-3">
+            <div className="text-[14px] font-semibold text-slate-900">Explanation Method</div>
+            <div className="mt-0.5 text-[11px] text-slate-500">
+              Choose an XAI technique to visualize model attention
             </div>
           </div>
-
-          {/* Metrics Row — real from backend */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-            {[
-              { label: 'MODEL', value: (result.model_name || 'N/A').toUpperCase(), color: '#FFFFFF' },
-              { label: 'METHOD', value: (result.method || 'N/A').toUpperCase(), color: '#5EEAD4' },
-              { label: 'CONFIDENCE', value: `${confidencePct}%`, color: '#5EEAD4' },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="p-4 rounded"
-                style={{
-                  background: 'rgba(94, 234, 212, 0.02)',
-                  border: '1px solid rgba(94, 234, 212, 0.15)',
-                }}
+          <div className="flex flex-wrap gap-2">
+            {(methods.length > 0 ? methods : [
+              { id: 'occlusion', label: 'Occlusion' },
+              { id: 'gradcam', label: 'Grad-CAM' },
+              { id: 'saliency', label: 'Saliency' },
+            ]).map(m => (
+              <button
+                key={m.id}
+                onClick={() => setSelectedMethod(m.id)}
+                className={`rounded-lg border px-4 py-2 text-[12px] font-medium transition-all ${
+                  selectedMethod === m.id
+                    ? 'border-emerald-600 bg-emerald-50 text-emerald-900'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                }`}
               >
-                <div
-                  className="text-[9px] font-mono tracking-wider mb-1"
-                  style={{ color: '#5EEAD4', opacity: 0.5 }}
-                >
-                  {item.label}
-                </div>
-                <div
-                  className="text-[16px] font-bold font-mono"
-                  style={{ color: item.color }}
-                >
-                  {item.value}
-                </div>
-              </div>
+                {m.label}
+              </button>
             ))}
           </div>
+        </div>
 
-          {/* Limitations */}
-          {result.limitations && result.limitations.length > 0 && (
-            <div
-              className="p-4 rounded mb-5"
-              style={{
-                background: 'rgba(251, 191, 36, 0.03)',
-                border: '1px solid rgba(251, 191, 36, 0.3)',
-              }}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-[13px]">⚠️</span>
-                <span
-                  className="text-[10px] font-mono tracking-[0.2em] font-bold"
-                  style={{ color: '#FBBF24' }}
-                >
-                  LIMITATIONS
-                </span>
-              </div>
-              <ul className="space-y-1.5">
-                {result.limitations.map((l, i) => (
-                  <li
-                    key={i}
-                    className="text-[10px] font-mono flex gap-2"
-                    style={{ color: '#FBBF24', opacity: 0.85 }}
-                  >
-                    <span>•</span>
-                    <span>{l}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* XAI Lab */}
-          <div className="mt-8 pt-6" style={{ borderTop: '1px solid rgba(94, 234, 212, 0.15)' }}>
-            <div className="mb-4">
-              <h3
-                className="text-[13px] font-bold font-mono tracking-[0.2em] mb-1"
-                style={{ color: '#5EEAD4' }}
-              >
-                XAI_LAB
-              </h3>
-              <p
-                className="text-[10px] font-mono"
-                style={{ color: '#5EEAD4', opacity: 0.5 }}
-              >
-                Visual attribution heatmaps revealing what the vision model attends to
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* GradCAM Heatmap */}
-              <div
-                className="p-4 rounded"
-                style={{
-                  background: 'rgba(94, 234, 212, 0.02)',
-                  border: '1px solid rgba(94, 234, 212, 0.15)',
-                }}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Target size={12} style={{ color: '#5EEAD4' }} />
-                    <span
-                      className="text-[10px] font-mono tracking-wider"
-                      style={{ color: '#5EEAD4' }}
-                    >
-                      GRADCAM_HEATMAP
-                    </span>
-                  </div>
-                  <span
-                    className="text-[9px] font-mono py-0.5 px-2 rounded"
-                    style={{
-                      background: 'rgba(94, 234, 212, 0.1)',
-                      color: '#5EEAD4',
-                      border: '1px solid rgba(94, 234, 212, 0.3)',
-                    }}
-                  >
-                    {confidenceLabel}_CONFIDENCE
-                  </span>
-                </div>
-                <div
-                  className="rounded overflow-hidden"
-                  style={{ border: '1px solid rgba(94, 234, 212, 0.3)' }}
-                >
-                  <img
-                    src={`data:image/png;base64,${result.heatmap_overlay}`}
-                    alt="GradCAM Heatmap"
-                    style={{ width: '100%', display: 'block' }}
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-2 mt-3">
-                  {[
-                    { label: 'MODEL', value: (result.model_name || 'N/A').toUpperCase(), color: '#FFFFFF' },
-                    { label: 'METHOD', value: (result.method || 'N/A').toUpperCase(), color: '#5EEAD4' },
-                    { label: 'CONFIDENCE', value: `${confidencePct}%`, color: '#5EEAD4' },
-                  ].map((item, i) => (
-                    <div
-                      key={i}
-                      className="p-2 rounded"
-                      style={{
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        border: '1px solid rgba(94, 234, 212, 0.1)',
-                      }}
-                    >
-                      <div
-                        className="text-[8px] font-mono tracking-wider mb-1"
-                        style={{ color: '#5EEAD4', opacity: 0.5 }}
-                      >
-                        {item.label}
-                      </div>
-                      <div
-                        className="text-[11px] font-bold font-mono truncate"
-                        style={{ color: item.color }}
-                      >
-                        {item.value}
-                      </div>
+        {/* Stats */}
+        {result && (
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { label: 'Confidence', value: `${((result.confidence || 0) * 100).toFixed(1)}%`, color: '#10B981', icon: Target },
+              { label: 'Method', value: result.method || selectedMethod, color: '#3B82F6', icon: Brain },
+              { label: 'Model', value: result.model_name || 'good', color: '#8B5CF6', icon: Zap },
+              { label: 'Access', value: result.access_level || 'black-box', color: '#F59E0B', icon: Eye },
+            ].map((s) => {
+              const Icon = s.icon
+              return (
+                <div key={s.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${s.color}15` }}>
+                      <Icon size={14} style={{ color: s.color }} />
                     </div>
+                  </div>
+                  <div className="mt-3 text-[20px] font-bold tracking-tight text-slate-900 capitalize">
+                    {s.value}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Main visualization */}
+        <div className="mt-6">
+          {loading && !result ? (
+            <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Generating explanation...
+            </div>
+          ) : error ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+              <AlertTriangle size={24} className="mx-auto text-red-500" />
+              <div className="mt-2 text-[13px] font-medium text-red-700">XAI generation failed</div>
+              <div className="mt-1 text-[11px] text-red-600">{error}</div>
+            </div>
+          ) : result ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <div className="text-[14px] font-semibold text-slate-900">Explanation Visualization</div>
+                  <div className="mt-0.5 text-[11px] text-slate-500">
+                    {view === 'overlay' ? 'Heatmap overlaid on original image' : 'Raw attention heatmap'}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+                  {(['overlay', 'raw'] as const).map(v => (
+                    <button
+                      key={v}
+                      onClick={() => setView(v)}
+                      className={`rounded-md px-3 py-1.5 text-[11px] font-medium capitalize transition-all ${
+                        view === v
+                          ? 'bg-white text-emerald-900 shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {v}
+                    </button>
                   ))}
                 </div>
               </div>
 
-              {/* Feature Attributions — real heatmap */}
-              <div
-                className="p-4 rounded"
-                style={{
-                  background: 'rgba(94, 234, 212, 0.02)',
-                  border: '1px solid rgba(94, 234, 212, 0.15)',
-                }}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Zap size={12} style={{ color: '#5EEAD4' }} />
-                    <span
-                      className="text-[10px] font-mono tracking-wider"
-                      style={{ color: '#5EEAD4' }}
-                    >
-                      RAW_HEATMAP
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                {/* Original */}
+                <div>
+                  <div className="mb-2 flex items-center gap-2">
+                    <ImageIcon size={13} className="text-slate-400" />
+                    <span className="text-[11px] font-medium text-slate-600">Original</span>
+                  </div>
+                  <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-900">
+                    {result.original_image ? (
+                      <img
+                        src={`data:image/jpeg;base64,${result.original_image}`}
+                        alt="Original"
+                        className="w-full object-contain"
+                      />
+                    ) : (
+                      <div className="flex aspect-video items-center justify-center">
+                        <ImageIcon size={28} className="text-slate-600" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Heatmap */}
+                <div className="lg:col-span-2">
+                  <div className="mb-2 flex items-center gap-2">
+                    <Sparkles size={13} className="text-emerald-500" />
+                    <span className="text-[11px] font-medium text-slate-600">
+                      {view === 'overlay' ? 'Heatmap Overlay' : 'Raw Heatmap'}
                     </span>
                   </div>
-                  <span
-                    className="text-[9px] font-mono"
-                    style={{ color: '#5EEAD4', opacity: 0.6 }}
-                  >
-                    ACCESS: {(result.access_level || 'N/A').toUpperCase()}
-                  </span>
-                </div>
-                <div
-                  className="rounded overflow-hidden flex items-center justify-center"
-                  style={{
-                    background: '#050810',
-                    border: '1px solid rgba(94, 234, 212, 0.3)',
-                    minHeight: 280,
-                  }}
-                >
-                  <img
-                    src={`data:image/png;base64,${result.heatmap_raw}`}
-                    alt="Raw Heatmap"
-                    style={{ width: '100%', display: 'block' }}
-                  />
-                </div>
-                <div
-                  className="text-[9px] font-mono mt-3"
-                  style={{ color: '#5EEAD4', opacity: 0.5 }}
-                >
-                  Method: {result.method} · Size: {result.image_size?.join('×')}
+                  <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-900">
+                    {view === 'overlay' && result.heatmap_overlay ? (
+                      <img
+                        src={`data:image/jpeg;base64,${result.heatmap_overlay}`}
+                        alt="Heatmap Overlay"
+                        className="w-full object-contain"
+                      />
+                    ) : view === 'raw' && result.heatmap_raw ? (
+                      <img
+                        src={`data:image/jpeg;base64,${result.heatmap_raw}`}
+                        alt="Raw Heatmap"
+                        className="w-full object-contain"
+                      />
+                    ) : (
+                      <div className="flex aspect-video items-center justify-center">
+                        <Sparkles size={28} className="text-slate-600" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              {/* Limitations */}
+              {result.limitations && result.limitations.length > 0 && (
+                <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-600" />
+                    <div>
+                      <div className="text-[12px] font-semibold text-amber-900">
+                        Known Limitations
+                      </div>
+                      <ul className="mt-2 space-y-1">
+                        {result.limitations.map((l, i) => (
+                          <li key={i} className="flex items-start gap-1.5 text-[11px] text-amber-800">
+                            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-amber-600" />
+                            {l}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        </>
-      ) : (
-        <div
-          className="text-center py-16 rounded"
-          style={{
-            background: 'rgba(94, 234, 212, 0.02)',
-            border: '1px solid rgba(94, 234, 212, 0.15)',
-          }}
-        >
-          <Brain size={40} style={{ color: '#5EEAD4' }} className="mx-auto mb-3" />
-          <p className="text-[11px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>
-            Click REGENERATE to run XAI explanation
-          </p>
+          ) : (
+            <div className="rounded-2xl border border-slate-200 bg-white py-20 text-center">
+              <Brain size={32} className="mx-auto text-slate-400" />
+              <div className="mt-3 text-[14px] font-medium text-slate-700">Ready to generate</div>
+              <div className="mt-1 text-[11px] text-slate-500">
+                Select a method above to generate an explanation
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }
+
+export default XAI

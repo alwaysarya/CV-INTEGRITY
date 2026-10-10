@@ -1,8 +1,9 @@
-import { motion } from 'framer-motion'
-import { FileCode, CheckCircle, AlertTriangle, XCircle, Zap, RefreshCw, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import {
+  FileCode, CheckCircle, AlertTriangle, XCircle, Zap, RefreshCw,
+  Loader2, Play, BarChart3, TrendingUp, Activity
+} from 'lucide-react'
 import axios from 'axios'
-import { notify } from '@/lib/toast'
 
 const API = 'http://localhost:8000'
 
@@ -20,25 +21,24 @@ export function ContractsEngine() {
   const [contracts, setContracts] = useState<Contract[]>([])
   const [executing, setExecuting] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState({ total: 0, approved: 0, review: 0, quarantine: 0 })
 
   useEffect(() => { init() }, [])
 
   const init = async () => {
-    await loadContracts()
-    await loadStats()
+    await Promise.all([loadContracts(), loadStats()])
   }
 
   const loadStats = async () => {
     try {
-      const res = await fetch(`${API}/api/contracts/stats`)
-      const data = await res.json()
-      if (data.status === 'success') {
+      const res = await fetch(`${API}/api/contracts/stats`).then(r => r.json()).catch(() => null)
+      if (res && res.status === 'success') {
         setStats({
-          total: data.total_executions || 0,
-          approved: data.decisions?.auto_approve || 0,
-          review: data.decisions?.review || 0,
-          quarantine: data.decisions?.quarantine || 0,
+          total: res.total_executions || 0,
+          approved: res.decisions?.auto_approve || 0,
+          review: res.decisions?.review || 0,
+          quarantine: res.decisions?.quarantine || 0,
         })
       }
     } catch (err) { console.error(err) }
@@ -46,184 +46,201 @@ export function ContractsEngine() {
 
   const loadContracts = async () => {
     setLoading(true)
+    setError(null)
     try {
-      const res = await axios.get(`${API}/api/contracts/list`)
-      const list = (res.data.contracts || []).map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        description: c.description,
-        thresholds: c.thresholds,
+      const res = await axios.get(`${API}/api/contracts/list`).catch(() => ({ data: { contracts: [] } }))
+      const list = res.data.contracts || []
+      setContracts(list.map((c: any, i: number) => ({
+        id: c.id || `contract_${i}`,
+        name: c.name || `Contract ${i + 1}`,
+        description: typeof c.description === 'string' ? c.description : 'Automated rule',
         executions: c.executions || 0,
         approved: c.approved || 0,
         quarantined: c.quarantined || 0,
-      }))
-      setContracts(list)
-    } catch (err) {
-      console.error(err)
-      notify.error('Load failed', 'Could not fetch contracts')
-    } finally {
-      setLoading(false)
-    }
+        thresholds: c.thresholds,
+      })))
+    } catch (err: any) {
+      setError(err.message)
+    } finally { setLoading(false) }
   }
 
-  const executeContract = async (contract: Contract) => {
-    setExecuting(contract.id)
-    notify.info('Executing contract...', contract.name)
+  const executeContract = async (id: string) => {
+    setExecuting(id)
     try {
-      const res = await fetch(`${API}/api/contracts/execute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contract_id: contract.id, target: 'system', metrics: {} }),
-      })
-      const data = await res.json()
-      if (data.status === 'success') {
-        const decision = data.decision
-        const score = data.trust_score
-        if (decision === 'AUTO_APPROVE') notify.success(contract.name, `AUTO-APPROVE (score: ${score})`)
-        else if (decision === 'REVIEW') notify.info(contract.name, `REVIEW (score: ${score})`)
-        else notify.error(contract.name, `QUARANTINE (score: ${score})`)
+      await axios.post(`${API}/api/contracts/execute/${id}`).catch(() => null)
+      await init()
+    } catch (err) { console.error(err) } finally { setExecuting(null) }
+  }
 
-        // Update local state + refresh stats
-        setContracts(prev => prev.map(c => c.id === contract.id ? {
-          ...c,
-          executions: (c.executions || 0) + 1,
-          approved: decision === 'AUTO_APPROVE' ? (c.approved || 0) + 1 : c.approved,
-          quarantined: decision === 'QUARANTINE' ? (c.quarantined || 0) + 1 : c.quarantined,
-        } : c))
-        await loadStats()
-      } else {
-        notify.error('Execution failed', data.detail || 'Unknown error')
-      }
-    } catch (err: any) {
-      notify.error('Execution failed', err.message)
-    } finally {
-      setExecuting(null)
-    }
+  const executeAll = async () => {
+    setExecuting('all')
+    try {
+      await Promise.all(contracts.map(c => axios.post(`${API}/api/contracts/execute/${c.id}`).catch(() => null)))
+      await init()
+    } catch (err) { console.error(err) } finally { setExecuting(null) }
   }
 
   return (
-    <div className="space-y-6 p-6" style={{ background: '#0A0F14', minHeight: 'calc(100vh - 72px)' }}>
-
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <h1 className="text-[32px] font-bold tracking-tight mb-1 text-[#E5F5F0]">Smart Contracts Engine</h1>
-            <p className="text-[13px] max-w-2xl text-[#8AA4A0]">
-              Deterministic smart contracts encode platform governance rules — auto-fire decisions based on trust score thresholds.
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Contracts Engine
+            </div>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Contracts Engine
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Execution engine for automated trust-based decisions across the platform.
             </p>
           </div>
-          <button onClick={loadContracts}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-medium bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition">
-            <RefreshCw size={14} /> Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={init}
+              className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+            <button
+              onClick={executeAll}
+              disabled={executing === 'all' || contracts.length === 0}
+              className="flex h-9 items-center gap-2 rounded-lg bg-emerald-600 px-3 text-[11px] font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {executing === 'all' ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
+              {executing === 'all' ? 'Running...' : 'Execute All'}
+            </button>
+          </div>
         </div>
 
-        {/* Stats Summary */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { label: 'Total Executions', value: stats.total, color: '#5EEAD4' },
-            { label: 'Auto Approved', value: stats.approved, color: '#10B981' },
-            { label: 'Under Review', value: stats.review, color: '#F59E0B' },
-            { label: 'Quarantined', value: stats.quarantine, color: '#F87171' },
-          ].map((s, i) => (
-            <div key={i} className="p-4 rounded-2xl bg-[#0F1419] border border-cyan-500/20">
-              <div className="text-[10px] uppercase tracking-wider mb-1 text-[#8AA4A0]">{s.label}</div>
-              <div className="text-2xl font-bold font-mono" style={{ color: s.color }}>{s.value}</div>
-            </div>
-          ))}
+            { label: 'Total Executions', value: stats.total, color: '#0F172A', icon: Activity },
+            { label: 'Auto-Approved', value: stats.approved, color: '#10B981', icon: CheckCircle },
+            { label: 'Review', value: stats.review, color: '#F59E0B', icon: AlertTriangle },
+            { label: 'Quarantined', value: stats.quarantine, color: '#EF4444', icon: XCircle },
+          ].map((s) => {
+            const Icon = s.icon
+            return (
+              <div key={s.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+                <div className="flex items-center justify-between">
+                  <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${s.color}15` }}>
+                    <Icon size={14} style={{ color: s.color }} />
+                  </div>
+                </div>
+                <div className="mt-3 text-[28px] font-bold leading-none tracking-tight text-slate-900">{s.value}</div>
+              </div>
+            )
+          })}
         </div>
 
-        {/* Auto-Decision Rule Set */}
-        <div className="p-5 rounded-3xl mb-6 bg-[#0F1419] border border-cyan-500/20">
-          <h3 className="font-bold text-[13px] tracking-wide mb-4 text-[#E5F5F0]">Auto-Decision Rule Set</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { score: 'Trust Score ≥ 80', label: 'AUTO-APPROVE', icon: CheckCircle, bg: 'rgba(16, 185, 129, 0.1)', color: '#10B981' },
-              { score: '50 ≤ Trust Score < 80', label: 'REVIEW', icon: AlertTriangle, bg: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' },
-              { score: 'Trust Score < 50', label: 'QUARANTINE', icon: XCircle, bg: 'rgba(248, 113, 113, 0.1)', color: '#F87171' },
-            ].map((item, i) => {
-              const Icon = item.icon
-              return (
-                <div key={i} className="p-5 rounded-2xl text-center" style={{ background: item.bg, border: `1px solid ${item.color}40` }}>
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 bg-[#0A0F14]">
-                    <Icon size={18} style={{ color: item.color }} />
-                  </div>
-                  <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: item.color, opacity: 0.8 }}>{item.score}</div>
-                  <div className="text-[13px] font-bold" style={{ color: item.color }}>{item.label}</div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Contract Cards — LIVE FROM API */}
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="animate-spin text-cyan-400" size={28} />
-            <span className="ml-3 text-[#8AA4A0]">Loading contracts...</span>
-          </div>
-        ) : contracts.length === 0 ? (
-          <div className="text-center py-16 text-[#8AA4A0]">
-            <FileCode size={32} className="mx-auto mb-3 opacity-40" />
-            <p className="text-sm">No contracts found</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {contracts.map((contract, i) => (
-              <motion.div
-                key={contract.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="p-5 rounded-3xl bg-[#0F1419] border border-cyan-500/20"
-              >
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-cyan-500/10 border border-cyan-500/30">
-                    <FileCode size={18} className="text-cyan-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-[13px] font-bold leading-tight mb-1 text-[#E5F5F0]">{contract.name}</h3>
-                    <div className="text-[9px] font-mono truncate text-[#5EEAD4] opacity-60">{contract.id}</div>
-                  </div>
-                </div>
-
-                <p className="text-[11px] mb-4 min-h-[40px] text-[#8AA4A0]">{contract.description}</p>
-
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  {[
-                    { label: 'Executions', value: contract.executions, color: '#E5F5F0' },
-                    { label: 'Approved', value: contract.approved, color: '#10B981' },
-                    { label: 'Quarantined', value: contract.quarantined, color: '#F87171' },
-                  ].map((item, k) => (
-                    <div key={k} className="p-2.5 rounded-xl text-center bg-[#0A0F14] border border-cyan-500/10">
-                      <div className="text-[9px] uppercase tracking-wider mb-1 text-[#8AA4A0]">{item.label}</div>
-                      <div className="text-[12px] font-bold font-mono" style={{ color: item.color }}>{item.value}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={() => executeContract(contract)}
-                  disabled={executing === contract.id}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-[12px] font-semibold text-white transition-all hover:scale-[1.02] disabled:opacity-50"
-                  style={{ background: '#2E7D4F', boxShadow: '0 4px 14px rgba(46, 125, 79, 0.25)' }}
+        {/* Decision breakdown */}
+        {stats.total > 0 && (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-3 text-[13px] font-semibold text-slate-900">Decision Breakdown</div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: 'Auto-Approved', value: stats.approved, color: '#10B981' },
+                { label: 'Review', value: stats.review, color: '#F59E0B' },
+                { label: 'Quarantined', value: stats.quarantine, color: '#EF4444' },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="flex items-center gap-2 rounded-lg border px-3 py-1.5"
+                  style={{ background: `${item.color}10`, borderColor: `${item.color}30` }}
                 >
-                  {executing === contract.id ? (
-                    <>
-                      <Loader2 className="animate-spin" size={12} /> Executing...
-                    </>
-                  ) : (
-                    <>
-                      <Zap size={12} /> Execute Contract
-                    </>
-                  )}
-                </button>
-              </motion.div>
-            ))}
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: item.color }} />
+                  <span className="text-[11px] font-medium text-slate-700">{item.label}</span>
+                  <span className="font-mono text-[11px] font-bold" style={{ color: item.color }}>{item.value}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
-      </motion.div>
+
+        {/* Contracts list */}
+        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-100 px-5 py-4">
+            <div className="text-[14px] font-semibold text-slate-900">Active Contracts</div>
+            <div className="mt-0.5 text-[11px] text-slate-500">
+              {contracts.length} contracts in execution engine
+            </div>
+          </div>
+
+          {loading && contracts.length === 0 ? (
+            <div className="flex items-center justify-center gap-2 py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Loading contracts...
+            </div>
+          ) : error ? (
+            <div className="py-20 text-center">
+              <AlertTriangle size={24} className="mx-auto text-red-500" />
+              <div className="mt-2 text-[13px] font-medium text-slate-700">Failed to load contracts</div>
+              <div className="mt-1 text-[11px] text-slate-400">{error}</div>
+            </div>
+          ) : contracts.length === 0 ? (
+            <div className="py-20 text-center">
+              <FileCode size={32} className="mx-auto text-slate-400" />
+              <div className="mt-3 text-[14px] font-medium text-slate-700">No contracts</div>
+              <div className="mt-1 text-[11px] text-slate-500">Contracts will appear here once registered</div>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {contracts.map((c) => (
+                <div
+                  key={c.id}
+                  className="grid grid-cols-12 items-center gap-4 px-5 py-4 transition-colors hover:bg-slate-50"
+                >
+                  <div className="col-span-5 flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50">
+                      <FileCode size={15} className="text-emerald-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="truncate text-[13px] font-medium text-slate-900">{c.name}</div>
+                      <div className="mt-0.5 truncate text-[11px] text-slate-500">{c.description}</div>
+                    </div>
+                  </div>
+
+                  <div className="col-span-2">
+                    <div className="text-[10px] font-medium text-slate-500">Executions</div>
+                    <div className="mt-0.5 font-mono text-[14px] font-bold text-slate-900">{c.executions}</div>
+                  </div>
+
+                  <div className="col-span-2">
+                    <div className="text-[10px] font-medium text-slate-500">Approved</div>
+                    <div className="mt-0.5 font-mono text-[14px] font-bold text-emerald-600">{c.approved}</div>
+                  </div>
+
+                  <div className="col-span-2">
+                    <div className="text-[10px] font-medium text-slate-500">Quarantined</div>
+                    <div className="mt-0.5 font-mono text-[14px] font-bold text-red-600">{c.quarantined}</div>
+                  </div>
+
+                  <div className="col-span-1 flex justify-end">
+                    <button
+                      onClick={() => executeContract(c.id)}
+                      disabled={executing === c.id}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-50"
+                    >
+                      {executing === c.id ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : (
+                        <Play size={13} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
+
+export default ContractsEngine

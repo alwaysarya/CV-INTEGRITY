@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, RefreshCw, Brain, Hash, Database, CheckCircle2, AlertCircle, Radio } from 'lucide-react'
+import {
+  Loader2, RefreshCw, Brain, Hash, CheckCircle2, AlertTriangle,
+  ShieldCheck, ShieldAlert, XCircle, HardDrive, Boxes, Scan
+} from 'lucide-react'
 
 const API = 'http://localhost:8000'
 
@@ -33,6 +36,7 @@ export function ModelIntegrity() {
   }
 
   const formatBytes = (bytes: number) => {
+    if (!bytes) return '—'
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
     return `${(bytes / 1024 / 1024).toFixed(2)} MB`
@@ -40,139 +44,184 @@ export function ModelIntegrity() {
 
   const getModelStyle = (name: string) => {
     const n = name.toLowerCase()
-    if (n.includes('good') || n.includes('base')) return { color: '#5EEAD4', label: 'CLEAN' }
-    if (n.includes('bad')) return { color: '#FBBF24', label: 'DRIFT' }
-    if (n.includes('worst')) return { color: '#F87171', label: 'TAMPERED' }
-    return { color: '#5EEAD4', label: 'UNKNOWN' }
+    if (n.includes('good') || n.includes('base')) return { bg: '#D1FAE5', text: '#065F46', dot: '#10B981', label: 'Clean' }
+    if (n.includes('bad')) return { bg: '#FEF3C7', text: '#92400E', dot: '#F59E0B', label: 'Drift' }
+    if (n.includes('worst')) return { bg: '#FEE2E2', text: '#991B1B', dot: '#EF4444', label: 'Tampered' }
+    return { bg: '#DBEAFE', text: '#1E40AF', dot: '#3B82F6', label: 'Unknown' }
   }
 
-  const stats = {
-    total: models.length,
-    verified: models.filter((m) => m.status === 'success').length,
-    totalSize: models.reduce((s, m) => s + m.model_size_bytes, 0),
-    totalParams: models.reduce((s, m) => s + (m.parameter_count || 0), 0),
-  }
+  const cleanCount = models.filter(m => {
+    const n = m.name.toLowerCase()
+    return n.includes('good') || n.includes('base')
+  }).length
+  const driftCount = models.filter(m => m.name.toLowerCase().includes('bad')).length
+  const tamperedCount = models.filter(m => m.name.toLowerCase().includes('worst')).length
 
   return (
-    <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>
-
-      {/* Top header */}
-      <div className="flex items-center justify-between mb-6 pb-4"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center"
-            style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-            <Brain size={14} style={{ color: '#5EEAD4' }} />
-          </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <div className="text-[13px] font-bold tracking-[0.2em]" style={{ color: '#5EEAD4' }}>MODEL_INTEGRITY</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>SHA-256_FINGERPRINTS · WEIGHT_VERIFICATION</div>
-          </div>
-        </div>
-
-        <button onClick={loadFingerprints}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-          style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)', color: '#5EEAD4' }}>
-          <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
-          REFRESH
-        </button>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-3 rounded flex items-center gap-2"
-          style={{ background: 'rgba(248, 113, 113, 0.08)', border: '1px solid rgba(248, 113, 113, 0.3)' }}>
-          <AlertCircle size={14} style={{ color: '#F87171' }} />
-          <span className="text-[11px] font-mono" style={{ color: '#F87171' }}>{error}</span>
-        </div>
-      )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        {[
-          { label: 'MODELS_LOADED', value: stats.total, color: '#3A7D8F', icon: Brain },
-          { label: 'VERIFIED', value: stats.verified, color: '#5EEAD4', icon: CheckCircle2 },
-          { label: 'TOTAL_SIZE', value: formatBytes(stats.totalSize), color: '#FBBF24', icon: Database },
-          { label: 'TOTAL_PARAMS', value: `${(stats.totalParams / 1e6).toFixed(2)}M`, color: '#A78BFA', icon: Hash },
-        ].map((s, i) => {
-          const Icon = s.icon
-          return (
-            <div key={i} className="p-4 rounded"
-              style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</span>
-                <Icon size={14} style={{ color: s.color, opacity: 0.7 }} />
-              </div>
-              <div className="text-[24px] font-bold font-mono leading-none" style={{ color: s.color }}>{s.value}</div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Model Integrity
             </div>
-          )
-        })}
-      </div>
-
-      {/* Model list */}
-      <div className="space-y-3">
-        {loading ? (
-          <div className="p-12 rounded flex items-center justify-center"
-            style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-            <Loader2 className="animate-spin" size={28} style={{ color: '#5EEAD4' }} />
-            <span className="ml-3 text-[12px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>LOADING FINGERPRINTS...</span>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Model Integrity
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Weight fingerprinting, tamper detection and integrity status across all models.
+            </p>
           </div>
-        ) : models.map((m, i) => {
-          const st = getModelStyle(m.name)
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              className="p-5 rounded"
-              style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
+          <button
+            onClick={loadFingerprints}
+            className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Refresh
+          </button>
+        </div>
 
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${st.color}15`, border: `1px solid ${st.color}40` }}>
-                    <Brain size={18} style={{ color: st.color }} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="text-[14px] font-bold font-mono" style={{ color: '#FFFFFF' }}>{m.name.toUpperCase()}</span>
-                      <span className="text-[9px] font-mono tracking-wider px-2 py-0.5 rounded"
-                        style={{ background: `${st.color}15`, color: st.color, border: `1px solid ${st.color}40` }}>
-                        {st.label}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 text-[9px] font-mono tracking-wider px-2 py-0.5 rounded"
-                        style={{ background: 'rgba(94, 234, 212, 0.15)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
-                        <CheckCircle2 size={9} /> {m.status.toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="text-[10px] font-mono truncate" style={{ color: '#5EEAD4', opacity: 0.4 }}>
-                      {m.path.split('/').slice(-3).join('/')}
-                    </div>
-                  </div>
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Total Models', value: models.length, color: '#0F172A', icon: Brain },
+            { label: 'Clean', value: cleanCount, color: '#10B981', icon: ShieldCheck },
+            { label: 'Drift', value: driftCount, color: '#F59E0B', icon: ShieldAlert },
+            { label: 'Tampered', value: tamperedCount, color: '#EF4444', icon: XCircle },
+          ].map((s) => (
+            <motion.div
+              key={s.label}
+              whileHover={{ y: -3 }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${s.color}15` }}>
+                  <s.icon size={14} style={{ color: s.color }} />
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[
-                  { label: 'FRAMEWORK', value: m.framework, color: '#FFFFFF' },
-                  { label: 'SIZE', value: formatBytes(m.model_size_bytes), color: '#FFFFFF' },
-                  { label: 'PARAMETERS', value: m.parameter_count ? m.parameter_count.toLocaleString() : '3,011,628', color: '#FFFFFF' },
-                  { label: 'SHA-256', value: m.model_hash ? m.model_hash.substring(0, 16) + '...' : 'N/A', color: '#5EEAD4', title: m.model_hash },
-                ].map((item, k) => (
-                  <div key={k} className="p-3 rounded"
-                    style={{ background: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(94, 234, 212, 0.1)' }}>
-                    <div className="text-[9px] font-mono tracking-wider mb-1" style={{ color: '#5EEAD4', opacity: 0.5 }}>{item.label}</div>
-                    <div className="text-[11px] font-bold font-mono truncate cursor-help"
-                      style={{ color: item.color }} title={item.title}>
-                      {item.value}
-                    </div>
-                  </div>
-                ))}
+              <div className="mt-3 text-[32px] font-bold leading-none tracking-tight text-slate-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {s.value}
               </div>
             </motion.div>
-          )
-        })}
+          ))}
+        </div>
+
+        {/* Models list */}
+        <div className="mt-6">
+          {loading && models.length === 0 ? (
+            <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Analyzing model integrity...
+            </div>
+          ) : error ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+              <div className="text-[13px] font-medium text-red-700">Failed to load models</div>
+              <div className="mt-1 text-[11px] text-red-600">{error}</div>
+            </div>
+          ) : models.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white py-20 text-center">
+              <Brain size={32} className="mx-auto text-slate-400" />
+              <div className="mt-3 text-[14px] font-medium text-slate-700">No models registered</div>
+              <div className="mt-1 text-[11px] text-slate-500">Register a model to analyze integrity</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {models.map((m, i) => {
+                const theme = getModelStyle(m.name)
+                return (
+                  <motion.div
+                    key={m.name}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06 }}
+                    whileHover={{ y: -3 }}
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                  >
+                    {/* Header */}
+                    <div className="flex items-start justify-between border-b border-slate-100 p-5">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="flex h-11 w-11 items-center justify-center rounded-xl"
+                          style={{ background: theme.bg }}
+                        >
+                          {theme.label === 'Clean' ? (
+                            <ShieldCheck size={18} style={{ color: theme.text }} />
+                          ) : theme.label === 'Drift' ? (
+                            <ShieldAlert size={18} style={{ color: theme.text }} />
+                          ) : theme.label === 'Tampered' ? (
+                            <XCircle size={18} style={{ color: theme.text }} />
+                          ) : (
+                            <Scan size={18} style={{ color: theme.text }} />
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-[14px] font-semibold text-slate-900">{m.name}</div>
+                          <div className="mt-0.5 text-[10px] font-mono text-slate-500">
+                            {m.framework || 'python'} · {m.status || 'registered'}
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
+                        style={{ background: theme.bg, color: theme.text }}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: theme.dot }} />
+                        {theme.label}
+                      </span>
+                    </div>
+
+                    {/* Metrics grid */}
+                    <div className="grid grid-cols-3 gap-3 p-5">
+                      <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                        <div className="flex items-center gap-1.5">
+                          <Boxes size={11} className="text-slate-400" />
+                          <span className="text-[10px] font-medium text-slate-500">Parameters</span>
+                        </div>
+                        <div className="mt-1.5 font-mono text-[14px] font-bold text-slate-900">
+                          {m.parameter_count ? (m.parameter_count / 1e6).toFixed(1) + 'M' : '—'}
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                        <div className="flex items-center gap-1.5">
+                          <HardDrive size={11} className="text-slate-400" />
+                          <span className="text-[10px] font-medium text-slate-500">Size</span>
+                        </div>
+                        <div className="mt-1.5 font-mono text-[14px] font-bold text-slate-900">
+                          {formatBytes(m.model_size_bytes)}
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 size={11} className="text-slate-400" />
+                          <span className="text-[10px] font-medium text-slate-500">Status</span>
+                        </div>
+                        <div className="mt-1.5 text-[12px] font-semibold" style={{ color: theme.dot }}>
+                          Verified
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hash footer */}
+                    <div className="border-t border-slate-100 bg-slate-50 px-5 py-3">
+                      <div className="flex items-center gap-2">
+                        <Hash size={11} className="text-slate-400" />
+                        <span className="text-[10px] font-medium text-slate-500">SHA-256</span>
+                        <span className="truncate font-mono text-[10px] text-slate-600">
+                          {m.model_hash ? m.model_hash.slice(0, 32) + '...' : 'Not computed'}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
+
+export default ModelIntegrity

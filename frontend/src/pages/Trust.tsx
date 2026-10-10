@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Shield, Search, Eye, TrendingUp, CheckCircle, XCircle, Award, AlertTriangle, Loader2, RefreshCw, Check, Radio } from 'lucide-react'
+import {
+  Shield, Search, Loader2, RefreshCw, CheckCircle, XCircle,
+  Award, TrendingUp, AlertTriangle, Hash, Database, Cpu, Activity
+} from 'lucide-react'
 
 const API = 'http://localhost:8000'
 
@@ -29,7 +32,7 @@ export function Trust() {
       const ts = data.trust_scores || {}
       const list: TrustScore[] = Object.entries(ts).map(([key, val]: [string, any]) => ({
         name: key.toUpperCase(),
-        score: val.final_score || 0,
+        score: Number(val.final_score || 0),
         decision: (val.decision || 'REVIEW').replace(/[✅⚠️❌]/g, '').trim(),
         recommendation: val.recommendation || '',
         components: val.components || {},
@@ -42,239 +45,222 @@ export function Trust() {
 
   const filtered = scores.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
 
-  const getLevel = (score: number) => {
-    if (score >= 85) return 'EXCELLENT'
-    if (score >= 70) return 'GOOD'
-    if (score >= 50) return 'FAIR'
-    return 'POOR'
+  const getTheme = (score: number) => {
+    if (score >= 85) return { bg: '#D1FAE5', text: '#065F46', dot: '#10B981', label: 'Excellent', decision: 'Accept' }
+    if (score >= 70) return { bg: '#DBEAFE', text: '#1E40AF', dot: '#3B82F6', label: 'Good', decision: 'Accept' }
+    if (score >= 50) return { bg: '#FEF3C7', text: '#92400E', dot: '#F59E0B', label: 'Fair', decision: 'Review' }
+    return { bg: '#FEE2E2', text: '#991B1B', dot: '#EF4444', label: 'Poor', decision: 'Quarantine' }
   }
 
-  const getColor = (score: number) => {
-    if (score >= 85) return '#5EEAD4'
-    if (score >= 70) return '#38BDF8'
-    if (score >= 50) return '#FBBF24'
-    return '#F87171'
-  }
-
-  const stats = {
-    total: scores.length,
-    avg: scores.length ? Math.round(scores.reduce((sum, s) => sum + s.score, 0) / scores.length) : 0,
-    excellent: scores.filter((s) => s.score >= 85).length,
-    needsReview: scores.filter((s) => s.score < 70).length,
-  }
-
-  // REAL pillars computed from backend components
-  const components = scores.flatMap(s => Object.entries(s.components || {}))
-  const aggComponents: Record<string, number[]> = {}
-  scores.forEach(s => {
-    Object.entries(s.components || {}).forEach(([k, v]) => {
-      if (!aggComponents[k]) aggComponents[k] = []
-      aggComponents[k].push(Number(v))
-    })
-  })
-  const trustPillars = Object.entries(aggComponents).map(([key, values]) => ({
-    label: key.replace(/_/g, ' '),
-    value: values.length ? Math.round(values.reduce((a, b) => a + b, 0) / values.length * 10) / 10 : 0,
-  }))
+  const avgScore = scores.length
+    ? Math.round(scores.reduce((s, x) => s + x.score, 0) / scores.length)
+    : 0
+  const acceptCount = scores.filter(s => s.score >= 70).length
+  const reviewCount = scores.filter(s => s.score >= 50 && s.score < 70).length
+  const quarantineCount = scores.filter(s => s.score < 50).length
 
   return (
-    <div className="min-h-screen p-6" style={{ background: '#08080C', fontFamily: 'Inter, system-ui, sans-serif' }}>
-
-      {/* Top header */}
-      <div className="flex items-center justify-between mb-6 pb-4"
-        style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded flex items-center justify-center"
-            style={{ background: 'rgba(94, 234, 212, 0.1)', border: '1px solid rgba(94, 234, 212, 0.4)' }}>
-            <Shield size={14} style={{ color: '#5EEAD4' }} />
-          </div>
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 pb-6">
           <div>
-            <div className="text-[13px] font-bold tracking-[0.2em]" style={{ color: '#5EEAD4' }}>TRUST_MATRIX</div>
-            <div className="text-[9px] tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>COMPOSITE_ASSURANCE · NIST_AI_RMF</div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-400">
+              CV-INTEGRITY / Trust
+            </div>
+            <h1 className="mt-1 text-[28px] font-bold tracking-tight text-slate-900">
+              Trust Matrix
+            </h1>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Entity trust scores with component breakdown and disposition recommendations.
+            </p>
           </div>
+          <button
+            onClick={loadScores}
+            className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Refresh
+          </button>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Average Trust', value: `${avgScore}%`, color: '#0F172A', icon: Shield },
+            { label: 'Accepted', value: acceptCount, color: '#10B981', icon: CheckCircle },
+            { label: 'Review', value: reviewCount, color: '#F59E0B', icon: AlertTriangle },
+            { label: 'Quarantine', value: quarantineCount, color: '#EF4444', icon: XCircle },
+          ].map((s) => (
+            <motion.div
+              key={s.label}
+              whileHover={{ y: -3 }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-[12px] font-medium text-slate-500">{s.label}</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${s.color}15` }}>
+                  <s.icon size={14} style={{ color: s.color }} />
+                </div>
+              </div>
+              <div className="mt-3 text-[32px] font-bold leading-none tracking-tight text-slate-900" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {s.value}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="relative">
-            <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#5EEAD4', opacity: 0.5 }} />
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              placeholder="Search entities..."
+              type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 pr-3 py-1.5 rounded text-[11px] font-mono outline-none w-52"
-              style={{ background: 'rgba(94, 234, 212, 0.05)', border: '1px solid rgba(94, 234, 212, 0.2)', color: '#FFFFFF' }}
+              placeholder="Search entities..."
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-[13px] text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
-          <button onClick={loadScores}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-mono tracking-wider"
-            style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)', color: '#5EEAD4' }}>
-            <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
-            REFRESH
-          </button>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded"
-            style={{ background: 'rgba(94, 234, 212, 0.08)', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#5EEAD4' }} />
-            <span className="text-[10px] font-mono tracking-wider" style={{ color: '#5EEAD4' }}>TIER_1</span>
-          </div>
         </div>
-      </div>
 
-      {error && (
-        <div className="mb-4 p-3 rounded flex items-center gap-2"
-          style={{ background: 'rgba(248, 113, 113, 0.08)', border: '1px solid rgba(248, 113, 113, 0.3)' }}>
-          <AlertTriangle size={14} style={{ color: '#F87171' }} />
-          <span className="text-[11px] font-mono" style={{ color: '#F87171' }}>{error}</span>
-        </div>
-      )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        {[
-          { label: 'TOTAL_ENTITIES', value: stats.total, color: '#3A7D8F', icon: TrendingUp },
-          { label: 'AVG_TRUST_SCORE', value: `${stats.avg}%`, color: '#5EEAD4', icon: Award },
-          { label: 'EXCELLENT', value: stats.excellent, color: '#5EEAD4', icon: CheckCircle },
-          { label: 'NEEDS_REVIEW', value: stats.needsReview, color: '#F87171', icon: XCircle },
-        ].map((s, i) => {
-          const Icon = s.icon
-          return (
-            <div key={i} className="p-4 rounded"
-              style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono tracking-[0.2em]" style={{ color: '#5EEAD4', opacity: 0.5 }}>{s.label}</span>
-                <Icon size={14} style={{ color: s.color, opacity: 0.7 }} />
-              </div>
-              <div className="text-[28px] font-bold font-mono leading-none" style={{ color: s.color }}>{s.value}</div>
+        {/* Trust scores */}
+        <div className="mt-6">
+          {loading && scores.length === 0 ? (
+            <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-20 text-[13px] text-slate-400">
+              <Loader2 size={16} className="animate-spin" />
+              Loading trust scores...
             </div>
-          )
-        })}
-      </div>
-
-      {/* Trust Table */}
-      <div className="p-5 rounded mb-5"
-        style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="animate-spin" size={28} style={{ color: '#5EEAD4' }} />
-            <span className="ml-3 text-[12px] font-mono" style={{ color: '#5EEAD4', opacity: 0.6 }}>LOADING TRUST SCORES...</span>
-          </div>
-        ) : (
-          <table className="w-full">
-            <thead>
-              <tr style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.15)' }}>
-                {['ENTITY', 'TRUST_SCORE', 'LEVEL', 'DECISION'].map((h, i) => (
-                  <th key={h}
-                    className={`text-[10px] font-mono tracking-[0.15em] uppercase pb-3 ${i < 2 ? 'text-left' : 'text-right'}`}
-                    style={{ color: '#5EEAD4', opacity: 0.5 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((s, idx) => {
-                const color = getColor(s.score)
-                const level = getLevel(s.score)
+          ) : error ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+              <div className="text-[13px] font-medium text-red-700">Failed to load trust scores</div>
+              <div className="mt-1 text-[11px] text-red-600">{error}</div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white py-20 text-center">
+              <Shield size={32} className="mx-auto text-slate-400" />
+              <div className="mt-3 text-[14px] font-medium text-slate-700">No trust data</div>
+              <div className="mt-1 text-[11px] text-slate-500">
+                {search ? 'Try a different search term' : 'Trust scores will appear once entities are evaluated'}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {filtered.map((s, i) => {
+                const theme = getTheme(s.score)
+                const components = s.components || {}
                 return (
-                  <tr key={idx} style={{ borderBottom: '1px solid rgba(94, 234, 212, 0.06)' }}>
-                    <td className="py-4">
+                  <motion.div
+                    key={s.name}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06 }}
+                    whileHover={{ y: -3 }}
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                  >
+                    {/* Header */}
+                    <div className="flex items-start justify-between border-b border-slate-100 p-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded flex items-center justify-center"
-                          style={{ background: `${color}15`, border: `1px solid ${color}40` }}>
-                          <Shield size={15} style={{ color }} />
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ background: theme.bg }}>
+                          <Shield size={18} style={{ color: theme.text }} />
                         </div>
                         <div>
-                          <div className="text-[13px] font-bold font-mono" style={{ color: '#FFFFFF' }}>{s.name}</div>
-                          {s.recommendation && (
-                            <div className="text-[10px] font-mono truncate max-w-xs" style={{ color: '#5EEAD4', opacity: 0.4 }}>{s.recommendation}</div>
-                          )}
+                          <div className="text-[15px] font-semibold text-slate-900">{s.name}</div>
+                          <div className="mt-0.5 text-[11px] text-slate-500">Trust evaluation</div>
                         </div>
                       </div>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center gap-3 max-w-md">
-                        <div className="flex-1 h-1.5 rounded-full overflow-hidden"
-                          style={{ background: 'rgba(94, 234, 212, 0.1)' }}>
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${s.score}%` }}
-                            transition={{ duration: 0.8 }}
-                            className="h-full rounded-full"
-                            style={{ background: color, boxShadow: `0 0 8px ${color}` }}
-                          />
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
+                        style={{ background: theme.bg, color: theme.text }}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: theme.dot }} />
+                        {theme.decision}
+                      </span>
+                    </div>
+
+                    {/* Score */}
+                    <div className="p-5">
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <div className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                            Trust Score
+                          </div>
+                          <div className="mt-1 text-[42px] font-bold leading-none tracking-tight" style={{ color: theme.dot }}>
+                            {s.score.toFixed(0)}
+                            <span className="text-[18px]">%</span>
+                          </div>
                         </div>
-                        <span className="text-[13px] font-bold font-mono w-12 text-right" style={{ color }}>
-                          {s.score.toFixed(0)}
-                        </span>
+                        <div className="text-right">
+                          <div className="text-[10px] font-medium text-slate-500">Level</div>
+                          <div className="mt-1 text-[14px] font-semibold" style={{ color: theme.text }}>
+                            {theme.label}
+                          </div>
+                        </div>
                       </div>
-                    </td>
-                    <td className="py-4 text-right">
-                      <span className="text-[10px] font-mono tracking-wider px-2.5 py-1 rounded"
-                        style={{ background: `${color}15`, color, border: `1px solid ${color}40` }}>
-                        {level}
-                      </span>
-                    </td>
-                    <td className="py-4 text-right">
-                      <span className="text-[11px] font-mono font-bold" style={{ color }}>
-                        {s.decision}
-                      </span>
-                    </td>
-                  </tr>
+
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(s.score, 100)}%` }}
+                          transition={{ duration: 0.8 }}
+                          className="h-full rounded-full"
+                          style={{ background: theme.dot }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Components */}
+                    {Object.keys(components).length > 0 && (
+                      <div className="border-t border-slate-100 p-5">
+                        <div className="mb-3 text-[11px] font-medium text-slate-500">Component Breakdown</div>
+                        <div className="space-y-2.5">
+                          {Object.entries(components).map(([key, val]) => {
+                            const v = Number(val)
+                            const compColor = v >= 75 ? '#10B981' : v >= 50 ? '#F59E0B' : '#EF4444'
+                            return (
+                              <div key={key}>
+                                <div className="flex items-center justify-between text-[11px]">
+                                  <span className="font-medium capitalize text-slate-600">
+                                    {key.replace(/_/g, ' ')}
+                                  </span>
+                                  <span className="font-mono font-semibold" style={{ color: compColor }}>
+                                    {v.toFixed(0)}%
+                                  </span>
+                                </div>
+                                <div className="mt-1 h-1 overflow-hidden rounded-full bg-slate-100">
+                                  <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min(v, 100)}%` }}
+                                    transition={{ duration: 0.6, delay: 0.1 }}
+                                    className="h-full rounded-full"
+                                    style={{ background: compColor }}
+                                  />
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recommendation */}
+                    {s.recommendation && (
+                      <div className="border-t border-slate-100 bg-slate-50 px-5 py-3">
+                        <div className="flex items-center gap-2">
+                          <Award size={12} className="text-slate-400" />
+                          <span className="text-[11px] text-slate-600">{s.recommendation}</span>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
                 )
               })}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {/* Global Composite + Pillars */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
-        {/* Composite Index */}
-        <div className="p-5 rounded"
-          style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-          <div className="text-[10px] font-mono tracking-[0.2em] mb-3" style={{ color: '#5EEAD4', opacity: 0.6 }}>GLOBAL_COMPOSITE_INDEX</div>
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-[48px] font-bold font-mono leading-none" style={{ color: '#5EEAD4' }}>{stats.avg}</span>
-            <span className="text-[18px] font-mono" style={{ color: '#5EEAD4', opacity: 0.5 }}>/100</span>
-          </div>
-          <p className="text-[10px] font-mono leading-relaxed" style={{ color: '#5EEAD4', opacity: 0.5 }}>
-            Synthesized from SHA-256 blockchain verification, adversarial evasion boundaries, backdoor checks, and drift monitoring.
-          </p>
-          <div className="flex gap-2 mt-4">
-            <span className="text-[9px] px-2 py-0.5 rounded font-mono"
-              style={{ background: 'rgba(94, 234, 212, 0.15)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
-              TIER_1
-            </span>
-            <span className="text-[9px] px-2 py-0.5 rounded font-mono"
-              style={{ background: 'rgba(94, 234, 212, 0.15)', color: '#5EEAD4', border: '1px solid rgba(94, 234, 212, 0.3)' }}>
-              NIST_AI_RMF
-            </span>
-          </div>
-        </div>
-
-        {/* 6 Trust Pillars */}
-        <div className="lg:col-span-2 p-5 rounded"
-          style={{ background: 'rgba(94, 234, 212, 0.02)', border: '1px solid rgba(94, 234, 212, 0.15)' }}>
-          <div className="text-[10px] font-mono tracking-[0.2em] mb-4" style={{ color: '#5EEAD4', opacity: 0.6 }}>6_TRUST_DIMENSION_PILLARS</div>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            {trustPillars.map((p, i) => (
-              <div key={i}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-mono" style={{ color: '#FFFFFF', opacity: 0.8 }}>{p.label.toUpperCase()}</span>
-                  <span className="text-[11px] font-bold font-mono" style={{ color: '#5EEAD4' }}>{p.value}%</span>
-                </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(94, 234, 212, 0.1)' }}>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${p.value}%` }}
-                    transition={{ duration: 1, delay: i * 0.1 }}
-                    className="h-full rounded-full"
-                    style={{ background: 'linear-gradient(90deg, #5EEAD4, #38BDF8)', boxShadow: '0 0 6px #5EEAD4' }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
-
-      </div>
+    </div>
   )
 }
+
+export default Trust
