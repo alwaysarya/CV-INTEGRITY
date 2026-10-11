@@ -13,6 +13,7 @@ import { Attacks } from '@/pages/Attacks'
 import { XAI } from '@/pages/XAI'
 import { Provenance } from '@/pages/Provenance'
 import { Login } from '@/pages/Login'
+import { Landing } from '@/pages/Landing'
 import { VideoAnalysis } from '@/pages/VideoAnalysis'
 import { DriftMonitor } from '@/pages/DriftMonitor'
 import { Robustness } from '@/pages/Robustness'
@@ -41,6 +42,7 @@ function App() {
       <CommandPalette />
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/landing" element={<Landing />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="datasets" element={<Datasets />} />
