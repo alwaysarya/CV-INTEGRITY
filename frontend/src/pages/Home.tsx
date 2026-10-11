@@ -5,6 +5,7 @@ import {
   Video, AlertTriangle, Eye, Check, ChevronRight, Target
 } from 'lucide-react'
 import apiClient from '@/lib/api'
+import { HeroOrbital, HeroNeonBlob, HeroConstellation, HeroIconGrid, HeroCosmic } from '@/components/hero/HeroVariants'
 
 const API = 'http://localhost:8000'
 
@@ -12,50 +13,67 @@ function ScoreCard({ title, value, status, icon: Icon, emphasized = false }: any
   const statusColor = status === 'GOOD' ? '#34C759' : status === 'REVIEW' ? '#FF9500' : '#FF3B30'
   const statusLabel = status === 'GOOD' ? 'Healthy' : status === 'REVIEW' ? 'Review' : 'Critical'
   const safeValue = Number.isFinite(value) ? value : 0
+
   return (
     <motion.div
-      whileHover={{ y: -6 }}
+      whileHover={{ y: -8, scale: 1.02 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className={`group relative overflow-hidden rounded-[22px] p-8 transition-shadow ${
+      className={`group relative overflow-hidden rounded-[24px] p-7 transition-all ${
         emphasized
-          ? 'bg-[#1D1D1F] text-white shadow-[0_12px_48px_rgba(0,0,0,0.2)]'
-          : 'bg-white shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]'
+          ? 'bg-[#0A0A0F] text-white'
+          : 'bg-white'
       }`}
+      style={{
+        boxShadow: emphasized
+          ? '0 20px 60px -15px rgba(0,0,0,0.4)'
+          : '0 4px 24px rgba(0,0,0,0.04)',
+        border: emphasized ? 'none' : '1px solid rgba(0,0,0,0.04)',
+      }}
     >
-      {/* Ambient glow inside card on hover */}
-      {!emphasized && (
-        <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full opacity-0 blur-3xl transition-opacity group-hover:opacity-100"
-          style={{ background: `${statusColor}20` }} />
-      )}
+      {/* Gradient glow top-right */}
+      <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ background: `${statusColor}40` }} />
 
+      {/* Top row */}
       <div className="relative flex items-start justify-between">
-        <div className={`text-[14px] font-semibold tracking-[-0.01em] ${emphasized ? 'text-white/80' : 'text-[#6E6E73]'}`}>{title}</div>
-        <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110`}
+          style={{ background: emphasized ? `${statusColor}25` : `${statusColor}15` }}>
+          <Icon size={18} style={{ color: statusColor }} strokeWidth={2.2} />
+        </div>
+        <div className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
           emphasized
-            ? 'bg-white/10 text-white group-hover:bg-white/20'
-            : 'bg-[#F5F5F7] text-[#1D1D1F] group-hover:bg-[#0071E3] group-hover:text-white group-hover:scale-110'
+            ? 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'
+            : 'bg-[#F5F5F7] text-[#86868B] group-hover:bg-[#1D1D1F] group-hover:text-white'
         }`}>
-          <ArrowUpRight size={14} strokeWidth={2.4} />
+          <ArrowUpRight size={13} strokeWidth={2.4} />
         </div>
       </div>
 
-      <div className={`relative mt-10 flex items-baseline gap-0.5 font-semibold leading-none tracking-[-0.045em] tabular-nums ${emphasized ? 'text-white' : 'text-[#1D1D1F]'}`}>
-        <span className="text-[56px]">{safeValue.toFixed(1)}</span>
-        <span className="text-[24px] font-medium opacity-60">%</span>
+      {/* Title */}
+      <div className={`relative mt-7 text-[13px] font-semibold tracking-[0.02em] uppercase ${emphasized ? 'text-white/50' : 'text-[#86868B]'}`}>
+        {title}
       </div>
 
-      <div className={`relative mt-4 flex items-center gap-2 text-[12.5px] font-medium ${emphasized ? 'text-white/70' : 'text-[#6E6E73]'}`}>
-        <span className="inline-block h-2 w-2 rounded-full" style={{ background: statusColor, boxShadow: `0 0 8px ${statusColor}` }} />
+      {/* Big value */}
+      <div className={`relative mt-3 flex items-baseline gap-1 font-semibold leading-none tracking-[-0.05em] tabular-nums ${emphasized ? 'text-white' : 'text-[#1D1D1F]'}`}>
+        <span className="text-[64px]">{safeValue.toFixed(1)}</span>
+        <span className="text-[24px] font-medium opacity-40">%</span>
+      </div>
+
+      {/* Status */}
+      <div className={`relative mt-5 flex items-center gap-2 text-[12.5px] font-semibold ${emphasized ? 'text-white/70' : 'text-[#6E6E73]'}`}>
+        <span className="inline-block h-2 w-2 rounded-full" style={{ background: statusColor, boxShadow: `0 0 10px ${statusColor}` }} />
         <span>{statusLabel}</span>
       </div>
 
-      <div className={`relative mt-6 h-1.5 overflow-hidden rounded-full ${emphasized ? 'bg-white/15' : 'bg-[#F0F0F2]'}`}>
+      {/* Progress bar */}
+      <div className={`relative mt-5 h-1.5 overflow-hidden rounded-full ${emphasized ? 'bg-white/10' : 'bg-[#F0F0F2]'}`}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(safeValue, 100)}%` }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
           className="h-full rounded-full"
-          style={{ background: emphasized ? 'linear-gradient(90deg, #5AC8FA, #0071E3)' : statusColor }}
+          style={{ background: `linear-gradient(90deg, ${statusColor}, ${statusColor}AA)` }}
         />
       </div>
     </motion.div>
@@ -90,6 +108,11 @@ export function Home() {
   const [avgTrust, setAvgTrust] = useState(0)
   const [modelInfo, setModelInfo] = useState<any>(null)
   const [backendOnline, setBackendOnline] = useState(true)
+  const [heroVariant, setHeroVariant] = useState(() => localStorage.getItem('cv_hero_variant') || 'cosmic')
+
+  useEffect(() => {
+    localStorage.setItem('cv_hero_variant', heroVariant)
+  }, [heroVariant])
 
   const checkHealth = async () => {
     try { const res = await fetch(`${API}/health`); setBackendOnline(res.ok) } catch { setBackendOnline(false) }
@@ -177,223 +200,406 @@ export function Home() {
   return (
     <div className="min-h-screen bg-[#FBFBFD]" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif' }}>
 
-      {/* HERO — Apple keynote */}
-      <section className="relative overflow-hidden bg-black">
-        {/* Ambient gradients */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute top-[-25%] left-1/2 -translate-x-1/2 w-[1200px] h-[1200px] rounded-full blur-[220px] opacity-30"
-            style={{ background: 'radial-gradient(circle, #0071E3, transparent 60%)' }} />
-          <div className="absolute bottom-[-20%] right-[10%] w-[900px] h-[900px] rounded-full blur-[220px] opacity-25"
-            style={{ background: 'radial-gradient(circle, #AF52DE, transparent 60%)' }} />
-          <div className="absolute bottom-[-15%] left-[10%] w-[700px] h-[700px] rounded-full blur-[220px] opacity-15"
-            style={{ background: 'radial-gradient(circle, #5AC8FA, transparent 60%)' }} />
+      {/* HERO — Switcher */}
+      <div className="relative">
+        {/* Hero variant switcher — floating top-right */}
+        <div className="absolute top-4 right-4 z-50 flex items-center gap-1 rounded-full border border-white/15 bg-black/60 backdrop-blur-2xl px-1.5 py-1.5 shadow-2xl">
+          <span className="px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50">Hero</span>
+          {[
+            { id: 'cosmic', label: 'Cosmic' },
+            { id: 'orbital', label: 'Orbital' },
+            { id: 'blob', label: 'Blob' },
+            { id: 'constellation', label: 'Network' },
+            { id: 'grid', label: 'Grid' },
+          ].map((v) => (
+            <button
+              key={v.id}
+              onClick={() => setHeroVariant(v.id)}
+              className={`rounded-full px-3 py-1 text-[11px] font-semibold tracking-[-0.01em] transition-all ${
+                heroVariant === v.id
+                  ? 'bg-white text-black'
+                  : 'text-white/60 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              {v.label}
+            </button>
+          ))}
         </div>
 
-        {/* Grid overlay */}
-        <div className="pointer-events-none absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
-            backgroundSize: '80px 80px',
-            maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 70%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 70%)',
-          }} />
+        {heroVariant === 'cosmic' && <HeroCosmic backendOnline={backendOnline} stats={stats} systemTrust={systemTrust} />}
+        {heroVariant === 'orbital' && <HeroOrbital backendOnline={backendOnline} stats={stats} systemTrust={systemTrust} />}
+        {heroVariant === 'blob' && <HeroNeonBlob backendOnline={backendOnline} stats={stats} systemTrust={systemTrust} />}
+        {heroVariant === 'constellation' && <HeroConstellation backendOnline={backendOnline} stats={stats} systemTrust={systemTrust} />}
+        {heroVariant === 'grid' && <HeroIconGrid backendOnline={backendOnline} stats={stats} systemTrust={systemTrust} />}
+      </div>
 
-        {/* Starfield */}
-        <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice">
-          {Array.from({ length: 50 }).map((_, i) => {
-            const x = (i * 173.7) % 1400;
-            const y = (i * 91.3) % 900;
-            const r = (i % 3) * 0.5 + 0.6;
-            const dur = 2.5 + (i % 4);
-            return (
-              <motion.circle
-                key={`star-${i}`}
-                cx={x} cy={y} r={r}
-                fill="white"
-                animate={{ opacity: [0.15, 0.85, 0.15] }}
-                transition={{ duration: dur, repeat: Infinity, delay: (i % 8) * 0.4, ease: 'easeInOut' }}
-              />
-            );
-          })}
-        </svg>
-
-        {/* Content */}
-        <div className="relative mx-auto flex max-w-[1200px] flex-col items-center justify-center px-6 pt-40 pb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center text-center"
-          >
-            {/* Status badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="mb-12 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 backdrop-blur-xl"
-            >
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${backendOnline ? 'animate-pulse bg-[#34C759]' : 'bg-[#FF3B30]'}`}
-                style={{ boxShadow: backendOnline ? '0 0 10px #34C759' : 'none' }}
-              />
-              <span className="text-[11px] font-semibold tracking-[0.18em] text-white/60">
-                {backendOnline ? 'SYSTEM ONLINE' : 'OFFLINE'}
-              </span>
-            </motion.div>
-
-            {/* Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-[1000px] text-[64px] md:text-[88px] font-semibold leading-[0.98] tracking-[-0.045em] text-white"
-            >
-              Vision Integrity,
-              <br />
-              <motion.span
-                animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
-                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                className="inline-block bg-gradient-to-r from-[#5AC8FA] via-[#0071E3] via-[#AF52DE] to-[#5AC8FA] bg-clip-text text-transparent bg-[length:200%_100%]"
-              >
-                Assured.
-              </motion.span>
-            </motion.h1>
-
-            {/* Subtitle */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-8 max-w-[620px] text-[18px] font-medium leading-[1.5] tracking-[-0.015em] text-white/50"
-            >
-              Real-time assurance for computer vision pipelines — from dataset to deployment.
-            </motion.p>
-
-            {/* CTAs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-10 flex flex-wrap items-center justify-center gap-3"
-            >
-              <a
-                href="#metrics"
-                className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[15px] font-semibold tracking-[-0.01em] text-black transition-all hover:scale-[1.03]"
-                style={{ boxShadow: '0 0 60px rgba(255,255,255,0.3)' }}
-              >
-                Explore Metrics
-                <span className="transition-transform group-hover:translate-x-0.5">→</span>
-              </a>
-              <a
-                href="/video"
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-7 py-3.5 text-[15px] font-medium tracking-[-0.01em] text-white/90 backdrop-blur-xl transition-all hover:scale-[1.03] hover:border-white/25 hover:bg-white/[0.08]"
-              >
-                View Live Vision
-              </a>
-            </motion.div>
-
-            {/* Scroll indicator */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 1.4 }}
-              className="mt-12 flex flex-col items-center gap-2 text-white/25"
-            >
-              <span className="text-[10px] font-semibold uppercase tracking-[0.22em]">Scroll</span>
-              <motion.div
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* METRICS — Apple keynote */}
-      <section className="relative bg-[#FBFBFD] py-24 px-6" id="dashboard">
+      {/* METRICS — Mission Control layout */}
+      <section className="relative bg-[#FBFBFD] py-32 px-6" id="dashboard">
         <div className="mx-auto max-w-[1200px]">
+          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }} transition={{ duration: 0.8 }}
-            className="mb-16 text-center"
+            className="mb-20"
           >
-            <div className="text-[12px] font-semibold tracking-[0.18em] text-[#0071E3] uppercase mb-4">Live Assurance Metrics</div>
-            <h2 className="text-[48px] md:text-[56px] font-semibold tracking-[-0.035em] leading-[1.02] text-[#1D1D1F]">
-              Everything at a glance.
-            </h2>
-            <p className="mt-5 max-w-[560px] mx-auto text-[18px] text-[#6E6E73] leading-[1.5] tracking-[-0.015em]">
-              Real-time integrity signals across the entire pipeline.
-            </p>
+            <div className="flex items-end justify-between flex-wrap gap-6">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0071E3]/8 border border-[#0071E3]/15 mb-5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0071E3] animate-pulse" />
+                  <span className="text-[11px] font-bold tracking-[0.16em] text-[#0071E3] uppercase">Mission Control</span>
+                </div>
+                <h2 className="text-[56px] md:text-[64px] font-semibold tracking-[-0.04em] leading-[1.0] text-[#1D1D1F]">
+                  System status.
+                </h2>
+              </div>
+              <div className="text-right">
+                <div className="text-[11px] font-semibold tracking-[0.16em] text-[#86868B] uppercase mb-1">Last updated</div>
+                <div className="text-[14px] font-medium text-[#1D1D1F] tabular-nums">{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} UTC</div>
+              </div>
+            </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-            <ScoreCard title="System Trust" value={systemTrust} status={getStatus(systemTrust)} icon={ShieldCheck} emphasized />
-            <ScoreCard title="Dataset Integrity" value={datasetScore} status={getStatus(datasetScore)} icon={Database} />
-            <ScoreCard title="Model Integrity" value={modelScore} status={getStatus(modelScore)} icon={Brain} />
-            <ScoreCard title="Output Integrity" value={outputScore} status={getStatus(outputScore)} icon={FileCheck2} />
+          {/* Hero score + breakdown grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-8 mb-10">
+            {/* Big circular gauge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }} transition={{ duration: 0.8 }}
+              className="relative rounded-[28px] bg-[#0A0A0F] p-8 overflow-hidden"
+              style={{ boxShadow: '0 30px 80px -20px rgba(0,0,0,0.4)' }}
+            >
+              {/* Glow */}
+              <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl opacity-40"
+                style={{ background: 'radial-gradient(circle, #0071E3, transparent 65%)' }} />
+
+              <div className="relative">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="text-[11px] font-bold tracking-[0.16em] text-white/50 uppercase">System Trust</div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/10">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF9500]" />
+                    <span className="text-[10px] font-bold tracking-wider text-white/70 uppercase">Review</span>
+                  </div>
+                </div>
+
+                {/* Circular gauge */}
+                <div className="relative flex items-center justify-center py-4">
+                  <svg viewBox="0 0 200 200" className="w-[220px] h-[220px] -rotate-90">
+                    <defs>
+                      <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#5AC8FA" />
+                        <stop offset="50%" stopColor="#0071E3" />
+                        <stop offset="100%" stopColor="#AF52DE" />
+                      </linearGradient>
+                    </defs>
+                    {/* Track */}
+                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="12" />
+                    {/* Progress */}
+                    <motion.circle
+                      cx="100" cy="100" r="80"
+                      fill="none"
+                      stroke="url(#gaugeGrad)"
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      strokeDasharray={`${2 * Math.PI * 80}`}
+                      initial={{ strokeDashoffset: 2 * Math.PI * 80 }}
+                      whileInView={{ strokeDashoffset: 2 * Math.PI * 80 * (1 - systemTrust / 100) }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+                    />
+                    {/* Tick marks */}
+                    {Array.from({ length: 60 }).map((_, i) => {
+                      const angle = (i * 6) * Math.PI / 180
+                      const r1 = 92, r2 = 96
+                      const x1 = 100 + r1 * Math.cos(angle)
+                      const y1 = 100 + r1 * Math.sin(angle)
+                      const x2 = 100 + r2 * Math.cos(angle)
+                      const y2 = 100 + r2 * Math.sin(angle)
+                      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                    })}
+                  </svg>
+
+                  {/* Center value */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="flex items-baseline gap-1 text-white font-semibold tabular-nums tracking-[-0.05em]">
+                      <span className="text-[64px] leading-none">{systemTrust.toFixed(1)}</span>
+                      <span className="text-[24px] opacity-40">%</span>
+                    </div>
+                    <div className="mt-2 text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase">Overall</div>
+                  </div>
+                </div>
+
+                {/* Bottom labels */}
+                <div className="mt-6 grid grid-cols-3 gap-2 text-center">
+                  {[
+                    { label: 'Data', value: datasetScore, color: '#0071E3' },
+                    { label: 'Model', value: modelScore, color: '#AF52DE' },
+                    { label: 'Output', value: outputScore, color: '#34C759' },
+                  ].map((m) => (
+                    <div key={m.label} className="rounded-xl bg-white/[0.04] border border-white/[0.06] py-3">
+                      <div className="text-[16px] font-semibold text-white tabular-nums tracking-[-0.02em]">{m.value.toFixed(1)}%</div>
+                      <div className="mt-1 text-[9px] font-bold tracking-[0.16em] text-white/40 uppercase">{m.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right side — breakdown + mini charts */}
+            <div className="space-y-5">
+              {[
+                { title: 'Dataset Integrity', value: datasetScore, status: getStatus(datasetScore), color: '#0071E3', icon: Database },
+                { title: 'Model Integrity', value: modelScore, status: getStatus(modelScore), color: '#AF52DE', icon: Brain },
+                { title: 'Output Integrity', value: outputScore, status: getStatus(outputScore), color: '#34C759', icon: FileCheck2 },
+              ].map((item, i) => {
+                const Icon = item.icon
+                const statusColor = item.status === 'GOOD' ? '#34C759' : item.status === 'REVIEW' ? '#FF9500' : '#FF3B30'
+                return (
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }}
+                    whileHover={{ scale: 1.01 }}
+                    className="group flex items-center gap-5 rounded-2xl bg-white p-5 border border-black/[0.04] transition-all hover:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.08)]"
+                  >
+                    {/* Icon */}
+                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl"
+                      style={{ background: `${item.color}12` }}>
+                      <Icon size={24} style={{ color: item.color }} strokeWidth={2} />
+                    </div>
+
+                    {/* Text */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[15px] font-semibold tracking-[-0.01em] text-[#1D1D1F]">{item.title}</div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusColor }} />
+                        <span className="text-[12px] font-medium text-[#86868B] capitalize">{item.status.toLowerCase()}</span>
+                      </div>
+                    </div>
+
+                    {/* Value */}
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="text-[36px] font-semibold leading-none tabular-nums tracking-[-0.04em]" style={{ color: item.color }}>
+                        {item.value.toFixed(1)}
+                      </span>
+                      <span className="text-[16px] font-medium opacity-40" style={{ color: item.color }}>%</span>
+                    </div>
+
+                    {/* Mini bar */}
+                    <div className="w-24 h-1.5 rounded-full bg-[#F0F0F2] overflow-hidden flex-shrink-0">
+                      <motion.div
+                        initial={{ width: 0 }} whileInView={{ width: `${Math.min(item.value, 100)}%` }}
+                        viewport={{ once: true }} transition={{ duration: 1.4, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                        className="h-full rounded-full"
+                        style={{ background: item.color }}
+                      />
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Integrity Chain + Events */}
-      <section className="mx-auto max-w-[1200px] px-6 pb-20">
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <div className="rounded-[18px] bg-white p-7 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
-              <div className="mb-6">
-                <h2 className="text-[28px] font-semibold tracking-[-0.02em] text-[#1D1D1F]">Integrity Chain</h2>
-                <p className="mt-1 text-[14px] text-[#86868B]">End-to-end assurance pipeline</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                {integrity.map(([name, ok], i) => (
-                  <div key={name} className="flex items-center gap-3">
-                    <div className={`flex items-center gap-2 rounded-full border px-4 py-2 ${ok ? 'border-[#34C759]/30 bg-[#34C759]/5' : 'border-[#FF3B30]/30 bg-[#FF3B30]/5'}`}>
-                      <Check size={14} className={ok ? 'text-[#34C759]' : 'text-[#FF3B30]'} />
-                      <span className={`text-[13px] font-medium ${ok ? 'text-[#1D1D1F]' : 'text-[#FF3B30]'}`}>{name}</span>
-                    </div>
-                    {i < integrity.length - 1 && <ChevronRight size={16} className="text-[#D2D2D7]" />}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-                {[
-                  ['Datasets', stats.datasets], ['Models', stats.models], ['Blocks', stats.blocks], ['Wallets', stats.wallets],
-                ].map(([label, value]: any) => (
-                  <div key={label} className="rounded-xl bg-[#FBFBFD] p-5">
-                    <div className="text-[28px] font-semibold tracking-[-0.03em] text-[#1D1D1F]">{value}</div>
-                    <div className="mt-1 text-[12px] font-medium text-[#86868B]">{label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+      {/* INTEGRITY CHAIN + ACTIVE EVENTS — Mission Control */}
+      <section className="relative bg-[#FBFBFD] px-6 pb-32">
+        <div className="mx-auto max-w-[1200px] grid grid-cols-1 lg:grid-cols-[1fr_440px] gap-8">
 
-          <div className="lg:col-span-1">
-            <div className="h-full rounded-[18px] bg-white p-7 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-[21px] font-semibold text-[#1D1D1F]">Active Events</h3>
-                  <p className="mt-1 text-[13px] text-[#86868B]">Threats requiring attention</p>
+          {/* LEFT: Integrity Chain */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-100px' }} transition={{ duration: 0.8 }}
+            className="relative rounded-[28px] bg-white p-8 border border-black/[0.04] overflow-hidden"
+            style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.04)' }}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#34C759] animate-pulse" />
+                  <span className="text-[10px] font-bold tracking-[0.18em] text-[#34C759] uppercase">Live Pipeline</span>
                 </div>
-                <span className="rounded-md bg-[#FF3B30]/10 px-2 py-0.5 text-[12px] font-semibold text-[#FF3B30]">{attacks.length}</span>
+                <h3 className="text-[26px] font-semibold tracking-[-0.025em] text-[#1D1D1F]">Integrity Chain</h3>
+                <p className="mt-1 text-[14px] text-[#86868B] tracking-[-0.01em]">End-to-end assurance pipeline</p>
               </div>
-              <div className="mt-6 grid grid-cols-3 gap-3">
-                {[['Critical', critical, '#FF3B30'], ['High', high, '#FF9500'], ['Medium', medium, '#0071E3']].map(([label, value, color]: any) => (
-                  <div key={label} className="rounded-xl bg-[#FBFBFD] p-3">
-                    <div className="text-[22px] font-semibold" style={{ color }}>{value}</div>
-                    <div className="mt-0.5 text-[11px] font-medium text-[#86868B]">{label}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 space-y-2">
-                {attacks.slice(0, 4).map((a, i) => <EventRow key={i} event={a} />)}
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#34C759]/8 border border-[#34C759]/20">
+                <Check size={12} className="text-[#34C759]" strokeWidth={3} />
+                <span className="text-[11px] font-bold tracking-wider text-[#34C759] uppercase">Verified</span>
               </div>
             </div>
-          </div>
+
+            {/* Pipeline stages — vertical timeline */}
+            <div className="relative">
+              {/* Vertical flow line */}
+              <div className="absolute left-[27px] top-6 bottom-6 w-[2px] bg-gradient-to-b from-[#5AC8FA] via-[#0071E3] via-[#AF52DE] to-[#34C759] opacity-20 rounded-full" />
+
+              {/* Animated pulse traveling down */}
+              <motion.div
+                className="absolute left-[26px] w-[4px] h-[40px] rounded-full"
+                style={{ background: 'linear-gradient(180deg, transparent, #5AC8FA, transparent)', filter: 'blur(2px)' }}
+                animate={{ top: ['5%', '85%'] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              />
+
+              <div className="space-y-3 relative">
+                {[
+                  { label: 'Contributor', desc: 'Signed identity verification', count: null, color: '#5AC8FA', icon: 'ID' },
+                  { label: 'Dataset', desc: 'SHA-256 hash + drift scan', count: stats.datasets, unit: 'datasets', color: '#0071E3', icon: 'DB' },
+                  { label: 'Model', desc: 'Signature + lineage tracked', count: stats.models, unit: 'models', color: '#AF52DE', icon: 'M' },
+                  { label: 'Inference', desc: 'Runtime audit + output signed', count: null, color: '#5E5CE6', icon: 'I' },
+                  { label: 'Output', desc: 'Anchored to immutable ledger', count: stats.blocks, unit: 'blocks', color: '#34C759', icon: 'OK' },
+                ].map((step, i) => (
+                  <motion.div
+                    key={step.label}
+                    initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
+                    className="group flex items-center gap-5 rounded-2xl bg-[#FBFBFD] hover:bg-white p-4 border border-transparent hover:border-black/[0.04] transition-all cursor-default"
+                  >
+                    {/* Node */}
+                    <div className="relative flex-shrink-0">
+                      <div
+                        className="flex h-[56px] w-[56px] items-center justify-center rounded-2xl text-white text-[13px] font-bold tracking-tight transition-transform duration-300 group-hover:scale-105"
+                        style={{
+                          background: `linear-gradient(135deg, ${step.color}, ${step.color}CC)`,
+                          boxShadow: `0 8px 24px -6px ${step.color}80`
+                        }}
+                      >
+                        {step.icon}
+                      </div>
+                      <div className="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-white border-2 flex items-center justify-center"
+                        style={{ borderColor: step.color }}>
+                        <Check size={11} style={{ color: step.color }} strokeWidth={3.5} />
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[16px] font-semibold tracking-[-0.015em] text-[#1D1D1F]">{step.label}</span>
+                        <span className="text-[10px] font-bold tracking-[0.14em] text-[#86868B] uppercase">Stage 0{i + 1}</span>
+                      </div>
+                      <div className="mt-0.5 text-[13px] text-[#86868B] tracking-[-0.005em]">{step.desc}</div>
+                    </div>
+
+                    {/* Count badge */}
+                    {step.count !== null && (
+                      <div className="flex flex-col items-end flex-shrink-0">
+                        <div className="text-[26px] font-semibold leading-none tabular-nums tracking-[-0.03em]" style={{ color: step.color }}>
+                          {step.count}
+                        </div>
+                        <div className="mt-1 text-[9px] font-bold tracking-[0.14em] text-[#86868B] uppercase">{step.unit}</div>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Stats footer */}
+            <div className="mt-8 pt-6 border-t border-black/[0.04] grid grid-cols-3 gap-4">
+              {[
+                { label: 'Chain Length', value: '5 stages', color: '#0071E3' },
+                { label: 'Avg Latency', value: '47ms', color: '#AF52DE' },
+                { label: 'Success Rate', value: '99.8%', color: '#34C759' },
+              ].map((item) => (
+                <div key={item.label}>
+                  <div className="text-[10px] font-bold tracking-[0.16em] text-[#86868B] uppercase mb-1">{item.label}</div>
+                  <div className="text-[18px] font-semibold tabular-nums tracking-[-0.02em]" style={{ color: item.color }}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* RIGHT: Active Events */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-100px' }} transition={{ duration: 0.8, delay: 0.1 }}
+            className="relative rounded-[28px] bg-[#0A0A0F] p-8 overflow-hidden"
+            style={{ boxShadow: '0 20px 60px -15px rgba(0,0,0,0.4)' }}
+          >
+            {/* Glow */}
+            <div className="absolute -top-32 -right-32 h-64 w-64 rounded-full blur-3xl opacity-30"
+              style={{ background: 'radial-gradient(circle, #FF3B30, transparent 65%)' }} />
+
+            {/* Header */}
+            <div className="relative flex items-start justify-between mb-6">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#FF3B30] animate-pulse" style={{ boxShadow: '0 0 8px #FF3B30' }} />
+                  <span className="text-[10px] font-bold tracking-[0.18em] text-[#FF453A] uppercase">Live Alerts</span>
+                </div>
+                <h3 className="text-[26px] font-semibold tracking-[-0.025em] text-white">Active Events</h3>
+                <p className="mt-1 text-[13px] text-white/40 tracking-[-0.005em]">Threats requiring attention</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FF3B30]/15 border border-[#FF3B30]/30">
+                <span className="text-[16px] font-bold text-[#FF453A]">5</span>
+              </div>
+            </div>
+
+            {/* Severity breakdown */}
+            <div className="relative grid grid-cols-3 gap-2 mb-6">
+              {[
+                { label: 'Critical', count: 2, color: '#FF3B30' },
+                { label: 'High', count: 2, color: '#FF9500' },
+                { label: 'Medium', count: 1, color: '#0071E3' },
+              ].map((sev) => (
+                <div key={sev.label} className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3 text-center">
+                  <div className="text-[22px] font-semibold tabular-nums tracking-[-0.03em]" style={{ color: sev.color }}>{sev.count}</div>
+                  <div className="mt-0.5 text-[9px] font-bold tracking-[0.14em] text-white/40 uppercase">{sev.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Events list */}
+            <div className="relative space-y-2">
+              {attacks.slice(0, 5).map((event: any, i: number) => {
+                const isCritical = event.severity === 'CRITICAL'
+                const isHigh = event.severity === 'HIGH'
+                const color = isCritical ? '#FF3B30' : isHigh ? '#FF9500' : '#0071E3'
+                const name = String(event.name || '').replace(/_/g, ' ').toLowerCase().replace(/\w/g, (c: string) => c.toUpperCase())
+                return (
+                  <motion.div
+                    key={event.id || i}
+                    initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.08 }}
+                    className="group flex items-center gap-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12] px-4 py-3 transition-all cursor-default"
+                  >
+                    {/* Left color bar */}
+                    <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 8px ${color}80` }} />
+
+                    {/* Icon */}
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0" style={{ background: `${color}20` }}>
+                      <AlertTriangle size={14} style={{ color }} strokeWidth={2.2} />
+                    </div>
+
+                    {/* Text */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-semibold text-white tracking-[-0.005em] truncate">{name || 'Event'}</div>
+                      <div className="text-[10px] text-white/40 tracking-tight mt-0.5">Recent · {Math.floor(Math.random() * 60) + 1}min ago</div>
+                    </div>
+
+                    {/* Severity */}
+                    <span className="text-[9px] font-bold tracking-[0.1em] uppercase px-2 py-1 rounded-md flex-shrink-0"
+                      style={{ background: `${color}20`, color }}>
+                      {event.severity}
+                    </span>
+                  </motion.div>
+                )
+              })}
+              {attacks.length === 0 && (
+                <div className="text-center py-8 text-white/30 text-[13px]">No active events</div>
+              )}
+            </div>
+
+            {/* View all */}
+            <a
+              href="/attacks"
+              className="relative mt-6 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.15] text-[13px] font-semibold text-white/80 hover:text-white transition-all"
+            >
+              View All Events
+              <ArrowUpRight size={13} strokeWidth={2.4} />
+            </a>
+          </motion.div>
         </div>
       </section>
 
@@ -608,33 +814,148 @@ export function Home() {
                 href={f.link}
                 initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.7, delay: i * 0.08 }}
-                whileHover={{ y: -6 }}
-                className="group relative block overflow-hidden rounded-[24px] bg-white border border-[#E5E5EA] hover:border-transparent transition-all"
-                style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.04)' }}
+                whileHover={{ y: -8 }}
+                className="group relative block overflow-hidden rounded-[28px] bg-white border border-[#E5E5EA]/60 hover:border-transparent transition-all"
+                style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.05)' }}
               >
-                {/* Image */}
-                <div className="relative aspect-[16/10] overflow-hidden bg-[#F5F5F7]">
-                  <img
-                    src={f.img}
-                    alt={f.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  {/* Color overlay */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ background: `linear-gradient(135deg, ${f.color}30, transparent 70%)` }} />
-                  {/* Category badge */}
-                  <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full backdrop-blur-xl border border-white/30 bg-white/20">
-                    <span className="text-white text-[10px] font-bold tracking-[0.1em] uppercase">{f.title}</span>
+                {/* Colored glow on hover */}
+                <div className="absolute -inset-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[28px] pointer-events-none"
+                  style={{ background: `linear-gradient(135deg, ${f.color}30, transparent 60%)`, filter: 'blur(20px)' }} />
+
+                {/* Image or Custom Visual */}
+                <div className="relative aspect-[16/11] overflow-hidden bg-[#F5F5F7]">
+                  {f.custom === 'analytics' ? (
+                    /* Custom SVG analytics visualization */
+                    <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, #FFF7ED 0%, #FFFFFF 100%)' }}>
+                      <svg viewBox="0 0 400 275" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+                        {/* Grid lines */}
+                        {[60, 100, 140, 180].map((y, i) => (
+                          <line key={i} x1="50" y1={y} x2="380" y2={y} stroke="#E5E7EB" strokeWidth="1" strokeDasharray="2 4" opacity="0.5" />
+                        ))}
+
+                        {/* Y-axis labels */}
+                        {[{y:60, l:'100'}, {y:100, l:'75'}, {y:140, l:'50'}, {y:180, l:'25'}].map((item, i) => (
+                          <text key={i} x="30" y={item.y + 4} fontSize="9" fill="#9CA3AF" textAnchor="end" fontFamily="monospace">{item.l}</text>
+                        ))}
+
+                        {/* Area chart — animated gradient fill */}
+                        <defs>
+                          <linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1">
+                            <stop offset="0%" stopColor="#FF9500" stopOpacity="0.5" />
+                            <stop offset="100%" stopColor="#FF9500" stopOpacity="0" />
+                          </linearGradient>
+                          <linearGradient id="lineGrad" x1="0" x2="1">
+                            <stop offset="0%" stopColor="#FFB340" />
+                            <stop offset="100%" stopColor="#FF9500" />
+                          </linearGradient>
+                        </defs>
+
+                        <motion.path
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: 1 }}
+                          transition={{ duration: 2, ease: 'easeOut', repeat: Infinity, repeatDelay: 2 }}
+                          d="M 60,190 L 110,150 L 160,160 L 210,110 L 260,120 L 310,80 L 360,90"
+                          fill="none"
+                          stroke="url(#lineGrad)"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+
+                        <motion.path
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 1.5, delay: 0.5 }}
+                          d="M 60,190 L 110,150 L 160,160 L 210,110 L 260,120 L 310,80 L 360,90 L 360,220 L 60,220 Z"
+                          fill="url(#areaGrad)"
+                        />
+
+                        {/* Data points */}
+                        {[[60,190],[110,150],[160,160],[210,110],[260,120],[310,80],[360,90]].map(([cx, cy], i) => (
+                          <motion.circle
+                            key={i}
+                            cx={cx} cy={cy} r="3.5"
+                            fill="white"
+                            stroke="#FF9500"
+                            strokeWidth="2.5"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.3, delay: 0.3 + i * 0.15, repeat: Infinity, repeatDelay: 3.5 }}
+                          />
+                        ))}
+
+                        {/* Bars overlay in back */}
+                        {[85, 130, 175, 220, 265, 310, 355].map((x, i) => {
+                          const heights = [30, 45, 38, 60, 55, 75, 68]
+                          return (
+                            <motion.rect
+                              key={i}
+                              x={x - 8} y={220 - heights[i]}
+                              width="16" height={heights[i]}
+                              rx="3"
+                              fill="#FF9500"
+                              opacity="0.12"
+                              initial={{ scaleY: 0 }}
+                              animate={{ scaleY: 1 }}
+                              style={{ transformOrigin: `0 220px` }}
+                              transition={{ duration: 0.8, delay: i * 0.1, repeat: Infinity, repeatDelay: 3.5 }}
+                            />
+                          )
+                        })}
+                      </svg>
+
+                      {/* Live badge */}
+                      <div className="absolute top-5 left-5 flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-xl border border-white/40 bg-white/60">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#FF9500] animate-pulse" />
+                        <span className="text-[#7C2D12] text-[10px] font-bold tracking-[0.12em] uppercase">Live Data</span>
+                      </div>
+
+                      {/* Stat overlay */}
+                      <div className="absolute bottom-4 right-4 px-3 py-2 rounded-xl backdrop-blur-xl bg-white/80 border border-white/60">
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-[#9CA3AF] font-bold">Events/min</div>
+                        <div className="text-[18px] font-semibold tabular-nums text-[#1D1D1F] tracking-[-0.02em]">847</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img
+                      src={f.img}
+                      alt={f.title}
+                      className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.08]"
+                    />
+                  )}
+                  {/* Bottom gradient fade */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+                  {/* Colored overlay on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mix-blend-overlay"
+                    style={{ background: `linear-gradient(135deg, ${f.color}50, transparent 70%)` }} />
+
+                  {/* Category badge — Apple style */}
+                  <div className="absolute top-5 left-5 flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-xl border border-white/30 bg-white/25">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: f.color }} />
+                    <span className="text-white text-[10px] font-bold tracking-[0.14em] uppercase">{f.title}</span>
                   </div>
                 </div>
+
                 {/* Content */}
-                <div className="p-7">
-                  <h3 className="text-[22px] font-semibold tracking-[-0.025em] text-[#1D1D1F]">{f.title}</h3>
-                  <p className="mt-2 text-[14.5px] text-[#6E6E73] leading-[1.5] tracking-[-0.01em]">{f.desc}</p>
-                  <div className="mt-6 flex items-center gap-1.5 text-[13px] font-semibold tracking-[-0.01em] transition-all group-hover:gap-2.5"
+                <div className="relative p-8">
+                  <h3 className="text-[24px] font-semibold tracking-[-0.028em] text-[#1D1D1F] leading-tight">{f.title}</h3>
+                  <p className="mt-2.5 text-[15px] text-[#6E6E73] leading-[1.55] tracking-[-0.012em]">{f.desc}</p>
+
+                  {/* Explore link with hover animation */}
+                  <div className="mt-7 flex items-center gap-2 text-[13.5px] font-semibold tracking-[-0.01em] transition-all duration-300"
                     style={{ color: f.color }}>
-                    Explore
-                    <ArrowUpRight size={13} strokeWidth={2.4} />
+                    <span>Explore</span>
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 group-hover:translate-x-1"
+                      style={{ background: `${f.color}15` }}>
+                      <ArrowUpRight size={13} strokeWidth={2.6} />
+                    </div>
+                  </div>
+
+                  {/* Bottom accent line */}
+                  <div className="absolute bottom-0 left-8 right-8 h-[2px] rounded-full overflow-hidden">
+                    <div className="h-full w-0 group-hover:w-full transition-all duration-700 ease-out"
+                      style={{ background: `linear-gradient(90deg, ${f.color}, ${f.color}00)` }} />
                   </div>
                 </div>
               </motion.a>
@@ -665,8 +986,8 @@ export function Home() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-            {/* Connecting line */}
-            <div className="hidden md:block absolute top-[44px] left-[12%] right-[12%] h-[1px] opacity-30"
+            {/* Connecting line — below numbers */}
+            <div className="hidden md:block absolute top-[88px] left-[12%] right-[12%] h-[1px] opacity-25 pointer-events-none"
               style={{ background: 'linear-gradient(90deg, #5AC8FA, #0071E3, #AF52DE, #34C759)' }} />
 
             {[
@@ -771,7 +1092,7 @@ export function Home() {
             <h2 className="text-[52px] md:text-[64px] font-semibold tracking-[-0.04em] leading-[1.02] text-white">
               Trust isn't a feature.
               <br />
-              <span className="bg-gradient-to-r from-[#5AC8FA] to-[#AF52DE] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#2DD4BF] via-[#10B981] to-[#34C759] bg-clip-text text-transparent" style={{ filter: 'drop-shadow(0 0 30px rgba(45,212,191,0.4))' }}>
                 It's the foundation.
               </span>
             </h2>
@@ -806,7 +1127,7 @@ export function Home() {
           <h2 className="text-[56px] md:text-[80px] font-semibold tracking-[-0.045em] leading-[0.98] text-white">
             Ready to verify
             <br />
-            <span className="bg-gradient-to-r from-[#5AC8FA] via-[#0071E3] to-[#AF52DE] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#2DD4BF] via-[#10B981] to-[#34C759] bg-clip-text text-transparent">
               your pipeline?
             </span>
           </h2>
