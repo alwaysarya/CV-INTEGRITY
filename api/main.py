@@ -165,8 +165,6 @@ if FASTAPI_AVAILABLE:
     try:
         from api.routes.drift_route import router as drift_router
         app.include_router(drift_router)
-        from api.routes.team_route import router as team_router
-        app.include_router(team_router)
         print("✅ Drift routes registered")
     except Exception as e:
         print(f"⚠️ Failed to register drift routes: {e}")
@@ -187,29 +185,6 @@ if FASTAPI_AVAILABLE:
         print("✅ Model Analysis routes registered")
     except Exception as e:
         print(f"⚠️ Failed to register model analysis routes: {e}")
-
-    # 11. Inference Provenance routes (NEW — PS 2.2.3)
-    try:
-        from api.routes.provenance_route import router as provenance_router
-        app.include_router(provenance_router)
-        print("✅ Provenance routes registered")
-    except Exception as e:
-        print(f"⚠️ Failed to register provenance routes: {e}")
-
-    # 13. Smart Contracts routes (NEW)
-    try:
-        from api.routes.contracts_route import router as contracts_router
-        app.include_router(contracts_router)
-        print("✅ Contracts routes registered")
-    except Exception as e:
-        print(f"⚠️ Failed to register contracts routes: {e}")
-
-    # Original block continues below
-    try:
-        pass
-        print("✅ Provenance routes registered")
-    except Exception as e:
-        print(f"⚠️ Failed to register provenance routes: {e}")
     print("=" * 60)
     print("✅ ALL ROUTES REGISTERED")
     print("=" * 60)
@@ -494,14 +469,9 @@ if FASTAPI_AVAILABLE:
         if REPORTS.exists():
             stats['reports'] = len(list(REPORTS.glob('*.json')))
         
-        try:
-            chain_file = Path(__file__).parent.parent / 'blockchain' / 'data' / 'chain.json'
-            if chain_file.exists():
-                with open(chain_file) as f:
-                    chain_data = json.load(f)
-                    stats['blocks'] = len(chain_data.get('chain', []))
-        except Exception as e:
-            print(f'⚠️ Blockchain load failed: {e}')
+        blockchain = load_json('blockchain.json')
+        if blockchain:
+            stats['blocks'] = blockchain.get('length', 0)
         
         wallets = load_json('wallets.json')
         if wallets:
