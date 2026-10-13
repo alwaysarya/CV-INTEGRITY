@@ -235,7 +235,7 @@ export function Landing() {
           <motion.span
             animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
             transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            className="bg-gradient-to-r from-[#5AC8FA] via-[#0071E3] via-[#AF52DE] to-[#5AC8FA] bg-clip-text text-transparent bg-[length:200%_100%]"
+            className="bg-gradient-to-r from-[#FF006E] via-[#3A86FF] via-[#8338EC] to-[#FF006E] bg-clip-text text-transparent bg-[length:200%_100%]"
           >
             Assured.
           </motion.span>
@@ -259,7 +259,7 @@ export function Landing() {
             className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white text-[15px] font-medium tracking-tight transition-all"
             style={{ boxShadow: '0 12px 40px -8px rgba(0,113,227,0.6)' }}
           >
-            Enter Dashboard
+            Enter Vision World
             <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" strokeWidth={2.4} />
           </button>
           <a

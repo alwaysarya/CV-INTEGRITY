@@ -55,6 +55,7 @@ function CustomBarChart({ data, series }: { data: any[]; series: { key: string; 
   return (
     <div className="relative">
       <div className="flex">
+        {/* Y-axis */}
         <div className="flex flex-col justify-between h-[280px] pr-4 text-right">
           {[100, 75, 50, 25, 0].map((v) => (
             <div key={v} className="text-[10px] font-mono text-white/30 tabular-nums leading-none">
@@ -63,56 +64,57 @@ function CustomBarChart({ data, series }: { data: any[]; series: { key: string; 
           ))}
         </div>
 
+        {/* Chart area */}
         <div className="flex-1 relative">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="absolute left-0 right-0 border-t border-dashed border-white/[0.06]"
-              style={{ top: `${i * 25}%` }}
-            />
-          ))}
+          {/* Grid lines */}
+          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div key={i} className="border-t border-dashed border-white/[0.06]" />
+            ))}
+          </div>
 
+          {/* Bars */}
           <div className="relative h-[280px] flex items-end justify-around gap-4">
             {data.map((row, rowIdx) => (
-              <div key={rowIdx} className="flex items-end gap-2 flex-1 max-w-[120px]">
+              <div key={rowIdx} className="flex items-end gap-1.5 flex-1 max-w-[140px] h-full">
                 {series.map((s, colIdx) => {
                   const value = row[s.key] || 0
-                  const pct = (value / maxValue) * 100
+                  const heightPct = (value / maxValue) * 100
                   const isHovered = hoveredBar?.row === rowIdx && hoveredBar?.col === colIdx
 
                   return (
-                    <div key={s.key} className="flex-1 relative group" style={{ height: '100%' }}>
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        whileInView={{ height: `${pct}%`, opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1, delay: rowIdx * 0.1 + colIdx * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                        onMouseEnter={() => setHoveredBar({ row: rowIdx, col: colIdx })}
-                        onMouseLeave={() => setHoveredBar(null)}
-                        className="absolute bottom-0 left-0 right-0 rounded-t-md cursor-pointer transition-all"
-                        style={{
-                          background: isHovered
-                            ? `linear-gradient(180deg, ${s.color}, ${s.color}CC)`
-                            : `linear-gradient(180deg, ${s.color}CC, ${s.color}80)`,
-                          boxShadow: isHovered ? `0 0 30px ${s.color}80, inset 0 1px 0 rgba(255,255,255,0.3)` : 'none',
-                          transform: isHovered ? 'scaleX(1.05)' : 'scaleX(1)',
-                        }}
-                      />
+                    <div
+                      key={s.key}
+                      className="flex-1 relative h-full flex flex-col justify-end"
+                      onMouseEnter={() => setHoveredBar({ row: rowIdx, col: colIdx })}
+                      onMouseLeave={() => setHoveredBar(null)}
+                    >
+                      {/* Tooltip */}
                       {isHovered && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg backdrop-blur-xl border border-white/10 whitespace-nowrap z-10"
-                          style={{ background: 'rgba(10,10,15,0.95)' }}
+                        <div
+                          className="absolute -top-14 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg backdrop-blur-xl border border-white/10 whitespace-nowrap z-20"
+                          style={{ background: 'rgba(10,10,15,0.98)' }}
                         >
-                          <div className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/50">
+                          <div className="text-[9px] font-bold tracking-[0.12em] uppercase text-white/50">
                             {s.label}
                           </div>
                           <div className="text-[13px] font-semibold tabular-nums" style={{ color: s.color }}>
                             {value.toFixed(1)}
                           </div>
-                        </motion.div>
+                        </div>
                       )}
+
+                      {/* Bar */}
+                      <div
+                        className="w-full rounded-t-md transition-all duration-500 ease-out"
+                        style={{
+                          height: `${Math.max(heightPct, 2)}%`,
+                          background: `linear-gradient(180deg, ${s.color}, ${s.color}80)`,
+                          boxShadow: isHovered ? `0 0 30px ${s.color}90` : `0 0 12px ${s.color}40`,
+                          transform: isHovered ? 'scaleX(1.05)' : 'scaleX(1)',
+                          opacity: isHovered ? 1 : 0.9,
+                        }}
+                      />
                     </div>
                   )
                 })}
@@ -120,9 +122,10 @@ function CustomBarChart({ data, series }: { data: any[]; series: { key: string; 
             ))}
           </div>
 
-          <div className="flex justify-around mt-4">
+          {/* X-axis labels */}
+          <div className="flex justify-around mt-3">
             {data.map((row, i) => (
-              <div key={i} className="flex-1 max-w-[120px] text-center text-[11px] font-semibold tracking-[0.08em] uppercase text-white/50">
+              <div key={i} className="flex-1 max-w-[140px] text-center text-[11px] font-semibold tracking-[0.08em] uppercase text-white/50">
                 {row.name}
               </div>
             ))}
@@ -130,6 +133,7 @@ function CustomBarChart({ data, series }: { data: any[]; series: { key: string; 
         </div>
       </div>
 
+      {/* Legend */}
       <div className="flex flex-wrap items-center justify-center gap-5 mt-6 pt-6 border-t border-white/[0.06]">
         {series.map((s) => (
           <div key={s.key} className="flex items-center gap-2">
