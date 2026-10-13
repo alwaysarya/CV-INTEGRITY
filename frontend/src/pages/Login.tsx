@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { createSession } from '@/lib/sessions'
 import { motion } from 'framer-motion'
 import { ShieldCheck, Loader2, ArrowRight, Check, Lock, Database, Cpu, Boxes, Fingerprint, Sun, Moon } from 'lucide-react'
 
@@ -32,12 +33,14 @@ export function Login() {
         localStorage.setItem('cv_integrity_user', JSON.stringify(data.user))
         localStorage.setItem('cv_integrity_token', data.token)
         if (remember) localStorage.setItem('cv_integrity_remember', '1')
+        createSession(username)
         setLoading(false); navigate('/landing'); return
       }
       if (data.detail === 'Not Found' || data.detail?.includes('Not Found')) {
         localStorage.setItem('cv_integrity_user', JSON.stringify({ username, role: username, name: 'Demo User' }))
         localStorage.setItem('cv_integrity_token', 'demo_token')
         if (remember) localStorage.setItem('cv_integrity_remember', '1')
+        createSession(username)
         setLoading(false); navigate('/landing'); return
       }
       setError(data.detail || 'Invalid credentials'); setLoading(false)
@@ -45,6 +48,7 @@ export function Login() {
       localStorage.setItem('cv_integrity_user', JSON.stringify({ username, role: 'analyst', name: 'Demo User' }))
       localStorage.setItem('cv_integrity_token', 'demo_token')
       if (remember) localStorage.setItem('cv_integrity_remember', '1')
+      createSession(username)
       setLoading(false); navigate('/landing')
     }
   }

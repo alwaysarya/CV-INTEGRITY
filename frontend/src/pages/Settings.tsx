@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  User, Bell, Shield, Database, Palette, Save, Check, Key, Loader2,
+  User, Bell, Shield, Database, Palette, Save, Check, Key, Loader2, Clock, ArrowRight, AlertTriangle, Globe,
   RefreshCw, Activity, Cpu, Hash, Wallet, Mail, Building2, Lock, Eye
 } from 'lucide-react'
 import apiClient from '@/lib/api'
@@ -21,6 +22,7 @@ export function Settings() {
     health: null, blocks: 0, wallets: 0, datasets: 0, models: 0, attacks: 0,
   })
 
+  const navigate = useNavigate()
   const [profile, setProfile] = useState({
     name: 'Aryan Thakur',
     email: 'aryan@cv-integrity.ai',
@@ -42,6 +44,54 @@ export function Settings() {
     sessionTimeout: '30',
     apiAccess: true,
   })
+  const [passwordForm, setPasswordForm] = useState({ current: '', newPass: '', confirm: '' })
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [twoFactorSetup, setTwoFactorSetup] = useState<boolean>(() => localStorage.getItem('cv_2fa_setup') === 'true')
+  const [show2FAModal, setShow2FAModal] = useState(false)
+  const [loginHistory, setLoginHistory] = useState<any[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cv_login_history') || '[]')
+    } catch { return [] }
+  })
+
+  const passwordStrength = (() => {
+    const p = passwordForm.newPass
+    if (!p) return { score: 0, label: 'Empty', color: '#AEAEB2' }
+    let s = 0
+    if (p.length >= 8) s += 20
+    if (p.length >= 12) s += 10
+    if (/[A-Z]/.test(p)) s += 20
+    if (/[a-z]/.test(p)) s += 20
+    if (/[0-9]/.test(p)) s += 15
+    if (/[^A-Za-z0-9]/.test(p)) s += 15
+    if (s >= 85) return { score: s, label: 'Strong', color: '#10B981' }
+    if (s >= 60) return { score: s, label: 'Good', color: '#3B82F6' }
+    if (s >= 40) return { score: s, label: 'Weak', color: '#F59E0B' }
+    return { score: s, label: 'Very Weak', color: '#EF4444' }
+  })()
+
+  const handlePasswordChange = () => {
+    setPasswordError(null)
+    if (passwordForm.newPass !== passwordForm.confirm) {
+      setPasswordError('Passwords do not match')
+      return
+    }
+    if (passwordStrength.score < 60) {
+      setPasswordError('Password is too weak. Meet all requirements.')
+      return
+    }
+    // Demo: store hashed password (not real security, just demo)
+    localStorage.setItem('cv_password_hash', btoa(passwordForm.newPass))
+    setPasswordForm({ current: '', newPass: '', confirm: '' })
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2500)
+  }
+
+  const handle2FASetup = () => {
+    setTwoFactorSetup(true)
+    localStorage.setItem('cv_2fa_setup', 'true')
+    setShow2FAModal(false)
+  }
 
   useEffect(() => { loadSystemInfo() }, [])
 
@@ -78,6 +128,10 @@ export function Settings() {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: Shield },
+    { id: 'sessions', label: 'Active Sessions', icon: Key, link: '/settings/sessions' },
+    { id: 'api-keys', label: 'API Keys', icon: Key, link: '/settings/api-keys' },
+    { id: 'permissions', label: 'Roles & Permissions', icon: Shield, link: '/settings/permissions' },
+    { id: 'ip-allowlist', label: 'IP Allowlist', icon: Globe, link: '/settings/ip-allowlist' },
     { id: 'data', label: 'Data & System', icon: Database },
     { id: 'appearance', label: 'Appearance', icon: Palette },
   ]
@@ -118,7 +172,13 @@ export function Settings() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => {
+                      if ((tab as any).link) {
+                        navigate((tab as any).link)
+                      } else {
+                        setActiveTab(tab.id)
+                      }
+                    }}
                     className={`relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[13px] font-medium transition-all ${
                       active
                         ? 'bg-emerald-50 text-emerald-900'
@@ -228,22 +288,117 @@ export function Settings() {
 
             {/* SECURITY TAB */}
             {activeTab === 'security' && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="mb-6">
-                  <div className="text-[15px] font-semibold text-slate-900">Security Settings</div>
-                  <div className="mt-0.5 text-[12px] text-slate-500">Two-factor authentication and access control</div>
+              <div className="space-y-5">
+
+                {/* CHANGE PASSWORD CARD */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="mb-6 flex items-start justify-between">
+                    <div>
+                      <div className="text-[15px] font-semibold text-slate-900">Change Password</div>
+                      <div className="mt-0.5 text-[12px] text-slate-500">Update your account password</div>
+                    </div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50">
+                      <Lock size={15} className="text-emerald-600" strokeWidth={2.2} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-[11px] font-bold tracking-[0.14em] uppercase text-slate-500 mb-2 block">Current Password</label>
+                      <input
+                        type="password"
+                        value={passwordForm.current}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                        placeholder="Enter current password"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-800 outline-none placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold tracking-[0.14em] uppercase text-slate-500 mb-2 block">New Password</label>
+                      <input
+                        type="password"
+                        value={passwordForm.newPass}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, newPass: e.target.value })}
+                        placeholder="Enter new password"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-800 outline-none placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      />
+
+                      {/* Strength Meter */}
+                      {passwordForm.newPass && (
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[11px] font-bold tracking-[0.14em] uppercase text-slate-500">Strength</span>
+                            <span className="text-[11px] font-bold" style={{ color: passwordStrength.color }}>
+                              {passwordStrength.label}
+                            </span>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${passwordStrength.score}%` }}
+                              transition={{ duration: 0.4 }}
+                              className="h-full rounded-full"
+                              style={{ background: passwordStrength.color }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Requirements */}
+                      {passwordForm.newPass && (
+                        <div className="mt-4 space-y-2">
+                          {[
+                            { label: 'At least 8 characters', ok: passwordForm.newPass.length >= 8 },
+                            { label: 'One uppercase letter', ok: /[A-Z]/.test(passwordForm.newPass) },
+                            { label: 'One lowercase letter', ok: /[a-z]/.test(passwordForm.newPass) },
+                            { label: 'One number', ok: /[0-9]/.test(passwordForm.newPass) },
+                            { label: 'One special character', ok: /[^A-Za-z0-9]/.test(passwordForm.newPass) },
+                          ].map((req) => (
+                            <div key={req.label} className="flex items-center gap-2">
+                              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${req.ok ? 'bg-emerald-500' : 'bg-slate-200'}`}>
+                                {req.ok && <Check size={10} className="text-white" strokeWidth={3} />}
+                              </div>
+                              <span className={`text-[12px] ${req.ok ? 'text-slate-700' : 'text-slate-400'}`}>{req.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold tracking-[0.14em] uppercase text-slate-500 mb-2 block">Confirm New Password</label>
+                      <input
+                        type="password"
+                        value={passwordForm.confirm}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                        placeholder="Confirm new password"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-800 outline-none placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      />
+                    </div>
+
+                    {passwordError && (
+                      <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-[12px] text-red-700">
+                        {passwordError}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handlePasswordChange}
+                      disabled={!passwordForm.current || !passwordForm.newPass || !passwordForm.confirm}
+                      className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed px-4 py-3 text-[13px] font-semibold text-white transition-colors"
+                    >
+                      Update Password
+                    </button>
+                  </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
-                        <Lock size={14} className="text-emerald-600" />
-                      </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-slate-800">Two-Factor Authentication</div>
-                        <div className="mt-0.5 text-[11px] text-slate-500">Add an extra layer of security</div>
-                      </div>
+                {/* TWO-FACTOR */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="mb-4 flex items-start justify-between">
+                    <div>
+                      <div className="text-[15px] font-semibold text-slate-900">Two-Factor Authentication</div>
+                      <div className="mt-0.5 text-[12px] text-slate-500">Add an extra layer of security with TOTP</div>
                     </div>
                     <button
                       onClick={() => setSecurity({ ...security, twoFactor: !security.twoFactor })}
@@ -257,46 +412,127 @@ export function Settings() {
                     </button>
                   </div>
 
-                  <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
-                        <Key size={14} className="text-blue-600" />
+                  {security.twoFactor && (
+                    <div className="mt-4 pt-4 border-t border-slate-100">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50">
+                            <Shield size={15} className="text-emerald-600" />
+                          </div>
+                          <div>
+                            <div className="text-[12px] font-medium text-slate-800">Authenticator App</div>
+                            <div className="mt-0.5 text-[11px] text-slate-500">
+                              {twoFactorSetup ? 'Configured · backup codes saved' : 'Not yet configured'}
+                            </div>
+                          </div>
+                        </div>
+                        {!twoFactorSetup ? (
+                          <button
+                            onClick={() => setShow2FAModal(true)}
+                            className="rounded-lg bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-[12px] font-semibold text-white transition-colors"
+                          >
+                            Setup
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setShow2FAModal(true)}
+                            className="rounded-lg border border-slate-200 hover:bg-slate-50 px-4 py-2 text-[12px] font-semibold text-slate-700 transition-colors"
+                          >
+                            View Codes
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* SESSION TIMEOUT */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
+                        <Key size={15} className="text-blue-600" />
                       </div>
                       <div>
                         <div className="text-[13px] font-medium text-slate-800">Session Timeout</div>
-                        <div className="mt-0.5 text-[11px] text-slate-500">Minutes of inactivity before logout</div>
+                        <div className="mt-0.5 text-[11px] text-slate-500">Auto logout after inactivity</div>
                       </div>
                     </div>
-                    <input
-                      type="number"
+                    <select
                       value={security.sessionTimeout}
                       onChange={(e) => setSecurity({ ...security, sessionTimeout: e.target.value })}
-                      className="w-20 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-center text-[13px] font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50">
-                        <Eye size={14} className="text-amber-600" />
-                      </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-slate-800">API Access</div>
-                        <div className="mt-0.5 text-[11px] text-slate-500">Allow external API integration</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setSecurity({ ...security, apiAccess: !security.apiAccess })}
-                      className={`relative h-6 w-11 rounded-full transition-colors ${security.apiAccess ? 'bg-emerald-600' : 'bg-slate-300'}`}
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] font-medium text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     >
-                      <motion.div
-                        animate={{ x: security.apiAccess ? 22 : 2 }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                        className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm"
-                      />
-                    </button>
+                      <option value="5">5 minutes</option>
+                      <option value="15">15 minutes</option>
+                      <option value="30">30 minutes</option>
+                      <option value="60">1 hour</option>
+                      <option value="0">Never</option>
+                    </select>
                   </div>
                 </div>
+
+                {/* LOGIN HISTORY */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="mb-4 flex items-start justify-between">
+                    <div>
+                      <div className="text-[15px] font-semibold text-slate-900">Recent Logins</div>
+                      <div className="mt-0.5 text-[12px] text-slate-500">Last 5 sign-in attempts on your account</div>
+                    </div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50">
+                      <Clock size={15} className="text-amber-600" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {loginHistory.length === 0 ? (
+                      <div className="text-center py-6 text-[12px] text-slate-400">No login history</div>
+                    ) : (
+                      loginHistory.slice(0, 5).map((entry, i) => (
+                        <div key={i} className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${entry.success ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                              {entry.success ? (
+                                <Check size={13} className="text-emerald-600" strokeWidth={2.6} />
+                              ) : (
+                                <AlertTriangle size={13} className="text-red-600" strokeWidth={2.4} />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-[12px] font-medium text-slate-800 truncate">
+                                {entry.device} · {entry.browser}
+                              </div>
+                              <div className="text-[10px] text-slate-500 mt-0.5">
+                                {entry.ip} · {entry.location}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-[10px] font-mono text-slate-500 flex-shrink-0 ml-3">
+                            {new Date(entry.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* ACTIVE SESSIONS LINK */}
+                <button
+                  onClick={() => navigate('/settings/sessions')}
+                  className="w-full rounded-2xl border border-slate-200 bg-white p-5 hover:border-emerald-500/40 hover:shadow-md transition-all flex items-center justify-between group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50">
+                      <Key size={15} className="text-indigo-600" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-[13px] font-semibold text-slate-800">Active Sessions</div>
+                      <div className="mt-0.5 text-[11px] text-slate-500">Manage logged-in devices and sign out remotely</div>
+                    </div>
+                  </div>
+                  <ArrowRight size={16} className="text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
+                </button>
+
               </div>
             )}
 
@@ -385,6 +621,87 @@ export function Settings() {
           </div>
         </div>
       </div>
+
+      {/* 2FA Setup Modal */}
+      {show2FAModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+          >
+            <div className="mb-5">
+              <div className="text-[18px] font-semibold text-slate-900">Setup Two-Factor Authentication</div>
+              <div className="mt-1 text-[13px] text-slate-500">
+                1. Install an authenticator app (Google Authenticator, Authy, 1Password)
+              </div>
+              <div className="mt-1 text-[13px] text-slate-500">
+                2. Scan the QR code below
+              </div>
+            </div>
+
+            {/* QR Code (generated placeholder) */}
+            <div className="flex justify-center mb-5">
+              <div className="w-48 h-48 rounded-xl bg-slate-50 border-2 border-slate-200 flex items-center justify-center">
+                <svg viewBox="0 0 48 48" className="w-32 h-32">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <rect key={i} x={(i * 3) % 12 * 4} y={Math.floor(i * 3 / 12) * 4} width="4" height="4" fill="#1D1D1F" />
+                  ))}
+                  <rect x="4" y="4" width="12" height="12" fill="#1D1D1F" />
+                  <rect x="32" y="4" width="12" height="12" fill="#1D1D1F" />
+                  <rect x="4" y="32" width="12" height="12" fill="#1D1D1F" />
+                  <rect x="20" y="20" width="8" height="8" fill="#1D1D1F" />
+                  <rect x="24" y="36" width="4" height="4" fill="#1D1D1F" />
+                  <rect x="36" y="24" width="4" height="4" fill="#1D1D1F" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Secret key */}
+            <div className="mb-5">
+              <div className="text-[11px] font-bold tracking-[0.14em] uppercase text-slate-500 mb-2">Or enter manually</div>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-[12px] font-mono text-slate-800">
+                  JBSW Y3DP EHPK 3PXP
+                </code>
+                <button
+                  onClick={() => navigator.clipboard.writeText('JBSWY3DPEHPK3PXP')}
+                  className="rounded-lg bg-slate-100 hover:bg-slate-200 px-3 py-2 text-[11px] font-medium text-slate-700 transition-colors"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+
+            {/* Backup codes */}
+            <div className="mb-5">
+              <div className="text-[11px] font-bold tracking-[0.14em] uppercase text-slate-500 mb-2">Backup codes (save these)</div>
+              <div className="grid grid-cols-2 gap-2">
+                {['4F8K-2N9P', '7X3M-5Q1L', '9H2W-8R6T', '3B7V-1C4Y'].map((code) => (
+                  <code key={code} className="rounded-md bg-slate-50 border border-slate-200 px-2 py-1.5 text-[11px] font-mono text-center text-slate-700">
+                    {code}
+                  </code>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShow2FAModal(false)}
+                className="flex-1 rounded-lg border border-slate-200 hover:bg-slate-50 py-2.5 text-[13px] font-medium text-slate-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handle2FASetup}
+                className="flex-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 py-2.5 text-[13px] font-semibold text-white transition-colors"
+              >
+                {twoFactorSetup ? 'Done' : 'Enable 2FA'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }

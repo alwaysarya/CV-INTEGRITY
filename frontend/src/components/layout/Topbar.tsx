@@ -140,6 +140,7 @@ export function Topbar() {
   }
 
   const handleLogout = () => {
+    clearAllSessions()
     localStorage.removeItem('cv_integrity_user')
     localStorage.removeItem('cv_integrity_token')
     localStorage.removeItem('cv_integrity_remember')

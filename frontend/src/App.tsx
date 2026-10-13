@@ -22,6 +22,10 @@ import { Wallets } from '@/pages/Wallets'
 import { Reports } from '@/pages/Reports'
 import { Team } from '@/pages/Team'
 import { Settings } from '@/pages/Settings'
+import { Sessions } from '@/pages/Sessions'
+import { ApiKeys } from '@/pages/ApiKeys'
+import { Permissions } from '@/pages/Permissions'
+import { IpAllowlist } from '@/pages/IpAllowlist'
 import { Help } from '@/pages/Help'
 import { TamperDetection } from '@/pages/TamperDetection'
 import { NotFound } from '@/pages/NotFound'
@@ -63,6 +67,10 @@ function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="team" element={<Team />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="settings/sessions" element={<Sessions />} />
+          <Route path="settings/api-keys" element={<ApiKeys />} />
+          <Route path="settings/permissions" element={<Permissions />} />
+          <Route path="settings/ip-allowlist" element={<IpAllowlist />} />
           <Route path="help" element={<Help />} />
           <Route path="tamper" element={<TamperDetection />} />
           <Route path="model-integrity" element={<ModelIntegrity />} />
