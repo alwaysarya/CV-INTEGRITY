@@ -6,6 +6,10 @@ import {
   Database, Upload, FileSearch, Box, Wallet, FileCode, ClipboardCheck,
   BarChart3, TrendingUp, FileText, CheckCircle, Users, HelpCircle, Layers
 } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
+import { clearAllSessions } from '@/lib/sessions'
+import { AlertsPanel } from '@/components/alerts/AlertsPanel'
+import { getUnreadCount } from '@/lib/alerts'
 
 const topMenu = [
   {
@@ -103,9 +107,18 @@ export function Topbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null)
+  const [alertsOpen, setAlertsOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const settingsRef = useRef<HTMLDivElement>(null)
   const hoverTimeout = useRef<any>(null)
+
+  useEffect(() => {
+    setUnreadCount(getUnreadCount())
+    const onUpdate = () => setUnreadCount(getUnreadCount())
+    window.addEventListener('cv_alerts_updated', onUpdate)
+    return () => window.removeEventListener('cv_alerts_updated', onUpdate)
+  }, [])
 
   useEffect(() => {
     const stored = localStorage.getItem('cv_integrity_user')
@@ -260,9 +273,17 @@ export function Topbar() {
           >
             <Search size={15} />
           </button>
-          <button className="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
+          <button
+            onClick={() => setAlertsOpen(true)}
+            className="relative flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          >
             <Bell size={15} />
-            <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FF453A] text-[9px] font-bold text-white px-1 shadow-md"
+                style={{ boxShadow: '0 0 8px #FF453A80' }}>
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </button>
 
           {/* Settings dropdown */}
@@ -369,6 +390,7 @@ export function Topbar() {
           </div>
         </div>
       </div>
+      <AlertsPanel open={alertsOpen} onClose={() => setAlertsOpen(false)} />
     </header>
   )
 }

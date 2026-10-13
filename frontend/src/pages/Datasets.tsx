@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Database, Search, ArrowRight, Loader2, Sparkles } from 'lucide-react'
+import { Database, Search, ArrowRight, Loader2, Sparkles, Download } from 'lucide-react'
 import apiClient from '@/lib/api'
+import { exportCSV, exportJSON } from '@/lib/export'
 
 interface Dataset {
   name: string
@@ -18,6 +19,23 @@ export function Datasets() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+
+  const handleExportCSV = () => {
+    const data = datasets.map(d => ({
+      Name: d.name,
+      Score: d.overall_score,
+      Blur: d.blur_score,
+      Duplicate: d.duplicate_score,
+      Noise: d.noise_score,
+      Images: d.total_images,
+      Category: d.category,
+    }))
+    exportCSV(data, 'datasets')
+  }
+
+  const handleExportJSON = () => {
+    exportJSON(datasets, 'datasets')
+  }
 
   useEffect(() => { loadDatasets() }, [])
 

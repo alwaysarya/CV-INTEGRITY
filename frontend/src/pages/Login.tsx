@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createSession } from '@/lib/sessions'
+import { checkLockout, recordFailure, recordSuccess, formatCountdown, getPolicy } from '@/lib/lockout'
 import { motion } from 'framer-motion'
 import { ShieldCheck, Loader2, ArrowRight, Check, Lock, Database, Cpu, Boxes, Fingerprint, Sun, Moon } from 'lucide-react'
 
@@ -11,6 +12,28 @@ export function Login() {
   const [remember, setRemember] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null)
+  const [countdown, setCountdown] = useState<string>('')
+  const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null)
+
+  // Live countdown ticker
+  useEffect(() => {
+    if (!lockedUntil) return
+    const tick = () => {
+      const remaining = lockedUntil - Date.now()
+      if (remaining <= 0) {
+        setLockedUntil(null)
+        setCountdown('')
+        setError(null)
+        setAttemptsLeft(null)
+        return
+      }
+      setCountdown(formatCountdown(remaining))
+    }
+    tick()
+    const iv = setInterval(tick, 1000)
+    return () => clearInterval(iv)
+  }, [lockedUntil])
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('cv_integrity_theme') as 'dark' | 'light') || 'dark'
   })
@@ -21,6 +44,15 @@ export function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!username || !password) { setError('Please fill in all fields'); return }
+
+    // Check if locked out
+    const lockState = checkLockout(username)
+    if (lockState.locked) {
+      setLockedUntil(Date.now() + lockState.remainingMs)
+      setError('Account locked due to too many failed attempts')
+      return
+    }
+
     setLoading(true); setError(null)
     try {
       const res = await fetch('http://localhost:8000/api/auth/login', {
@@ -33,6 +65,7 @@ export function Login() {
         localStorage.setItem('cv_integrity_user', JSON.stringify(data.user))
         localStorage.setItem('cv_integrity_token', data.token)
         if (remember) localStorage.setItem('cv_integrity_remember', '1')
+        recordSuccess(username)
         createSession(username)
         setLoading(false); navigate('/landing'); return
       }
@@ -40,14 +73,24 @@ export function Login() {
         localStorage.setItem('cv_integrity_user', JSON.stringify({ username, role: username, name: 'Demo User' }))
         localStorage.setItem('cv_integrity_token', 'demo_token')
         if (remember) localStorage.setItem('cv_integrity_remember', '1')
+        recordSuccess(username)
         createSession(username)
         setLoading(false); navigate('/landing'); return
       }
-      setError(data.detail || 'Invalid credentials'); setLoading(false)
+      const result = recordFailure(username)
+      if (result.locked) {
+        setLockedUntil(result.lockedUntil)
+        setError('Account locked due to too many failed attempts')
+      } else {
+        setAttemptsLeft(result.attemptsLeft)
+        setError(`Invalid credentials · ${result.attemptsLeft} attempt${result.attemptsLeft === 1 ? '' : 's'} remaining`)
+      }
+      setLoading(false)
     } catch {
       localStorage.setItem('cv_integrity_user', JSON.stringify({ username, role: 'analyst', name: 'Demo User' }))
       localStorage.setItem('cv_integrity_token', 'demo_token')
       if (remember) localStorage.setItem('cv_integrity_remember', '1')
+      recordSuccess(username)
       createSession(username)
       setLoading(false); navigate('/landing')
     }
