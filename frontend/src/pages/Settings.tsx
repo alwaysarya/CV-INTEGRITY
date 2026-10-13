@@ -132,6 +132,7 @@ export function Settings() {
     { id: 'api-keys', label: 'API Keys', icon: Key, link: '/settings/api-keys' },
     { id: 'permissions', label: 'Roles & Permissions', icon: Shield, link: '/settings/permissions' },
     { id: 'ip-allowlist', label: 'IP Allowlist', icon: Globe, link: '/settings/ip-allowlist' },
+    { id: 'security-score', label: 'Security Score', icon: Shield, link: '/settings/security-score' },
     { id: 'data', label: 'Data & System', icon: Database },
     { id: 'appearance', label: 'Appearance', icon: Palette },
   ]

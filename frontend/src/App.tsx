@@ -26,6 +26,7 @@ import { Sessions } from '@/pages/Sessions'
 import { ApiKeys } from '@/pages/ApiKeys'
 import { Permissions } from '@/pages/Permissions'
 import { IpAllowlist } from '@/pages/IpAllowlist'
+import { SecurityScorePage } from '@/pages/SecurityScore'
 import { Help } from '@/pages/Help'
 import { TamperDetection } from '@/pages/TamperDetection'
 import { NotFound } from '@/pages/NotFound'
@@ -71,6 +72,7 @@ function App() {
           <Route path="settings/api-keys" element={<ApiKeys />} />
           <Route path="settings/permissions" element={<Permissions />} />
           <Route path="settings/ip-allowlist" element={<IpAllowlist />} />
+          <Route path="settings/security-score" element={<SecurityScorePage />} />
           <Route path="help" element={<Help />} />
           <Route path="tamper" element={<TamperDetection />} />
           <Route path="model-integrity" element={<ModelIntegrity />} />
