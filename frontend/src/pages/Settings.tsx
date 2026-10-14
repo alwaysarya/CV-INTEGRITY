@@ -134,6 +134,7 @@ export function Settings() {
     { id: 'ip-allowlist', label: 'IP Allowlist', icon: Globe, link: '/settings/ip-allowlist' },
     { id: 'security-score', label: 'Security Score', icon: Shield, link: '/settings/security-score' },
     { id: 'security-activity', label: 'Security Activity', icon: Activity, link: '/security/activity' },
+    { id: 'encryption', label: 'Encryption Status', icon: Lock, link: '/settings/encryption' },
     { id: 'data', label: 'Data & System', icon: Database },
     { id: 'appearance', label: 'Appearance', icon: Palette },
   ]

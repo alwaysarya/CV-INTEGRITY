@@ -28,6 +28,7 @@ import { Permissions } from '@/pages/Permissions'
 import { IpAllowlist } from '@/pages/IpAllowlist'
 import { SecurityScorePage } from '@/pages/SecurityScore'
 import { SecurityActivity } from '@/pages/SecurityActivity'
+import { EncryptionStatusPage } from '@/pages/EncryptionStatus'
 import { Help } from '@/pages/Help'
 import { TamperDetection } from '@/pages/TamperDetection'
 import { NotFound } from '@/pages/NotFound'
@@ -75,6 +76,7 @@ function App() {
           <Route path="settings/ip-allowlist" element={<IpAllowlist />} />
           <Route path="settings/security-score" element={<SecurityScorePage />} />
           <Route path="security/activity" element={<SecurityActivity />} />
+          <Route path="settings/encryption" element={<EncryptionStatusPage />} />
           <Route path="help" element={<Help />} />
           <Route path="tamper" element={<TamperDetection />} />
           <Route path="model-integrity" element={<ModelIntegrity />} />
